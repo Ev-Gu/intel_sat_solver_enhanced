@@ -104,35 +104,78 @@ static array<pair<string, string>, U(TArchiveFileType::None)> commandStringBefor
 static constexpr int BadRetVal = -1;
 using TLit = int32_t;
 
+// MaxSAT variables
+bool isMaxsat = false;
+unsigned long long cumulativeWeight = 0;
+long long maxAllowedWeight = numeric_limits<signed long long>::max();
+unsigned long long maxCumulativeWeight = numeric_limits<unsigned long long>::max();
+int minAllowedWeight = 1;
+long long maxLit = 0;
+
+struct TSoftClause
+{
+	long long Weight;
+	vector<TLit> Clause;
+};
+struct TRelaxVars
+{
+	long long Weight;
+	TLit RelaxVar;
+};
+vector<TSoftClause> softClausesToAdd;
+vector<TRelaxVars> relaxVars;
+
 template <typename TTopor>
-int OnFinishingSolving(TTopor& topor, TToporReturnVal ret, bool printModel, bool printUcore, const std::span<TLit> assumps = {}, vector<TLit>* varsToPrint = nullptr)
+int OnFinishingSolving(TTopor& topor, TToporReturnVal ret, bool printModel, bool printUcore, bool isMaxsat, TLit maxLit, const std::vector<TRelaxVars>& relaxVars, const std::span<TLit> assumps = {}, vector<TLit>* varsToPrint = nullptr)
 {
 	CApplyFuncOnExitFromScope<> printStatusExplanation([&]()
-	{
-		const string expl = topor.GetStatusExplanation();
-		if (!expl.empty())
 		{
-			cout << "c " << expl << endl;
-		}
-	});
+			const string expl = topor.GetStatusExplanation();
+			if (!expl.empty())
+			{
+				cout << "c " << expl << endl;
+			}
+		});
 
 	switch (ret)
 	{
 	case Topor::TToporReturnVal::RET_SAT:
+		if (isMaxsat)
+		{
+			unsigned long long cost = 0;
+			for (const auto& rv : relaxVars)
+			{
+				const TToporLitVal v = topor.GetLitValue(rv.RelaxVar);
+				if (v == TToporLitVal::VAL_SATISFIED)
+				{
+					cost += (unsigned long long)rv.Weight;
+				}
+			}
+			cout << "o " << cost << endl;
+		}
+
 		cout << "s SATISFIABLE" << endl;
 		if (printModel)
 		{
 			auto PrintVal = [&](TLit v)
-			{
-				const auto vVal = topor.GetLitValue(v);
-				assert(vVal != TToporLitVal::VAL_UNASSIGNED);
-				cout << " " << (vVal != TToporLitVal::VAL_UNSATISFIED ? v : -v);
-			};
+				{
+					const auto vVal = topor.GetLitValue(v);
+					assert(vVal != TToporLitVal::VAL_UNASSIGNED);
+					if (!isMaxsat) 
+					{
+						cout << " " << (vVal != TToporLitVal::VAL_UNSATISFIED ? v : -v);
+					}
+					else
+					{
+						cout << " " << (vVal != TToporLitVal::VAL_UNSATISFIED ? 1 : 0);
+					}
+				};
 
 			cout << "v";
 			if (!varsToPrint)
 			{
-				for (TLit v = 1; v <= topor.GetMaxUserVar(); ++v)
+				const TLit maxV = isMaxsat ? maxLit : topor.GetMaxUserVar();
+				for (TLit v = 1; v <= maxV; ++v)
 				{
 					PrintVal(v);
 				}
@@ -141,13 +184,23 @@ int OnFinishingSolving(TTopor& topor, TToporReturnVal ret, bool printModel, bool
 			{
 				for (auto v : *varsToPrint)
 				{
-					PrintVal(v);
+					if (!isMaxsat || v <= maxLit)
+					{
+						PrintVal(v);
+					}
 				}
 			}
-
-			cout << " 0" << endl;
+			if (!isMaxsat)
+			{
+				cout << " 0" << endl;
+			}
+			else
+			{
+				cout << endl;
+			}
 		}
 		return 10;
+
 	case Topor::TToporReturnVal::RET_UNSAT:
 		cout << "s UNSATISFIABLE" << endl;
 		if (printUcore)
@@ -164,6 +217,7 @@ int OnFinishingSolving(TTopor& topor, TToporReturnVal ret, bool printModel, bool
 			cout << " 0" << endl;
 		}
 		return 20;
+
 	case Topor::TToporReturnVal::RET_TIMEOUT_LOCAL:
 		cout << "s TIMEOUT_LOCAL" << endl;
 		return BadRetVal;
@@ -204,9 +258,10 @@ int main(int argc, char** argv)
 	if (argc == 1 || strcmp(argv[1], "-help") == 0 || strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)
 	{
 		cout << print_as_color <ansi_color_code::red>("c Usage:") << endl;
-		cout << "\tc <Intel(R) SAT Solver Executable> <CNF> OPTIONAL: <Param1> <Val1> <Param2> <Val2> ... <ParamN> <ValN>" << endl;
+		cout << "\tc <Intel(R) SAT Solver Executable> <CNF> OPTIONAL: -M <MVal> <Param1> <Val1> <Param2> <Val2> ... <ParamN> <ValN>" << endl;
 		cout << "\tc <CNF> can either be a text file or an archive file in one of the following formats: .xz, .lzma, .bz2, .gz, .7z (the test is based on the file signature)" << endl;
 		cout << "\tc <CNF> is expected to be in simplified DIMACS format, used at SAT Competitions (http://www.satcompetition.org/2011/format-benchmarks2011.html) with the following optional extension to support incrementality:" << endl;
+		cout << "\tc -M <Mval> : MaxSAT mode toggle (0 = SAT, 1 = MaxSAT); default = 0" << endl;
 		cout << "\tc The following Intel(R) SAT Solver Executable-specific commands are also legal (ignore \"c \" below): " << endl;
 		cout << "\tc r <ParamName> <ParamVal>" << endl;
 		cout << "\tc ot <TimeOut> <IsCpuTimeOut>" << endl;
@@ -271,6 +326,39 @@ int main(int argc, char** argv)
 		return BadRetVal;
 	}
 
+	// Early scan for -M (optional; default is 0 / SAT). This does not modify argv or parsing order.
+	for (int currArgNum = 2; currArgNum < argc; currArgNum += 2)
+	{
+		const string paramNameStr = (string)argv[currArgNum];
+		const string paramValStr = (string)argv[currArgNum + 1];
+
+		if (paramNameStr != "-M")
+		{
+			continue;
+		}
+
+		int intVal = 0;
+		try
+		{
+			intVal = stoi(paramValStr);
+		}
+		catch (...)
+		{
+			cout << "c topor_tool ERROR: couldn't convert -M " << paramValStr << " to an integer" << endl;
+			return BadRetVal;
+		}
+
+		if (intVal != 0 && intVal != 1)
+		{
+			cout << "c topor_tool ERROR: -M must be 0 or 1" << endl;
+			return BadRetVal;
+		}
+
+		isMaxsat = (intVal != 0);
+		break;
+	}
+
+	cout << "c running in " << (isMaxsat ? "MaxSAT mode" : "SAT mode") << endl;
 	// Does the signature match one of the archive types we support?
 
 	FILE* tmp = fopen(inputFileName.c_str(), "r");
@@ -438,9 +526,11 @@ int main(int argc, char** argv)
 	};
 
 	auto ToporOnFinishedSolving = [&](TToporReturnVal ret, bool printModel, bool printUcore, const std::span<TLit> assumps, vector<TLit>& varsToPrint)
-	{
-		return topor32 ? OnFinishingSolving(*topor32, ret, printModel, printUcore, assumps, varsToPrint.empty() ? nullptr : &varsToPrint) : topor64 ? OnFinishingSolving(*topor64, ret, printModel, printUcore, assumps, varsToPrint.empty() ? nullptr : &varsToPrint) : OnFinishingSolving(*toporc, ret, printModel, printUcore, assumps, varsToPrint.empty() ? nullptr : &varsToPrint);
-	};
+		{
+			return topor32 ? OnFinishingSolving(*topor32, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumps, varsToPrint.empty() ? nullptr : &varsToPrint) :
+				topor64 ? OnFinishingSolving(*topor64, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumps, varsToPrint.empty() ? nullptr : &varsToPrint) :
+				OnFinishingSolving(*toporc, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumps, varsToPrint.empty() ? nullptr : &varsToPrint);
+		};
 
 	auto ToporIsAssumptionRequired = [&](size_t assumpInd)
 	{
@@ -543,6 +633,12 @@ int main(int argc, char** argv)
 			{
 				const string paramNameStr = (string)argv[currArgNum];
 				const string paramValStr = (string)argv[currArgNum + 1];
+
+				// -M is a front-end flag (handled before file parsing). Skip it here so it is not treated as a solver lib param.
+				if (paramNameStr == "-M")
+				{
+					continue;
+				}
 
 				auto ReadBoolParam = [&](string& errMsg)
 				{
@@ -889,7 +985,9 @@ int main(int argc, char** argv)
 		nextSolveConfThr = numeric_limits<uint64_t>::max();
 
 		retValBasedOnLatestSolve = AllToporsNull() ? BadRetVal :
-			topor32 ? OnFinishingSolving(*topor32, ret, printModel, printUcore, assumpsPtr ? *assumpsPtr : assumpsEmpty) : topor64 ? OnFinishingSolving(*topor64, ret, printModel, printUcore, assumpsPtr ? *assumpsPtr : assumpsEmpty) : OnFinishingSolving(*toporc, ret, printModel, printUcore, assumpsPtr ? *assumpsPtr : assumpsEmpty);
+			topor32 ? OnFinishingSolving(*topor32, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty) :
+			topor64 ? OnFinishingSolving(*topor64, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty) :
+			OnFinishingSolving(*toporc, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty);
 
 		if (verifyModel && retValBasedOnLatestSolve == 10)
 		{
@@ -909,7 +1007,9 @@ int main(int argc, char** argv)
 			}
 			ret = ToporSolve(ucAssumps, nextSolveToInSecIsCpuTime, nextSolveConfThr);
 			retValBasedOnLatestSolve = AllToporsNull() ? BadRetVal :
-				topor32 ? OnFinishingSolving(*topor32, ret, printModel, printUcore, assumpsPtr ? *assumpsPtr : assumpsEmpty) : topor64 ? OnFinishingSolving(*topor64, ret, printModel, printUcore, assumpsPtr ? *assumpsPtr : assumpsEmpty) : OnFinishingSolving(*toporc, ret, printModel, printUcore, assumpsPtr ? *assumpsPtr : assumpsEmpty);
+				topor32 ? OnFinishingSolving(*topor32, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty) :
+				topor64 ? OnFinishingSolving(*topor64, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty) :
+				OnFinishingSolving(*toporc, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty);
 			if (retValBasedOnLatestSolve != 20)
 			{
 				cout << "ret == " << to_string(retValBasedOnLatestSolve) << ": UNSAT CORE BUG!!!!!\n";
@@ -926,12 +1026,12 @@ int main(int argc, char** argv)
 
 		size_t currLineI = 0;
 		auto SkipWhitespaces = [&]()
-		{
-			while (line[currLineI] == ' ' && currLineI < len)
 			{
-				++currLineI;
-			}
-		};
+				while (line[currLineI] == ' ' && currLineI < len)
+				{
+					++currLineI;
+				}
+			};
 
 		SkipWhitespaces();
 		if (currLineI >= len)
@@ -1078,37 +1178,37 @@ int main(int argc, char** argv)
 		}
 
 		auto ParseNumber = [&]()
-		{
-			SkipWhitespaces();
-			if (currLineI >= len)
 			{
-				throw logic_error("c topor_tool ERROR: no number after skipping white-spaces at line number " + to_string(lineNum));
-			}
-			bool isNeg = line[currLineI] == '-';
-			if (isNeg)
-			{
-				++currLineI;
-			}
-			if (!isdigit(line[currLineI]))
-			{
-				throw logic_error("c topor_tool ERROR: the first character is expected to be a digit at line number " + to_string(lineNum));
-			}
+				SkipWhitespaces();
+				if (currLineI >= len)
+				{
+					throw logic_error("c topor_tool ERROR: no number after skipping white-spaces at line number " + to_string(lineNum));
+				}
+				bool isNeg = line[currLineI] == '-';
+				if (isNeg)
+				{
+					++currLineI;
+				}
+				if (!isdigit(line[currLineI]))
+				{
+					throw logic_error("c topor_tool ERROR: the first character is expected to be a digit at line number " + to_string(lineNum));
+				}
 
-			long long res = 0;
+				long long res = 0;
 
-			while (isdigit(line[currLineI]))
-			{
-				const auto currDigit = line[currLineI++] - '0';
-				res = res * 10 + (long long)(currDigit);
-			}
+				while (isdigit(line[currLineI]))
+				{
+					const auto currDigit = line[currLineI++] - '0';
+					res = res * 10 + (long long)(currDigit);
+				}
 
-			if (isNeg)
-			{
-				res = -res;
-			}
+				if (isNeg)
+				{
+					res = -res;
+				}
 
-			return res;
-		};
+				return res;
+			};
 
 		if (line[currLineI] == 'l')
 		{
@@ -1214,15 +1314,15 @@ int main(int argc, char** argv)
 
 			// Erase all Occurrences of given substring from main string.
 			auto EraseAllSubStr = [&](string& mainStr, const string& toErase)
-			{
-				size_t pos = std::string::npos;
-				// Search for the substring in string in a loop until nothing is found
-				while ((pos = mainStr.find(toErase)) != std::string::npos)
 				{
-					// If found then erase it from string
-					mainStr.erase(pos, toErase.length());
-				}
-			};
+					size_t pos = std::string::npos;
+					// Search for the substring in string in a loop until nothing is found
+					while ((pos = mainStr.find(toErase)) != std::string::npos)
+					{
+						// If found then erase it from string
+						mainStr.erase(pos, toErase.length());
+					}
+				};
 
 			EraseAllSubStr(str, "/topor");
 
@@ -1233,6 +1333,11 @@ int main(int argc, char** argv)
 
 		if (line[currLineI] == 'p')
 		{
+			if (isMaxsat)
+			{
+				cout << "c topor_tool ERROR: MaxSAT format should not contain a p line (found at line number " << lineNum << "). Run in SAT mode or update the file";
+				return BadRetVal;
+			}
 			if (pLineRead)
 			{
 				cout << "c topor_tool ERROR: second line starting with p at line number " << lineNum << endl;
@@ -1300,35 +1405,36 @@ int main(int argc, char** argv)
 		vector<TLit> lits;
 
 		auto BufferToLits = [&]()
-		{
-			string errorString = "";
-
-			lits.clear();
-
-			long long currLit = numeric_limits<long long>::max();
-			while (currLit != 0)
 			{
-				try
+				string errorString = "";
+
+				lits.clear();
+
+				long long currLit = numeric_limits<long long>::max();
+				while (currLit != 0)
 				{
-					currLit = ParseNumber();
-					if (currLit > numeric_limits<TLit>::max() || currLit < numeric_limits<TLit>::min())
+					try
 					{
-						errorString = "c topor_tool ERROR: the literal " + to_string(currLit) + " is too big or too small\n";
+						currLit = ParseNumber();
+						if (currLit > numeric_limits<TLit>::max() || currLit < numeric_limits<TLit>::min())
+						{
+							errorString = "c topor_tool ERROR: the literal " + to_string(currLit) + " is too big or too small\n";
+							lits.clear();
+							break;
+						}
+						maxLit = max(maxLit, currLit);
+						lits.push_back(TLit(currLit));
+					}
+					catch (...)
+					{
+						errorString = "c topor_tool ERROR: couldn't translate the following line or parts of it into a vector of literals at line number " + to_string(lineNum) + "\n";
 						lits.clear();
 						break;
 					}
-					lits.push_back(TLit(currLit));
 				}
-				catch (...)
-				{
-					errorString = "c topor_tool ERROR: couldn't translate the following line or parts of it into a vector of literals at line number " + to_string(lineNum) + "\n";
-					lits.clear();
-					break;
-				}
-			}
 
-			return make_pair(errorString, lits);
-		};
+				return make_pair(errorString, lits);
+			};
 
 		if (line[currLineI] == 's')
 		{
@@ -1349,19 +1455,104 @@ int main(int argc, char** argv)
 			continue;
 		}
 
-		// New clause
-		auto [errString, cls] = BufferToLits();
-		if (!errString.empty())
+		// New SAT clause
+		if (!isMaxsat)
 		{
-			cout << errString;
-			return BadRetVal;
+			auto [errString, cls] = BufferToLits();
+			if (!errString.empty())
+			{
+				cout << errString;
+				return BadRetVal;
+			}
+			if (verifyModel)
+			{
+				vmClss.push_back(cls);
+			}
+			ToporAddClause(cls);
 		}
-		if (verifyModel)
+		// new MaxSAT clause
+		else
 		{
-			vmClss.push_back(cls);
+			if (line[currLineI] == 'h')
+			{
+				currLineI++;
+				SkipWhitespaces();
+				auto [errString, cls] = BufferToLits();
+				if (!errString.empty())
+				{
+					cout << errString;
+					return BadRetVal;
+				}
+				if (verifyModel)
+				{
+					vmClss.push_back(cls);
+				}
+				ToporAddClause(cls);
+			}
+			else
+			{
+				auto weight = ParseNumber();
+				if (weight < minAllowedWeight || weight > maxAllowedWeight)
+				{
+					cout << "c topor_tool ERROR: Clause weight range violated in line " << to_string(lineNum);
+					return BadRetVal;
+				}
+				else if (maxAllowedWeight - cumulativeWeight < weight)
+				{
+					cout << "c topor_tool ERROR: Cumulative weight limit exceeded in line " << to_string(lineNum);
+					return BadRetVal;
+				}
+				SkipWhitespaces();
+				auto [errString, cls] = BufferToLits();
+				if (!errString.empty())
+				{
+					cout << errString;
+					return BadRetVal;
+				}
+				softClausesToAdd.push_back({weight, cls});
+			}
 		}
-		ToporAddClause(cls);
+
 	}
+
+	if (isMaxsat)
+	{
+		long long nextRelaxVarLL = maxLit + 1;
+
+		relaxVars.clear();
+		relaxVars.reserve(softClausesToAdd.size());
+
+		for (auto& sc : softClausesToAdd)
+		{
+			if (nextRelaxVarLL > numeric_limits<TLit>::max() || nextRelaxVarLL < numeric_limits<TLit>::min())
+			{
+				cout << "c topor_tool ERROR: relaxation variable " << nextRelaxVarLL << " is too big or too small" << endl;
+				return BadRetVal;
+			}
+
+			const TLit relaxVar = (TLit)nextRelaxVarLL++;
+
+			relaxVars.push_back({ sc.Weight, relaxVar });
+
+			ToporFixPolarity(-relaxVar, false);
+			if (!sc.Clause.empty() && sc.Clause.back() == 0)
+			{
+				sc.Clause.pop_back();
+				sc.Clause.push_back(relaxVar);
+				sc.Clause.push_back(0);
+			}
+			else
+			{
+				sc.Clause.push_back(relaxVar);
+			}
+			if (verifyModel)
+			{
+				vmClss.push_back(sc.Clause);
+			}
+			ToporAddClause(sc.Clause);
+		}
+	}
+	softClausesToAdd.clear();
 
 	free(line);
 
