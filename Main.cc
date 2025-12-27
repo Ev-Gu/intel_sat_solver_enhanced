@@ -111,18 +111,13 @@ long long maxAllowedWeight = numeric_limits<signed long long>::max();
 unsigned long long maxCumulativeWeight = numeric_limits<unsigned long long>::max();
 int minAllowedWeight = 1;
 long long maxLit = 0;
+long long currRelaxLit;
 
-struct TSoftClause
-{
-	long long Weight;
-	vector<TLit> Clause;
-};
 struct TRelaxVars
 {
 	long long Weight;
 	TLit RelaxVar;
 };
-vector<TSoftClause> softClausesToAdd;
 vector<TRelaxVars> relaxVars;
 
 template <typename TTopor>
@@ -1019,6 +1014,146 @@ int main(int argc, char** argv)
 		return retValBasedOnLatestSolve;
 	};
 
+	// First pass: determine maxLit for MaxSAT mode
+	if (isMaxsat)
+	{
+		uint64_t firstPassLineNum = 1;
+
+		auto ParseNumberFirstPass = [](size_t& idx, const char* lineBuffer, size_t lineLen) -> long long
+			{
+				while (idx < lineLen && lineBuffer[idx] == ' ')
+				{
+					++idx;
+				}
+				if (idx >= lineLen)
+				{
+					return 0;
+				}
+
+				bool isNeg = lineBuffer[idx] == '-';
+				if (isNeg)
+				{
+					++idx;
+				}
+				if (idx >= lineLen || !isdigit(lineBuffer[idx]))
+				{
+					return 0;
+				}
+
+				long long res = 0;
+				while (idx < lineLen && isdigit(lineBuffer[idx]))
+				{
+					const auto currDigit = lineBuffer[idx++] - '0';
+					res = res * 10 + (long long)(currDigit);
+				}
+
+				// Return absolute value - we only care about variable numbers
+				return res;
+			};
+
+		while (ReadLine(f, line, maxSz) != nullptr)
+		{
+			const size_t len = strlen(line);
+			size_t currLineI = 0;
+
+			// Skip whitespaces
+			while (currLineI < len && line[currLineI] == ' ')
+			{
+				++currLineI;
+			}
+
+			if (currLineI >= len || line[currLineI] == 'c' || line[currLineI] == 'r' ||
+				line[currLineI] == 'o' || line[currLineI] == 'l' || line[currLineI] == 'b' ||
+				line[currLineI] == 'n' || line[currLineI] == 'p' || line[currLineI] == 's')
+			{
+				++firstPassLineNum;
+				continue;
+			}
+
+			// Process clause line (either 'h' for hard clause or weight for soft clause)
+			if (line[currLineI] == 'h')
+			{
+				++currLineI;
+			}
+			else
+			{
+				// Skip weight
+				long long weight = ParseNumberFirstPass(currLineI, line, len);
+				// Bounds check for weight
+				if (weight < minAllowedWeight || weight > maxAllowedWeight)
+				{
+					cout << "c topor_tool ERROR: Clause weight range violated in line " << to_string(firstPassLineNum) << endl;
+					free(line);
+					return BadRetVal;
+				}
+			}
+
+			// Parse literals to find max
+			long long currLit = numeric_limits<long long>::max();
+			while (currLit != 0)
+			{
+				currLit = ParseNumberFirstPass(currLineI, line, len);
+				if (currLit != 0)
+				{
+					// Bounds check for literal
+					if (currLit > numeric_limits<TLit>::max() || currLit < numeric_limits<TLit>::min())
+					{
+						cout << "c topor_tool ERROR: the literal " << to_string(currLit) << " is too big or too small at line " << to_string(firstPassLineNum) << endl;
+						free(line);
+						return BadRetVal;
+					}
+					// Take absolute value for max calculation
+					long long absLit = currLit < 0 ? -currLit : currLit;
+					maxLit = max(maxLit, absLit);
+				}
+			}
+
+			++firstPassLineNum;
+		}
+
+		// Reset file position for second pass
+#ifndef SKIP_ZLIB
+		if (useZlib)
+		{
+			// For gzip files, use gzseek
+			gzseek((gzFile)f, 0, SEEK_SET);
+		}
+		else
+		{
+			// For pipes (compressed archives), must reopen
+			pclose(f);
+			f = popen((commandStringBeforeAndAfter[U(aFileType)].first + " " + inputFileName + " " + commandStringBeforeAndAfter[U(aFileType)].second).c_str(), "r");
+			if (f == nullptr)
+			{
+				cout << "c topor_tool ERROR: couldn't reopen the input file for second pass" << endl;
+				free(line);
+				return BadRetVal;
+			}
+		}
+#else
+		if (useFopen)
+		{
+			// For regular files, use rewind
+			rewind(f);
+		}
+		else
+		{
+			// For pipes (compressed archives), must reopen
+			pclose(f);
+			f = popen((commandStringBeforeAndAfter[U(aFileType)].first + " " + inputFileName + " " + commandStringBeforeAndAfter[U(aFileType)].second).c_str(), "r");
+			if (f == nullptr)
+			{
+				cout << "c topor_tool ERROR: couldn't reopen the input file for second pass" << endl;
+				free(line);
+				return BadRetVal;
+			}
+		}
+#endif
+
+		lineNum = 1; // Reset line number for second pass
+		currRelaxLit = maxLit + 1;
+	}
+
 	while (ReadLine(f, line, maxSz) != nullptr)
 	{
 		const size_t len = strlen(line);
@@ -1491,6 +1626,12 @@ int main(int argc, char** argv)
 			}
 			else
 			{
+				if (currRelaxLit > numeric_limits<TLit>::max())
+				{
+					cout << "c topor_tool ERROR: failed to assign relaxation literal " << to_string(currRelaxLit) << " in line " << to_string(lineNum)<<", out of range\n";
+					lits.clear();
+					return BadRetVal;
+				}
 				auto weight = ParseNumber();
 				if (weight < minAllowedWeight || weight > maxAllowedWeight)
 				{
@@ -1502,6 +1643,7 @@ int main(int argc, char** argv)
 					cout << "c topor_tool ERROR: Cumulative weight limit exceeded in line " << to_string(lineNum);
 					return BadRetVal;
 				}
+				cumulativeWeight += weight;
 				SkipWhitespaces();
 				auto [errString, cls] = BufferToLits();
 				if (!errString.empty())
@@ -1509,50 +1651,19 @@ int main(int argc, char** argv)
 					cout << errString;
 					return BadRetVal;
 				}
-				softClausesToAdd.push_back({weight, cls});
+				cls.push_back(TLit(currRelaxLit));
+				relaxVars.push_back({ weight, TLit(currRelaxLit) });
+				ToporFixPolarity(-TLit(currRelaxLit), false);
+				currRelaxLit++;
+
+				if (verifyModel)
+				{
+					vmClss.push_back(cls);
+				}
+				ToporAddClause(cls);
 			}
 		}
-
 	}
-
-	if (isMaxsat)
-	{
-		long long nextRelaxVarLL = maxLit + 1;
-
-		relaxVars.clear();
-		relaxVars.reserve(softClausesToAdd.size());
-
-		for (auto& sc : softClausesToAdd)
-		{
-			if (nextRelaxVarLL > numeric_limits<TLit>::max() || nextRelaxVarLL < numeric_limits<TLit>::min())
-			{
-				cout << "c topor_tool ERROR: relaxation variable " << nextRelaxVarLL << " is too big or too small" << endl;
-				return BadRetVal;
-			}
-
-			const TLit relaxVar = (TLit)nextRelaxVarLL++;
-
-			relaxVars.push_back({ sc.Weight, relaxVar });
-
-			ToporFixPolarity(-relaxVar, false);
-			if (!sc.Clause.empty() && sc.Clause.back() == 0)
-			{
-				sc.Clause.pop_back();
-				sc.Clause.push_back(relaxVar);
-				sc.Clause.push_back(0);
-			}
-			else
-			{
-				sc.Clause.push_back(relaxVar);
-			}
-			if (verifyModel)
-			{
-				vmClss.push_back(sc.Clause);
-			}
-			ToporAddClause(sc.Clause);
-		}
-	}
-	softClausesToAdd.clear();
 
 	free(line);
 
