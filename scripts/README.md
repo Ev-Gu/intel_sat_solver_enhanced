@@ -20,7 +20,20 @@ Run any script without parameters to see its usage instructions.
   
 - **`test_parsing_on_regression.csh`**  
   Tests parsing correctness on all regression instances located in `regression_instances`.  
-  Runs `test_parsing_only.csh` on each `.cnf` and `.wcnf` file.  
+  Runs `test_parsing_only.csh` on each `.cnf` and `.wcnf` file.
+  
+- **`test_output_format.csh`**  
+  Tests output format correctness of IntelSAT.  
+  Validates that the solver output conforms to DIMACS format standards, including:
+  - Result line format ("s SATISFIABLE" or "s UNSATISFIABLE")
+  - Model line format ("v " followed by literals)
+  - MaxSAT objective line format ("o <number>")
+  - Line order and structure
+  - No invalid output lines
+
+- **`test_output_format_on_regression.csh`**  
+  Tests output format correctness on all regression instances.  
+  Runs `test_output_format.csh` on each `.cnf` and `.wcnf` file in `regression_instances/`.  
   
 - **`delta_debug_intel_sat.csh`**  
   Performs delta debugging on IntelSAT in case of a failure (i.e., finds a small instance where the failure still occurs).
@@ -136,7 +149,52 @@ Parsing test completed successfully
 
 ---
 
-#### 3. Run and Verify Test (`run_and_verify_intel_sat.csh`)
+#### 3. Output Format Test (`test_output_format.csh`)
+
+This test validates that IntelSAT output conforms to DIMACS format standards.
+
+**Location**: From the project root directory
+
+**Basic usage** (single file):
+```bash
+tcsh scripts/test_output_format.csh intel_sat_solver_test_static regression_instances/regr_1.cnf
+```
+
+**Parameters**:
+- `intel_sat_solver_test_static`: Path to the IntelSAT executable
+- `regression_instances/regr_1.cnf`: Path to the input file to test
+
+**Running on all regression instances**:
+```bash
+tcsh scripts/test_output_format_on_regression.csh intel_sat_solver_test_static
+```
+
+This automatically runs the output format test on all `.cnf` and `.wcnf` files in the `regression_instances/` directory.
+
+**What it validates**:
+- Result line format: Exactly "s SATISFIABLE" or "s UNSATISFIABLE" (no extra text)
+- Model line format: Starts with "v " followed by valid integer literals
+- MaxSAT objective line format: "o <number>" for MaxSAT instances
+- Line order: Result line comes before model/objective lines
+- No invalid output lines that violate DIMACS format
+- UNSATISFIABLE results don't include model lines
+
+**Expected output**:
+```
+Output format validation:
+=========================================
+OUTPUT FORMAT VALIDATION PASSED
+=========================================
+✓ Result line format: OK
+✓ Model line format: OK
+✓ Objective line format: OK
+✓ Line order: OK
+✓ No invalid lines: OK
+```
+
+---
+
+#### 4. Run and Verify Test (`run_and_verify_intel_sat.csh`)
 
 This test runs IntelSAT on an instance and verifies the results using drat-trim and DiMoCheck.
 
@@ -213,7 +271,10 @@ tcsh scripts/test_ipamir_incremental.csh .
 # 4. Run parsing test on a single file
 tcsh scripts/test_parsing_only.csh intel_sat_solver_test_static regression_instances/regr_1.cnf
 
-# 5. Run verification test on a single file
+# 5. Run output format test on a single file
+tcsh scripts/test_output_format.csh intel_sat_solver_test_static regression_instances/regr_1.cnf
+
+# 6. Run verification test on a single file
 tcsh scripts/run_and_verify_intel_sat.csh intel_sat_solver_test_static regression_instances/regr_1.cnf
 ```
 
