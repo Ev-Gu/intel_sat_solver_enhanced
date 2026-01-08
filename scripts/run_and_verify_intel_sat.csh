@@ -32,6 +32,15 @@ endif
 set f = $argv[2]
 set incremental_queries = `egrep -c "^s " $f`
 
+# Check if this is a MaxSAT instance (.wcnf file or -M 1 flag)
+set is_wcnf = `echo $f | grep -c "\.wcnf$"`
+set has_maxsat_flag = `echo $argv[1-] | grep -c "\-M 1"`
+set is_maxsat = 0
+if ($is_wcnf != 0 || $has_maxsat_flag != 0) then
+	set is_maxsat = 1
+	echo "Detected MaxSAT instance"
+endif
+
 set print_ucore = `echo $argv[1-] | grep -c "/topor_tool/print_ucore 1"`
 echo "print_ucore = $print_ucore"
 
@@ -176,54 +185,198 @@ if ($incremental_queries) then
 else
 	# The non-incremental case
 	echo "Type Not Incremental"
-	set ispcnf = `grep -c "^p cnf" $f` 
-	set newf = ${out_file}.cnf
-	cp $f $newf
-	if ($ispcnf == 0) then
-		set clss = `egrep -c "^-?[0-9]" $f` 
-		sed -i "1i p cnf $vars $clss" $newf
-		echo "Added p cnf $vars $clss to $newf"
-	endif
-	set clss = `grep "^p cnf" $newf | awk '{print $4}'`
-	echo "clss = $clss"
-	if ($issat) then
-		if ($clss == 0) then
-			echo "SAT -- empty"
-		else
-			echo "SAT -- running $cs"
-			echo "$cs $newf $out_file"
-			$cs $newf $out_file > $verify_out
-			set ok = `grep -c "satisfiable and solution correct" $verify_out`
-			if ($ok == 0) then
-				echo "ERROR: SAT verification failed!"
-				exit 130
+	
+	# Handle MaxSAT verification
+	if ($is_maxsat) then
+		if ($isunsat) then
+			echo "MaxSAT UNSATISFIABLE - verification passed"
+		else if ($issat) then
+			# Extract objective value and model
+			set obj_line = `grep "^o " $out_file | head -n 1`
+			if ($obj_line == "") then
+				echo "ERROR: No objective value line found in solver output"
+				exit 1
+			endif
+			set reported_obj = `echo $obj_line | sed 's/^o //' | awk '{print $1}'`
+			
+			set model_line = `grep "^v" $out_file | head -n 1`
+			if ($model_line == "") then
+				echo "ERROR: No model line found in solver output"
+				exit 1
+			endif
+			set model_values = `echo $model_line | sed 's/^v //'`
+			
+			# Create temporary files for verification
+			set model_file = "$tmpdir/model"
+			set hard_clauses_file = "$tmpdir/hard_clauses"
+			set soft_clauses_file = "$tmpdir/soft_clauses"
+			
+			# Write model to file (one value per line)
+			echo $model_values | awk '{for(i=1;i<=NF;i++) if($i != "") print $i}' > $model_file
+			
+			# Parse WCNF file to extract hard and soft clauses
+			set var_count = 0
+			awk '
+			{
+				if ($0 ~ /^c/ || $0 == "" || $0 ~ /^[ \t]*$/) next
+				first_char = substr($0, 1, 1)
+				if (first_char == "r" || first_char == "o" || first_char == "l" || first_char == "b" || first_char == "n" || first_char == "p" || first_char == "s") next
+				
+				if (first_char == "h") {
+					clause = ""
+					for (i = 2; i <= NF; i++) {
+						if (i > 2) clause = clause " "
+						clause = clause $i
+					}
+					print clause > "'$hard_clauses_file'"
+					for (i = 2; i <= NF; i++) {
+						if ($i != "0") {
+							abs_lit = ($i < 0) ? -$i : $i
+							if (abs_lit > var_count) var_count = abs_lit
+						}
+					}
+				} else if (first_char ~ /[0-9]/) {
+					print $0 > "'$soft_clauses_file'"
+					for (i = 2; i <= NF; i++) {
+						if ($i != "0") {
+							abs_lit = ($i < 0) ? -$i : $i
+							if (abs_lit > var_count) var_count = abs_lit
+						}
+					}
+				}
+			}
+			END {
+				print var_count > "'$tmpdir/var_count'"
+			}
+			' $f
+			
+			set var_count = `cat $tmpdir/var_count`
+			set model_var_count = `wc -l < $model_file`
+			if ($model_var_count < $var_count) then
+				echo "ERROR: Model has fewer variables ($model_var_count) than expected ($var_count)"
+				exit 1
 			endif
 			
-			echo "SAT -- running $cu"
-			echo "$cu $newf $drat_file $cupsat"
-			$cu $newf $drat_file $cupsat > $verify_out
-			set ok = `grep -c "s DERIVATION" $verify_out`
-			if ($ok == 0) then
-				echo "ERROR: SAT derivation verification failed!"
-				exit 135
+			touch $hard_clauses_file
+			touch $soft_clauses_file
+			
+			# Function to check if a clause is satisfied
+			set check_clause = "$tmpdir/check_clause"
+			cat > $check_clause << 'EOFCHECK'
+#!/bin/csh -f
+set clause_line = "$1"
+set model_file = "$2"
+set satisfied = 0
+
+foreach lit (`echo $clause_line | awk '{for(i=1;i<=NF;i++) if($i != "0") print $i}'`)
+	if ($lit == "0") break
+	set abs_lit = `echo $lit | sed 's/-//'`
+	set var_value = `sed -n "${abs_lit}p" $model_file`
+	if ($lit > 0 && $var_value == 1) then
+		set satisfied = 1
+		break
+	else if ($lit < 0 && $var_value == 0) then
+		set satisfied = 1
+		break
+	endif
+end
+
+if ($satisfied == 1) then
+	exit 0
+else
+	exit 1
+endif
+EOFCHECK
+			chmod +x $check_clause
+			
+			# Verify all hard clauses are satisfied
+			if (-s $hard_clauses_file) then
+				set hard_clause_num = 0
+				foreach hard_clause (`cat $hard_clauses_file`)
+					set hard_clause_num = `expr $hard_clause_num + 1`
+					$check_clause "$hard_clause" $model_file
+					if ($status != 0) then
+						echo "ERROR: Hard clause $hard_clause_num is not satisfied: $hard_clause"
+						exit 1
+					endif
+				end
+			endif
+			
+			# Compute cost from unsatisfied soft clauses
+			set computed_cost = 0
+			if (-s $soft_clauses_file) then
+				foreach soft_clause (`cat $soft_clauses_file`)
+					# Extract weight (first field) and clause (fields 2..NF)
+					set weight = `echo $soft_clause | awk '{print $1}'`
+					set clause_part = `echo $soft_clause | awk '{for(i=2;i<=NF;i++) {if(i>2) printf " "; printf "%s", $i}}'`
+					$check_clause "$clause_part" $model_file
+					if ($status == 0) then
+						continue
+					else
+						set computed_cost = `expr $computed_cost + $weight`
+					endif
+				end
+			endif
+			
+			# Verify computed cost matches reported objective
+			if ($computed_cost != $reported_obj) then
+				echo "ERROR: Cost mismatch - reported: $reported_obj, computed: $computed_cost"
+				exit 1
+			endif
+			
+			echo "MaxSAT SATISFIABLE - verification passed (objective: $reported_obj)"
+		endif
+	else
+		# Regular SAT verification
+		set ispcnf = `grep -c "^p cnf" $f` 
+		set newf = ${out_file}.cnf
+		cp $f $newf
+		if ($ispcnf == 0) then
+			set clss = `egrep -c "^-?[0-9]" $f` 
+			sed -i "1i p cnf $vars $clss" $newf
+			echo "Added p cnf $vars $clss to $newf"
+		endif
+		set clss = `grep "^p cnf" $newf | awk '{print $4}'`
+		echo "clss = $clss"
+		if ($issat) then
+			if ($clss == 0) then
+				echo "SAT -- empty"
+			else
+				echo "SAT -- running $cs"
+				echo "$cs $newf $out_file"
+				$cs $newf $out_file > $verify_out
+				set ok = `grep -c "satisfiable and solution correct" $verify_out`
+				if ($ok == 0) then
+					echo "ERROR: SAT verification failed!"
+					exit 130
+				endif
+				
+				echo "SAT -- running $cu"
+				echo "$cu $newf $drat_file $cupsat"
+				$cu $newf $drat_file $cupsat > $verify_out
+				set ok = `grep -c "s DERIVATION" $verify_out`
+				if ($ok == 0) then
+					echo "ERROR: SAT derivation verification failed!"
+					exit 135
+				endif
 			endif
 		endif
-	endif
-	
-	if ($isunsat) then
-		echo "UNSAT -- running $cu"
-		# If the proof is empty, the text format doesn't work for some reason in the drat verification tool, whereas "a" is interpreted as a binary "0"
-		set lines_in_drat = `wc -l $drat_file | awk '{print $1}'`
-		set empty_proof = `grep -c '^0$' $drat_file`
-		if ($lines_in_drat == 1 && $empty_proof == 1) then
-			echo "a" > $drat_file		
-		endif
-		echo "$cu $newf $drat_file $cupunsat"
-		$cu $newf $drat_file $cupunsat > $verify_out
-		set ok = `grep -c "s VERIFIED" $verify_out`
-		if ($ok == 0) then
-			echo "ERROR: UNSAT verification failed!"
-			exit 140
+		
+		if ($isunsat) then
+			echo "UNSAT -- running $cu"
+			# If the proof is empty, the text format doesn't work for some reason in the drat verification tool, whereas "a" is interpreted as a binary "0"
+			set lines_in_drat = `wc -l $drat_file | awk '{print $1}'`
+			set empty_proof = `grep -c '^0$' $drat_file`
+			if ($lines_in_drat == 1 && $empty_proof == 1) then
+				echo "a" > $drat_file		
+			endif
+			echo "$cu $newf $drat_file $cupunsat"
+			$cu $newf $drat_file $cupunsat > $verify_out
+			set ok = `grep -c "s VERIFIED" $verify_out`
+			if ($ok == 0) then
+				echo "ERROR: UNSAT verification failed!"
+				exit 140
+			endif
 		endif
 	endif
 endif

@@ -1,0 +1,11 @@
+c Regression test WCNF file 3
+c Simple MaxSAT instance
+c Hard constraint: at least one of 1, 2, 3 must be true
+h 1 2 3 0
+c Soft constraints
+-1 -2 0
+-2 -3 0
+-1 -3 0
+1 -2 0
+2 -3 0
+

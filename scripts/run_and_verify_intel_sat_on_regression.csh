@@ -54,3 +54,32 @@ foreach f (`ls -rS $regr/regr*.cnf`)
 		end
 	end
 end
+
+# Process .wcnf files (MaxSAT regression tests)
+# This section:
+# 1. Finds all .wcnf files in $regr (the regression_instances directory, set on line 12)
+# 2. Runs each file through IntelSAT in MaxSAT mode (-M 1)
+# 3. Checks for errors in the output
+# 4. Exits immediately on the first error, otherwise continues and reports success
+# Note: If no .wcnf files exist, the loop is skipped (due to 2>/dev/null) and the script continues
+#
+# WCNF file format (Weighted CNF for MaxSAT):
+# - Comments: lines starting with 'c'
+# - Hard clauses: lines starting with 'h' followed by literals ending with 0
+#   Example: h 1 2 3 4 0
+# - Soft clauses: lines starting with a weight (positive integer) followed by literals ending with 0
+#   Example: 5 -3 -5 6 7 0  (weight=5, clause: -3 OR -5 OR 6 OR 7)
+# Note: WCNF files should NOT contain a 'p wcnf' header line (unlike standard WCNF format)
+foreach f (`ls -rS $regr/*.wcnf 2>/dev/null`)
+	echo "$run_and_verify_topor $topor $f -M 1 $inputparams > outt"
+	$run_and_verify_topor $topor $f -M 1 $inputparams > outt
+	
+	set r = `grep -c ERROR outt`
+	if ($r != 0) then
+		echo "ERROR!"
+		exit
+	else
+		echo "Ok"
+		rm outt		
+	endif
+end
