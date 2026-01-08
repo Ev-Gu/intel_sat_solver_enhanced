@@ -13,9 +13,17 @@ Run any script without parameters to see its usage instructions.
 
 - **`run_and_verify_intel_sat_on_regression.csh`**  
   Runs and verifies IntelSAT on the regression instances located in `regression_instances`.  
-
+  
+- **`test_parsing_only.csh`**  
+  Tests parsing correctness (not solving) for a single instance.  
+  Verifies that the input file is parsed correctly without actually solving it.  
+  
+- **`test_parsing_on_regression.csh`**  
+  Tests parsing correctness on all regression instances located in `regression_instances`.  
+  Runs `test_parsing_only.csh` on each `.cnf` and `.wcnf` file.  
+  
 - **`delta_debug_intel_sat.csh`**  
-  Performs delta debugging on IntelSAT in case of a failure (i.e., finds a small instance where the failure still occurs).  
+  Performs delta debugging on IntelSAT in case of a failure (i.e., finds a small instance where the failure still occurs).
 
 - **`delta_debug_intel_sat_till_fixed_point.csh`**  
   Runs `delta_debug_intel_sat.csh` iteratively until a fixed point is reached.  
