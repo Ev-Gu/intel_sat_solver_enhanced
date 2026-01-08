@@ -136,7 +136,13 @@ set INCLUDES = "-I$root_dir"
 # Determine library flags
 set LIBFLAGS = ""
 set LDPATH = ""
-if ($lib_name =~ "*.so") then
+set is_shared = 0
+set lib_suffix = `echo $lib_name | sed 's/.*\.//'`
+if ($lib_suffix == "so") then
+    set is_shared = 1
+endif
+
+if ($is_shared == 1) then
     # Shared library - extract library base name for linking
     # Remove "lib" prefix and ".so" suffix, then use with -l
     set lib_link_name = `echo $lib_name | sed 's/^lib//' | sed 's/_shared_release\.so$/_shared_release/' | sed 's/\.so$//'`
@@ -205,7 +211,7 @@ foreach exe ($compiled_examples)
     echo "----------------------------------------"
     
     # Set library path if using shared library
-    if ($lib_name =~ "*.so") then
+    if ($is_shared == 1) then
         env $LDPATH $exe
         set run_status = $status
     else
