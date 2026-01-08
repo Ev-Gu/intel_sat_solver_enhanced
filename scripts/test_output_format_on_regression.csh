@@ -35,10 +35,13 @@ set all_passed = 1
 set test_count = 0
 set pass_count = 0
 
-# Test all .cnf files (use find to handle paths with spaces)
-foreach f (`find "$regr" -maxdepth 1 -name "*.cnf" -type f 2>/dev/null`)
+# Test all .cnf files (use sh with environment variable to handle paths with spaces)
+setenv REGR_DIR "$regr"
+set cnf_files = `sh -c 'find "$REGR_DIR" -maxdepth 1 -name "*.cnf" -type f 2>/dev/null'`
+unsetenv REGR_DIR
+foreach f ($cnf_files)
     @ test_count = $test_count + 1
-    set basename_file = `basename $f`
+    set basename_file = `basename "$f"`
     echo "========================================="
     echo "Testing output format: $basename_file"
     echo "========================================="
@@ -59,10 +62,13 @@ foreach f (`find "$regr" -maxdepth 1 -name "*.cnf" -type f 2>/dev/null`)
     echo ""
 end
 
-# Test all .wcnf files (use find to handle paths with spaces)
-foreach f (`find "$regr" -maxdepth 1 -name "*.wcnf" -type f 2>/dev/null`)
+# Test all .wcnf files (use sh with environment variable to handle paths with spaces)
+setenv REGR_DIR "$regr"
+set wcnf_files = `sh -c 'find "$REGR_DIR" -maxdepth 1 -name "*.wcnf" -type f 2>/dev/null'`
+unsetenv REGR_DIR
+foreach f ($wcnf_files)
     @ test_count = $test_count + 1
-    set basename_file = `basename $f`
+    set basename_file = `basename "$f"`
     echo "========================================="
     echo "Testing output format: $basename_file"
     echo "========================================="
