@@ -32,4 +32,10 @@ Run any script without parameters to see its usage instructions.
   Fuzzes incremental instances and verifies IntelSAT.  
 
 - **`fuzz_and_verify_parallel.csh`**  
-  Fuzzes incremental instances and verifies IntelSAT in parallel.  
+  Fuzzes incremental instances and verifies IntelSAT in parallel.
+
+- **`test_ipamir_incremental.csh`**  
+  Tests incremental flow using IPAMIR example programs.  
+  Compiles and runs IPAMIR (Incremental Partial MaxSAT API) example programs to verify  
+  incremental MaxSAT solving functionality. This script demonstrates how to use the IPAMIR  
+  interface for incremental solving with multiple solve calls, assumptions, and querying results.  
