@@ -35,8 +35,8 @@ set all_passed = 1
 set test_count = 0
 set pass_count = 0
 
-# Test all .cnf files
-foreach f (`ls $regr/*.cnf 2>/dev/null`)
+# Test all .cnf files (use find to handle paths with spaces)
+foreach f (`find "$regr" -maxdepth 1 -name "*.cnf" -type f 2>/dev/null`)
     @ test_count = $test_count + 1
     set basename_file = `basename $f`
     echo "========================================="
@@ -59,8 +59,8 @@ foreach f (`ls $regr/*.cnf 2>/dev/null`)
     echo ""
 end
 
-# Test all .wcnf files
-foreach f (`ls $regr/*.wcnf 2>/dev/null`)
+# Test all .wcnf files (use find to handle paths with spaces)
+foreach f (`find "$regr" -maxdepth 1 -name "*.wcnf" -type f 2>/dev/null`)
     @ test_count = $test_count + 1
     set basename_file = `basename $f`
     echo "========================================="
