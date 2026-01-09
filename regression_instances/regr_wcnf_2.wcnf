@@ -3,7 +3,6 @@ c MaxSAT instance with hard and soft clauses
 h -1 2 0
 h 3 -4 0
 1 2 3 0
--1 2 -3 0
+1 -1 2 -3 0
 4 -5 0
--4 5 0
-
+1 -4 5 0

@@ -2,10 +2,9 @@ c Regression test WCNF file 4
 c More complex MaxSAT instance
 h 1 -2 3 0
 h -1 2 -3 0
-1 2 0
--1 -2 0
-3 4 0
--3 -4 0
-1 -3 4 0
--1 3 -4 0
-
+1 1 2 0
+1 -1 -2 0
+1 3 4 0
+1 -3 -4 0
+1 1 -3 4 0
+1 -1 3 -4 0
