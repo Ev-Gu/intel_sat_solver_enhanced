@@ -15,8 +15,10 @@ if ($#argv < 1) then
 endif
 
 set build_dir = "$1"
-set script_dir = `dirname "$0"`
-set root_dir = `cd "$script_dir/.." && pwd`
+set script_dir = (`sh -c 'dirname "$1"' sh "$0"`)
+set script_dir = "$script_dir"
+set root_dir = (`sh -c 'cd "$1/.." && pwd' sh "$script_dir"`)
+set root_dir = "$root_dir"
 set examples_dir = "$root_dir/ipamir_examples"
 set additional_params = "$argv[2-]"
 
@@ -34,12 +36,14 @@ if ( ! -d "$examples_dir" ) then
 endif
 
 # Check if we're in the build directory or if it's the root
-set current_dir = `pwd`
+set current_dir = (`sh -c 'pwd'`)
+set current_dir = "$current_dir"
 if ( "$build_dir" == "." ) then
-    set build_dir = $current_dir
+    set build_dir = "$current_dir"
 else
     cd "$build_dir"
-    set build_dir = `pwd`
+    set build_dir = (`sh -c 'pwd'`)
+    set build_dir = "$build_dir"
 endif
 
 # Check if ToporIpamir.h exists
@@ -51,7 +55,8 @@ endif
 # Check if library needs to be built
 # The library name is determined by the Makefile LIB variable (defaults to directory name)
 # We'll try to detect it from existing libraries or use a reasonable default
-set lib_base_name = `basename "$root_dir"`
+set lib_base_name = (`sh -c 'basename "$1"' sh "$root_dir"`)
+set lib_base_name = "$lib_base_name"
 set lib_name = "lib${lib_base_name}_shared_release.so"
 set lib_static_name = "lib${lib_base_name}_release.a"
 set lib_exists = 0
@@ -65,9 +70,11 @@ else
     # Try to find any shared release library
     set found_lib = ""
     # Use find to avoid glob expansion issues in tcsh
-    set found_lib = `find "$root_dir" -maxdepth 1 -name "lib*_shared_release.so" -type f 2>/dev/null | head -n 1`
+    set found_lib = (`sh -c 'find "$1" -maxdepth 1 -name "lib*_shared_release.so" -type f 2>/dev/null | head -n 1' sh "$root_dir"`)
+    set found_lib = "$found_lib"
     if ( "$found_lib" != "" ) then
-        set lib_name = `basename "$found_lib"`
+        set lib_name = (`sh -c 'basename "$1"' sh "$found_lib"`)
+        set lib_name = "$lib_name"
         set lib_exists = 1
         echo "Found existing shared library: $root_dir/$lib_name"
     else if (-f "$root_dir/$lib_static_name") then
@@ -78,9 +85,11 @@ else
         # Try to find any static release library
         set found_lib = ""
         # Use find to avoid glob expansion issues in tcsh
-        set found_lib = `find "$root_dir" -maxdepth 1 -name "lib*_release.a" -type f 2>/dev/null | head -n 1`
+        set found_lib = (`sh -c 'find "$1" -maxdepth 1 -name "lib*_release.a" -type f 2>/dev/null | head -n 1' sh "$root_dir"`)
+        set found_lib = "$found_lib"
         if ( "$found_lib" != "" ) then
-            set lib_name = `basename "$found_lib"`
+            set lib_name = (`sh -c 'basename "$1"' sh "$found_lib"`)
+            set lib_name = "$lib_name"
             set lib_exists = 1
             echo "Found existing static library: $root_dir/$lib_name"
         else
@@ -147,7 +156,8 @@ set INCLUDES = "-I$root_dir"
 set LIBFLAGS = ""
 set LDPATH = ""
 set is_shared = 0
-set lib_suffix = `echo $lib_name | sed 's/.*\.//'`
+set lib_suffix = (`sh -c 'echo "$1" | sed "s/.*\.//"' sh "$lib_name"`)
+set lib_suffix = "$lib_suffix"
 if ( "$lib_suffix" == "so" ) then
     set is_shared = 1
 endif

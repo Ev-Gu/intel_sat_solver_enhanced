@@ -9,15 +9,29 @@ if ($#argv < 1) then
     exit 140
 endif
 
-set script_dir = `dirname $0`
+set script_dir = (`dirname $0`)
+set script_dir = "$script_dir"
 set test_output_format = "$script_dir/test_output_format.csh"
 set regr = "$script_dir/../regression_instances"
 set topor = $1
 
 if (! -e $topor) then
-    echo "intel_sat_executable doesn't exist at $topor. Exiting"
-    echo "ERROR"
-    exit 130
+	# Try with .exe extension (for Windows/MSYS2)
+	if (-e "${topor}.exe") then
+		set topor = "${topor}.exe"
+	else
+		echo "ERROR: intel_sat_executable doesn't exist at $topor"
+		echo "       (Also tried: ${topor}.exe)"
+		echo ""
+		echo "Available executables in current directory:"
+		sh -c 'ls -1 intel_sat_solver* 2>/dev/null | head -5' || echo "  (none found)"
+		echo ""
+		echo "Please use the correct executable name, e.g.:"
+		echo "  intel_sat_solver_enhanced_static"
+		echo "  intel_sat_solver_enhanced_static.exe"
+		echo "  ./intel_sat_solver_enhanced_static"
+		exit 130
+	endif
 endif
 
 echo "Testing output format on regression instances"
@@ -41,7 +55,8 @@ set cnf_files = `sh -c 'find "$REGR_DIR" -maxdepth 1 -name "*.cnf" -type f 2>/de
 unsetenv REGR_DIR
 foreach f ($cnf_files)
     @ test_count = $test_count + 1
-    set basename_file = `basename "$f"`
+    set basename_file = (`sh -c 'basename "$1"' sh "$f"`)
+    set basename_file = "$basename_file"
     echo "========================================="
     echo "Testing output format: $basename_file"
     echo "========================================="
@@ -68,7 +83,8 @@ set wcnf_files = `sh -c 'find "$REGR_DIR" -maxdepth 1 -name "*.wcnf" -type f 2>/
 unsetenv REGR_DIR
 foreach f ($wcnf_files)
     @ test_count = $test_count + 1
-    set basename_file = `basename "$f"`
+    set basename_file = (`sh -c 'basename "$1"' sh "$f"`)
+    set basename_file = "$basename_file"
     echo "========================================="
     echo "Testing output format: $basename_file"
     echo "========================================="

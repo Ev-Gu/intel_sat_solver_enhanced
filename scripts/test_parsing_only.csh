@@ -27,7 +27,7 @@ set temp_input_file = "$temp_input.$input_ext"
 cat $argv[2] > $temp_input_file
 
 # Check if the file already ends with a newline, and if not, add one before appending 'oc 0'
-set last_char = `tail -c 1 $temp_input_file | od -An -tu1 2>/dev/null`
+set last_char = `sh -c 'tail -c 1 "$1" | od -An -tu1 2>/dev/null' sh "$temp_input_file"`
 if ($last_char != "10" && $last_char != "") then
     echo "" >> $temp_input_file
 endif
@@ -39,9 +39,28 @@ echo "oc 0" >> $temp_input_file
 
 # Run the solver - it should parse the file and then immediately exit due to conflict threshold 0
 # The 'oc 0' command sets the conflict threshold to 0, which should cause immediate exit after parsing
-echo "Command: $argv[1] $temp_input_file $argv[3-]"
-echo "$argv[1] $temp_input_file $argv[3-] >& $out_file"
-$argv[1] $temp_input_file $argv[3-] >& $out_file
+# Handle Windows/MSYS2 executable extension and path resolution
+set solver_exe = "$argv[1]"
+if (! -e "$solver_exe" && ! -x "$solver_exe") then
+    # Try various combinations to find the executable
+    if (-e "${solver_exe}.exe") then
+        set solver_exe = "${solver_exe}.exe"
+    else if (-e "./${solver_exe}") then
+        set solver_exe = "./${solver_exe}"
+    else if (-e "./${solver_exe}.exe") then
+        set solver_exe = "./${solver_exe}.exe"
+    else
+        # Try to find it using which/where
+        set found_exe = `sh -c 'which "$1" 2>/dev/null || which "$1.exe" 2>/dev/null || echo ""' sh "$solver_exe"`
+        if ( "$found_exe" != "" ) then
+            set solver_exe = "$found_exe"
+        endif
+    endif
+endif
+
+echo "Command: $solver_exe $temp_input_file $argv[3-]"
+echo "$solver_exe $temp_input_file $argv[3-] >& $out_file"
+$solver_exe $temp_input_file $argv[3-] >& $out_file
 set parse_status = $status
 
 echo "========================================="
