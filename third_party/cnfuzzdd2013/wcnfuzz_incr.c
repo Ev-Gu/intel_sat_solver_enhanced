@@ -1,5 +1,6 @@
 /* Copyright (c) 2009 - 2010, Armin Biere, Johannes Kepler University. */
 /* Copyright (c) 2024 - 2025, Alexander Nadel, Technion. */
+/* Modified for WCNF (MaxSAT) incremental format */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -38,15 +39,16 @@ int
 main (int argc, char ** argv)
 {
   int i, j, k, l, m, n, o, p, sign, lit, layer, w, val, min, max, ospread;
-  int ** unused, * nunused, allmin, allmax, qbf, *quant, scramble, * map;
+  int ** unused, * nunused, allmin, allmax, *quant, scramble, * map;
   int seed, nlayers, ** layers, *width, * low, * high, * clauses;
-  int fp, eqs, ands, *arity, maxarity, lhs, rhs;
+  int eqs, ands, *arity, maxarity, lhs, rhs;
   const char * options;
   char option[100];
   FILE * file;
   char * mark;
+  int max_weight;  // Maximum weight for soft clauses
+  int hard_ratio;  // Probability that a clause is hard (out of 10)
 
-  qbf = 0;
   seed = -1;
   options = 0;
 
@@ -55,10 +57,12 @@ main (int argc, char ** argv)
       if (!strcmp (argv[i], "-h")) 
 	{
 	  printf (
-"usage: cnfuzz_incr [-h][-q][<seed>][<option-file>]\n"
+"usage: wcnfuzz_incr [-h][<seed>][<option-file>]\n"
 "\n"
 "  -h   print command line option help\n"
-"  -q   generate quantified CNF in QDIMACS format\n"
+"\n"
+"Generates random incremental WCNF (Weighted CNF) files for MaxSAT.\n"
+"Format: hard clauses start with 'h', soft clauses start with weight.\n"
 "\n"
 "If the seed is not specified it is calculated from the process id\n"
 "and the current system time (in seconds).\n"
@@ -66,29 +70,27 @@ main (int argc, char ** argv)
 "The optional <option-file> lists integer options with their ranges,\n"
 "one option in the format '<opt> <lower> <upper> per line.\n"
 "Those options are fuzzed and embedded into the generated input\n"
-"in comments before the 'p cnf ...' header.\n"
+"in comments before the clauses.\n"
 );
 	  exit (0);
 	}
-      if (!strcmp (argv[i], "-q")) 
-	qbf = 1;
       else if (numstr (argv[i])) 
 	{
 	  if (seed >= 0) 
 	    {
-	      fprintf (stderr, "*** cnfuzz: multiple seeds\n");
+	      fprintf (stderr, "*** wcnfuzz: multiple seeds\n");
 	      exit (1);
 	    }
 	  seed = atoi (argv[i]);
 	  if (seed < 0) 
 	    {
-	      fprintf (stderr, "*** cnfuzz: seed overflow\n");
+	      fprintf (stderr, "*** wcnfuzz: seed overflow\n");
 	      exit (1);
 	    }
 	}
       else if (options) 
 	{
-	  fprintf (stderr, "*** cnfuzz: multiple option files\n");
+	  fprintf (stderr, "*** wcnfuzz: multiple option files\n");
 	  exit (1);
 	}
       else
@@ -108,13 +110,7 @@ main (int argc, char ** argv)
   srand (seed);
   printf ("c seed %d\n", seed);
   fflush (stdout);
-  if (qbf) 
-    {
-      printf ("c qbf\n");
-      fp = pick (0, 3);
-      if (fp)
-	printf ("c but forced to be propositional\n");
-    }
+  
   if (options)
     {
       file = fopen (options, "r");
@@ -126,7 +122,7 @@ main (int argc, char ** argv)
       printf ("c %d ospread\n", ospread);
       if (!file)
 	{
-	  fprintf (stderr, "*** cnfuzz: can not read '%s'\n", options);
+	  fprintf (stderr, "*** wcnfuzz: can not read '%s'\n", options);
 	  exit (1);
 	}
       while (fscanf (file, "%s %d %d %d", option, &val, &min, &max) == 4)
@@ -153,6 +149,12 @@ main (int argc, char ** argv)
   ands = pick (0, 1) ? 0 : pick (0,99);
   printf ("c ands %d\n", ands);
   
+  // WCNF-specific parameters
+  max_weight = pick (1, 1000);
+  printf ("c maxWeight %d\n", max_weight);
+  hard_ratio = pick (1, 4);  // 10-40% hard clauses (1-4 out of 10)
+  printf ("c hardRatio %d/10 (probability clause is hard)\n", hard_ratio);
+  
   layers = (int**)calloc (nlayers, sizeof *layers);
   quant = (int*)calloc (nlayers, sizeof *quant);
   width = (int*)calloc (nlayers, sizeof *width);
@@ -164,15 +166,15 @@ main (int argc, char ** argv)
   for (i = 0; i < nlayers; i++)
     {
       width[i] = pick (10, w);
-      quant[i] = (qbf && !fp) ? pick (-1, 1) : 0;
+      quant[i] = 0;  // No QBF support for WCNF
       low[i] = i ? high[i-1] + 1 : 1;
       high[i] = low[i] + width[i] - 1;
       m = width[i];
       if (i) m += width[i-1];
       n = (pick (300, 450) * m) / 100;
       clauses[i] = n;
-      printf ("c layer[%d] = [%d..%d] w=%d v=%d c=%d r=%.2f q=%d\n",
-              i, low[i], high[i], width[i], m, n, n / (double) m, quant[i]);
+      printf ("c layer[%d] = [%d..%d] w=%d v=%d c=%d r=%.2f\n",
+              i, low[i], high[i], width[i], m, n, n / (double) m);
 
       nunused[i] = 2 * (high[i] - low[i] + 1);
       unused[i] = (int*)calloc (nunused[i], sizeof *unused[i]);
@@ -197,12 +199,12 @@ main (int argc, char ** argv)
     n += clauses[i];
   n += 2*eqs;
   
-  // Incremental
+  // Incremental WCNF format
   
   // No header for incremental 
   // m: variables
   // n: clauses
-  printf ("c pcnf-line-variables-clauses %d %d\n", m, n);
+  printf ("c pwcnf-line-variables-clauses %d %d\n", m, n);
   
   int clssSoFar = 0;
   
@@ -319,22 +321,26 @@ main (int argc, char ** argv)
   
   map = (int*)calloc (2*m + 1, sizeof *map);
   map += m;
-  if (qbf && !fp) 
-    for (i = 0; i < nlayers; i++)
-      {
-	if (!i && !quant[0]) continue;
-	fputc (quant[i] < 0 ? 'a' : 'e', stdout);
-	for (j = low[i]; j <= high[i]; j++)
-	  printf (" %d", j);
-	fputs (" 0\n", stdout);
-      }
+  
+  // Generate clauses with hard/soft assignment
   for (i = 0; i < nlayers; i++)
     {
       for (j = 0; j < clauses[i]; j++)
 	{
+	  // Decide if this clause is hard or soft
+	  bool is_hard = (pick(0, 9) < hard_ratio);
+	  int weight = is_hard ? 0 : pick(1, max_weight);
+	  
 	  l = 3;
 	  while (l < MAX && pick (17, 19) != 17)
 	    l++;
+
+	  // Print hard/soft prefix
+	  if (is_hard) {
+	    printf("h ");
+	  } else {
+	    printf("%d ", weight);  // Print weight for soft clauses
+	  }
 
 	  for (k = 0; k < l; k++)
 	    {
@@ -366,6 +372,8 @@ main (int argc, char ** argv)
 	    mark[abs (clause[k])] = 0;
 	}
     }
+    
+  // Generate equality clauses (make them hard clauses for WCNF)
   while (eqs-- > 0)
     {
       i = pick (0, nlayers - 1);
@@ -379,11 +387,13 @@ main (int argc, char ** argv)
 	}
       k *= SIGN ();
       l *= SIGN ();
-      printf ("%d %d 0\n", k, l);
+      printf ("h %d %d 0\n", k, l);  // Hard clause
       NewClause();
-      printf ("%d %d 0\n", -k, -l);
+      printf ("h %d %d 0\n", -k, -l);  // Hard clause
       NewClause();
     }
+    
+  // Generate AND clauses (make them hard clauses for WCNF)
   while (--ands >= 0)
     {
       l = arity[ands];
@@ -393,7 +403,7 @@ main (int argc, char ** argv)
       mark [lhs] = 1;
       lhs *= SIGN ();
       clause[0] = lhs;
-      printf ("%d ", lhs);
+      printf ("h %d ", lhs);  // Hard clause
       for (k = 1; k <= l; k++)
 	{
 	  j = pick (0, nlayers-1);
@@ -408,7 +418,7 @@ main (int argc, char ** argv)
       NewClause();
       for (k = 1; k <= l; k++)
       {		 
-	     printf ("%d %d 0\n", -clause[0], -clause[k]);
+	     printf ("h %d %d 0\n", -clause[0], -clause[k]);  // Hard clause
 	     NewClause();
 	  }
       for (k = 0; k <= l; k++)
@@ -434,3 +444,4 @@ main (int argc, char ** argv)
   printf("s 0\n");
   return 0;
 }
+

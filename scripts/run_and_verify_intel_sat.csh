@@ -26,6 +26,9 @@ set issat = `grep -c "s SATISFIABLE" $out_file`
 set isunsat = `grep -c "s UNSATISFIABLE" $out_file` 
 if ($issat == 0 && $isunsat == 0) then
 	echo "ERROR: unknown result"
+	echo "Solver output (last 50 lines):"
+	tail -n 50 $out_file
+	echo "Full solver output saved in: $out_file"
 	exit 120
 endif
 

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include <sys/times.h>
+#include <time.h>
 #include <unistd.h>
 #include <string.h>
 #include <ctype.h>
@@ -91,7 +91,7 @@ main (int argc, char ** argv)
 	options = argv[i];
     }
 
-  if (seed < 0) seed = abs ((times(0) * getpid ()) >> 1);
+  if (seed < 0) seed = abs ((time(NULL) * getpid ()) >> 1);
 
   srand (seed);
   printf ("c seed %d\n", seed);

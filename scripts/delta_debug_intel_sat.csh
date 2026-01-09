@@ -53,16 +53,38 @@ echo "The original CNF with the error is $forig"
 
 set curr_query = `egrep "Query [0-9]+ out of [0-9]+" $out_file | tail -n 1 | awk '{print $2}'`
 set queries = `egrep "Query [0-9]+ out of [0-9]+" $out_file | tail -n 1 | awk '{print $5}'`
-echo "ERROR in query $curr_query out of $queries"
+
+# Handle case where solver didn't produce query info (non-incremental error or crash)
+if ("$curr_query" == "" || "$queries" == "") then
+	echo "ERROR: Solver did not produce incremental query information (may have crashed or non-incremental error)"
+	echo "Treating as non-incremental error"
+	set curr_query = 0
+	set queries = 0
+	set is_incremental = 0
+else
+	echo "ERROR in query $curr_query out of $queries"
+endif
 
 if ($is_incremental) then
 	# Incremental: remove the rest of the queries (beyond curr_query) and put the result in fcurr
 
 	# Find the line of the current query in the input CNF
-	set curr_query_line_num_in_f = `grep -n -m$curr_query "^s " $f | tail -n 1 | cut -f1 -d:`
-	echo "curr_query_line_num_in_f = $curr_query_line_num_in_f"
-	# Put only the lines till the current query in fcurr
-	head -n $curr_query_line_num_in_f $f > $fcurr
+	if ("$curr_query" != "" && "$curr_query" != "0") then
+		set curr_query_line_num_in_f = `grep -n -m$curr_query "^s " $f | tail -n 1 | cut -f1 -d:`
+		echo "curr_query_line_num_in_f = $curr_query_line_num_in_f"
+		if ("$curr_query_line_num_in_f" != "") then
+			# Put only the lines till the current query in fcurr
+			head -n $curr_query_line_num_in_f $f > $fcurr
+		else
+			# Couldn't find the query, treat as non-incremental
+			cp $f $fcurr
+			echo "s 0" >> $fcurr
+		endif
+	else
+		# No valid query number, treat as non-incremental
+		cp $f $fcurr
+		echo "s 0" >> $fcurr
+	endif
 else
 	# Non-incremental: reduce the problem to incremental
 	cp $f $fcurr
@@ -82,6 +104,8 @@ set removed_queries = 0
 set already_tested_query = $curr_query
 set latest_untested_query = 1
 
+# Only try to remove queries if we have a valid query number
+if ("$already_tested_query" != "" && "$already_tested_query" != "0" && $already_tested_query > 0) then
 while ($latest_untested_query < $already_tested_query)
 	echo "Can we remove query $latest_untested_query out of $already_tested_query and still get an error?"
 	rm $out_file
@@ -104,10 +128,19 @@ while ($latest_untested_query < $already_tested_query)
 		echo "The minimized CNF in $fcurr updated!"
 	endif
 end
+endif
 
 # Reduce the number of clauses as much as possible
 set removed_clauses = 0
-set clss = `egrep -c "^-?[0-9]" $fcurr` 
+# Count clauses: for CNF, lines starting with numbers; for WCNF, lines starting with "h " or numbers (weight)
+set is_wcnf = `echo $fcurr | grep -c "\.wcnf$"`
+if ($is_wcnf != 0) then
+	# WCNF: count lines starting with "h " or starting with a number (soft clauses with weight)
+	set clss = `egrep -c "^h |^[0-9]" $fcurr`
+else
+	# CNF: count lines starting with numbers (clause literals)
+	set clss = `egrep -c "^-?[0-9]" $fcurr`
+endif
 set already_tested_cls = $clss
 set latest_untested_cls = 1
 
@@ -115,13 +148,21 @@ while ($latest_untested_cls <= $already_tested_cls)
 	echo "Can we remove clause $latest_untested_cls out of $already_tested_cls and still get an error?"
 	rm $out_file
 	# Delete the clause latest_untested_cls
-	set latest_untested_cls_line_num_in_fcurr = `egrep -n -m$latest_untested_cls "^-?[0-9]" $fcurr | tail -n 1 | cut -f1 -d:`
+	if ($is_wcnf != 0) then
+		set latest_untested_cls_line_num_in_fcurr = `egrep -n -m$latest_untested_cls "^h |^[0-9]" $fcurr | tail -n 1 | cut -f1 -d:`
+	else
+		set latest_untested_cls_line_num_in_fcurr = `egrep -n -m$latest_untested_cls "^-?[0-9]" $fcurr | tail -n 1 | cut -f1 -d:`
+	endif
 	set fcurrtest = ${fcurr}.test
 	sed "${latest_untested_cls_line_num_in_fcurr}d" $fcurr > $fcurrtest
 	if ($ispcnf != 0) then
 		# Replace the #clauses in "p cnf" by the correct one
 		sed -i '/p cnf/d' $fcurrtest
-		set clss_real = `egrep -c "^-?[0-9]" $fcurrtest` 
+		if ($is_wcnf != 0) then
+			set clss_real = `egrep -c "^h |^[0-9]" $fcurrtest`
+		else
+			set clss_real = `egrep -c "^-?[0-9]" $fcurrtest`
+		endif
 		sed -i "1i p cnf $vars $clss_real" $fcurrtest
 	endif
 	set newcl = "$run_and_verify_topor $t $fcurrtest $argv[3-]"	
@@ -138,6 +179,8 @@ while ($latest_untested_cls <= $already_tested_cls)
 		if ($err_query_number == "") then
 			set err_query_number = $curr_queries
 			echo "Couldn't grep err_query_number: has there been a crash?"
+			echo "Last 20 lines of solver output:"
+			tail -n 20 $out_file
 		endif
 		if ($err_query_number != $curr_queries) then
 			# Find the line of the current query in the current CNF
@@ -167,13 +210,17 @@ set fcurr = $fcurr_regr
 sed -i "1 i\c Topors command-line: $argv[1-]" ${fcurr} 
 
 set gitsfile = ${out_file}.git_status
-git status >& $gitsfile
-set ifgitfailed = `grep -c fatal $gitsfile`
-if ($ifgitfailed == 0) then
-	sed -i "1 i\c git `git log -1 | head -n 1`" ${fcurr} 
-	sed -i "1 i\c git current branch `git rev-parse --abbrev-ref HEAD`" ${fcurr} 
+# Try to get git info, but don't fail if git is not available
+which git >& /dev/null
+if ($status == 0) then
+	git status >& $gitsfile
+	set ifgitfailed = `grep -c fatal $gitsfile`
+	if ($ifgitfailed == 0) then
+		sed -i "1 i\c git `git log -1 | head -n 1`" ${fcurr} 
+		sed -i "1 i\c git current branch `git rev-parse --abbrev-ref HEAD`" ${fcurr} 
+	endif
+	rm -f $gitsfile
 endif
-rm $gitsfile
 
 echo "The minimized CNF is ${fcurr} To reproduce the problem:"
 echo "$run_and_verify_topor $t $fcurr $argv[3-]"
