@@ -1651,11 +1651,10 @@ int main(int argc, char** argv)
 					cout << errString;
 					return BadRetVal;
 				}
-				// Fix: Remove the terminating 0 before adding relaxation literal
-				// BufferToLits() includes the 0 in the clause, but we need to add
-				// the relaxation literal before the terminator
+
 				cls.pop_back();
 				cls.push_back(TLit(currRelaxLit));
+				cls.push_back(0);
 				relaxVars.push_back({ weight, TLit(currRelaxLit) });
 				ToporFixPolarity(-TLit(currRelaxLit), false);
 				currRelaxLit++;
