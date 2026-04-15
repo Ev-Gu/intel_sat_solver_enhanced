@@ -1,0 +1,5 @@
+*.csv
+MSE*
+baseWCNFs
+kissat
+*.zip

@@ -1,0 +1,29 @@
+#!/bin/bash
+
+## This script downloads all csv and WCNF files from the MaxSAT Evaluation homepage to test the solvers on.
+
+set -e
+
+cd $(dirname $0)
+
+# uses the program unzip and wget - for ubuntu just do
+# sudo apt-get install unzip
+# sudo apt-get install wget
+wget https://maxsat-evaluations.github.io/2024/MaxSATRegressionSuiteWCNFs.zip
+unzip MaxSATRegressionSuiteWCNFs.zip
+rm MaxSATRegressionSuiteWCNFs.zip
+
+
+# Prompt the user
+echo "Do you want to download and install kissat from the GitHub homepage (y/n)?"
+read -p "> " answer
+
+# Check the user's answer (case-insensitive)
+if [[ "$answer" =~ ^[Yy]$ ]]; then
+    echo "Downloading and installing kissat from GitHub..."
+    git clone https://github.com/arminbiere/kissat.git
+    cd kissat
+    ./configure
+    make test
+    cd ..
+fi
