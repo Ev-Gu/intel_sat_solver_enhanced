@@ -234,6 +234,7 @@
     <ClCompile Include="ToporIpasir.cc" Condition="$(Configuration.Contains('WithAPIs'))" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="algorithms\Alg_nuwls.h" />
     <ClInclude Include="BasicMemoryUsage.h" />
     <ClInclude Include="BitArray.hpp" />
     <ClInclude Include="ColorPrint.h" />

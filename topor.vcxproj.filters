@@ -125,5 +125,8 @@
     <ClInclude Include="ToporIpasir.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="algorithms\Alg_nuwls.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

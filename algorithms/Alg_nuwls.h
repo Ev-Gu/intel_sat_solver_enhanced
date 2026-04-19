@@ -12,14 +12,16 @@
 #include <stdlib.h>
 //#include <sys/times.h> //these two h files are for timing in linux
 #include <chrono>
-#include <unistd.h>
+//#include <unistd.h>
+double MainWallTimePassed();
+namespace nuwls{
 
 using namespace std;
 
 #define mypop(stack) stack[--stack##_fill_pointer]
 #define mypush(item, stack) stack[stack##_fill_pointer++] = item
 
-/*
+
 const float MY_RAND_MAX_FLOAT = 10000000.0;
 const int MY_RAND_MAX_INT = 10000000;
 const float BASIC_SCALE = 0.0000001; // 1.0f/MY_RAND_MAX_FLOAT;
@@ -31,7 +33,7 @@ struct lit
     int var_num;    // variable num, begin with 1
     bool sense;     // is 1 for true literals, 0 for false literals.
 };
-*/
+
 const int USING_NEIGHBOR_MODE = 3;   // 1. using 2. don't use 3. depends on ins
 
 
@@ -47,18 +49,161 @@ struct varlit
     bool sense;     // is 1 for true literals, 0 for false literals.
 };
 
-/*static struct tms start_time;
+static std::chrono::steady_clock::time_point start_time;
+
 static double get_runtime()
 {
-    struct tms stop;
-    times(&stop);
-    return (double)(stop.tms_utime - start_time.tms_utime + stop.tms_stime - start_time.tms_stime) / sysconf(_SC_CLK_TCK);
+    auto stop_time = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed = stop_time - start_time;
+    return elapsed.count();
 }
+
 static void start_timing()
 {
-    times(&start_time);
+    start_time = std::chrono::steady_clock::now();
 }
-*/
+
+struct NuwlsBuiltInstance
+{
+    int numVars = 0;
+    int numClauses = 0;
+    unsigned long long topClauseWeight = 0;
+
+    clauselit** clauseLit = nullptr;
+    int* clauseLitCount = nullptr;
+    long long* clauseWeight = nullptr;
+};
+
+inline void FreeNuwlsBuiltInstance(NuwlsBuiltInstance& bi)
+{
+    if (bi.clauseLit != nullptr)
+    {
+        for (int i = 0; i < bi.numClauses; ++i)
+        {
+            delete[] bi.clauseLit[i];
+        }
+        delete[] bi.clauseLit;
+        bi.clauseLit = nullptr;
+    }
+
+    delete[] bi.clauseLitCount;
+    bi.clauseLitCount = nullptr;
+
+    delete[] bi.clauseWeight;
+    bi.clauseWeight = nullptr;
+
+    bi.numClauses = 0;
+}
+
+template<typename LitT>
+inline NuwlsBuiltInstance SanitizeAndBuildNuwlsInstance(
+    int numVars,
+    unsigned long long topClauseWeight,
+    const std::vector<std::vector<LitT>>& hardClauses,
+    const std::vector<std::pair<uint64_t, std::vector<LitT>>>& softClauses,
+    const std::vector<LitT>* assumptions = nullptr)
+{
+    NuwlsBuiltInstance bi;
+    bi.numVars = numVars;
+    bi.topClauseWeight = topClauseWeight;
+
+    int assumpsCount = assumptions ? (int)assumptions->size() : 0;
+    int maxClauses = (int)hardClauses.size() + (int)softClauses.size() + assumpsCount;
+
+    bi.clauseLit = new clauselit * [maxClauses];
+    bi.clauseLitCount = new int[maxClauses];
+    bi.clauseWeight = new long long[maxClauses];
+
+    std::vector<int> redunt_test(numVars + 1, 0); // 0=unset, 1=pos, -1=neg
+    int cIdx = 0;
+
+    auto appendClause = [&](const std::vector<LitT>& src, long long w)
+        {
+            int limit = (int)src.size();
+            if (limit > 0 && src.back() == 0) --limit; // optional DIMACS terminator
+
+            bool clause_redundant = false;
+            std::vector<clauselit> tmp;
+            tmp.reserve(limit);
+
+            for (int i = 0; i < limit; ++i)
+            {
+                int lit = (int)src[i];
+                if (lit == 0) break;
+
+                int v = std::abs(lit);
+                int s = (lit > 0) ? 1 : -1;
+
+                if (v <= 0 || v > numVars)
+                {
+                    clause_redundant = true;
+                    break;
+                }
+
+                if (redunt_test[v] == 0)
+                {
+                    redunt_test[v] = s;
+                    clauselit cl;
+                    cl.var_num = v;
+                    cl.sense = (lit > 0);
+                    tmp.push_back(cl);
+                }
+                else if (redunt_test[v] == s)
+                {
+                    // duplicate literal in same clause
+                    continue;
+                }
+                else
+                {
+                    // tautology: x and ~x in same clause
+                    clause_redundant = true;
+                    break;
+                }
+            }
+
+            for (int i = 0; i < limit; ++i)
+            {
+                int lit = (int)src[i];
+                if (lit == 0) break;
+                redunt_test[std::abs(lit)] = 0;
+            }
+
+            if (clause_redundant || tmp.empty()) return;
+
+            bi.clauseLitCount[cIdx] = (int)tmp.size();
+            bi.clauseWeight[cIdx] = w;
+            bi.clauseLit[cIdx] = new clauselit[tmp.size() + 1];
+
+            for (int i = 0; i < (int)tmp.size(); ++i)
+                bi.clauseLit[cIdx][i] = tmp[i];
+
+            bi.clauseLit[cIdx][tmp.size()].var_num = 0; // NUWLS sentinel
+            ++cIdx;
+        };
+
+    // assumptions as hard unit clauses
+    if (assumptions)
+    {
+        for (LitT a : *assumptions)
+        {
+            if (a == 0) continue;
+            std::vector<LitT> unit{ a };
+            appendClause(unit, (long long)topClauseWeight);
+        }
+    }
+
+    for (const auto& h : hardClauses)
+        appendClause(h, (long long)topClauseWeight);
+
+    for (const auto& s : softClauses)
+        appendClause(s.second, (long long)s.first);
+
+    bi.numClauses = cIdx;
+    return bi;
+}
+
+
+
 class NUWLS
 {
 public:
@@ -81,6 +226,10 @@ public:
     int max_flips;
     int max_non_improve_flip;
     int step;
+
+    int param_max_flips = 2000000000;
+    int param_max_non_improve_flip = 10000000;
+    int param_time_limit = 15;
 
     int print_time;
     int cutoff_time;
@@ -199,7 +348,7 @@ public:
     void flip(int flipvar);
     void flip2(int flipvar);
     void update_goodvarstack1(int flipvar);
-    void update_goodvarstack2(int flipvar);
+    // void update_goodvarstack2(int flipvar);
     int pick_var();
     long long floorToPowerOfTen(double x);
     long long closestPowerOfTen(double num);
@@ -217,6 +366,7 @@ public:
     void simple_print();
     void print_best_solution();
     void free_memory();
+    void RunLocalSearch(vector<int>& current_model, unsigned long long& current_cost, int verbosity = 1);
 };
 
 inline NUWLS::NUWLS() {}
@@ -256,15 +406,15 @@ inline long long NUWLS::floorToPowerOfTen(double x)
 inline void NUWLS::settings()
 {
     local_soln_feasible = 1;
-    NUWLS_TIME_LIMIT = 15;
+    NUWLS_TIME_LIMIT = param_time_limit;
     
-    max_flips = Torc::Instance()->GetSatlikeMaxFlips();    
-    max_non_improve_flip = Torc::Instance()->GetSatlikeMaxNonImproveFlip();
-    cout << "c max_flips = " << max_flips << "; max_non_improve_flip = " << max_non_improve_flip << endl;	
+    max_flips = param_max_flips;
+    max_non_improve_flip = param_max_non_improve_flip;
+    //cout << "c max_flips = " << max_flips << "; max_non_improve_flip = " << max_non_improve_flip << endl;	
     
     if (1 == problem_weighted)
     {
-        cout << "c problem weighted = 1" << endl;
+        //cout << "c problem weighted = 1" << endl;
         large_clause_count_threshold = 0;
         soft_large_clause_count_threshold = 0;
 
@@ -310,7 +460,7 @@ inline void NUWLS::settings()
     }
     else
     {
-        cout << "c problem weighted = 0" << endl;
+        //cout << "c problem weighted = 0" << endl;
 
         large_clause_count_threshold = 0;
         soft_large_clause_count_threshold = 0;
@@ -500,7 +650,7 @@ inline void NUWLS::build_neighbor_relation()
 
 inline void NUWLS::build_instance(char *filename)
 {
-    cout << "org build instance function" << endl;
+    //cout << "org build instance function" << endl;
 }
 
 inline void NUWLS::build_instance(int numVars, int numClauses, unsigned long long topClauseweight, clauselit **nuwls_clause, int *nuwls_clause_lit_count, long long *nuwls_clause_weight)
@@ -583,12 +733,12 @@ inline void NUWLS::build_instance(int numVars, int numClauses, unsigned long lon
         }
     }
 
-    cout << "c before build neighbor" << endl;
+    //cout << "c before build neighbor" << endl;
 
     for (v = 1; v <= num_vars; ++v)
         var_lit[v][var_lit_count[v]].clause_num = -1;
 
-    cout << "c build instime is " << get_runtime() << endl;
+    //cout << "c build instime is " << get_runtime() << endl;
 
     if (USING_NEIGHBOR_MODE == 2 || 1 == problem_weighted || (USING_NEIGHBOR_MODE == 3 && ((get_runtime() > 1.0 || num_clauses > 10000000) && 0 == problem_weighted)))
     {
@@ -596,7 +746,7 @@ inline void NUWLS::build_instance(int numVars, int numClauses, unsigned long lon
     }
     else
     {
-        cout << "c using neighbor " << endl;
+        //cout << "c using neighbor " << endl;
         if_using_neighbor = true;
         build_neighbor_relation();
     }
@@ -1575,4 +1725,94 @@ inline void NUWLS::sat(int clause)
     }
 }
 
+inline void NUWLS::RunLocalSearch(vector<int>& solver_model, unsigned long long& current_cost, int verbosity)
+{
+    opt_unsat_weight = current_cost;
+    int time_limit_for_ls = get_runtime() + param_time_limit;
+    static unsigned breakTest = 0;
+
+    if (if_using_neighbor){
+        for (int step = 1; step < max_flips; ++step)
+        {
+            if (hard_unsat_nb == 0)
+            {
+                local_soln_feasible = 1;
+                if (soft_unsat_weight < opt_unsat_weight)
+                {
+                    max_flips = step + max_non_improve_flip;
+                    time_limit_for_ls = get_runtime() + param_time_limit;
+
+                    best_soln_feasible = 1;
+                    opt_unsat_weight = soft_unsat_weight;
+                    current_cost = soft_unsat_weight;
+
+                    if (verbosity > 0) printf("c timeo %u %llu \n", (unsigned)ceil(::MainWallTimePassed()), current_cost);
+
+
+                    // Save the better model back to the provided reference vector
+                    for (int v = 1; v <= num_vars; ++v)
+                    {
+                        solver_model[v] = cur_soln[v];
+                    }
+
+                    //cout << "o " << opt_unsat_weight << endl;
+                    if (opt_unsat_weight == 0) break;
+                }
+            }
+
+            int flipvar = pick_var();
+            // Consolidated the flip logic branches
+            flip2(flipvar);
+            time_stamp[flipvar] = step;
+
+            if (step % 1000 == 0)
+            {
+                ++breakTest;
+                if (get_runtime() > time_limit_for_ls) break;
+            }
+        }
+    }
+    else {
+        for (int step = 1; step < max_flips; ++step)
+        {
+            if (hard_unsat_nb == 0)
+            {
+                local_soln_feasible = 1;
+                if (soft_unsat_weight < opt_unsat_weight)
+                {
+                    max_flips = step + max_non_improve_flip;
+                    time_limit_for_ls = get_runtime() + param_time_limit;
+
+                    best_soln_feasible = 1;
+                    opt_unsat_weight = soft_unsat_weight;
+                    current_cost = soft_unsat_weight;
+
+                    if (verbosity > 0) printf("c timeo %u %llu \n", (unsigned)ceil(::MainWallTimePassed()), current_cost);
+
+                    // Save the better model back to the provided reference vector
+                    for (int v = 1; v <= num_vars; ++v)
+                    {
+                        solver_model[v] = cur_soln[v];
+                    }
+
+                    //cout << "o " << opt_unsat_weight << endl;
+                    if (opt_unsat_weight == 0) break;
+                }
+            }
+
+            int flipvar = pick_var();
+            // Consolidated the flip logic branches
+            flip(flipvar);
+            time_stamp[flipvar] = step;
+
+            if (step % 1000 == 0)
+            {
+                ++breakTest;
+                if (get_runtime() > time_limit_for_ls) break;
+            }
+        }
+    }
+}
+
+}
 #endif

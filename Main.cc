@@ -14,6 +14,7 @@
 #include <cstdio>
 #include <unordered_set>
 #include <type_traits>
+#include "algorithms/Alg_nuwls.h"
 
 #ifdef __CYGWIN__
 extern "C" FILE * popen(const char* command, const char* mode);
@@ -45,6 +46,7 @@ namespace fs = std::filesystem;
 
 using namespace std;
 using namespace Topor;
+using namespace nuwls;
 
 // Converts enum class to the underlying type
 template <typename E>
@@ -112,6 +114,25 @@ unsigned long long maxCumulativeWeight = numeric_limits<unsigned long long>::max
 int minAllowedWeight = 1;
 long long maxLit = 0;
 long long currRelaxLit;
+unsigned long long bestCost = numeric_limits<unsigned long long>::max();
+
+// NuWLS variables
+bool enableNuwls = true;
+bool isWeighted = false;
+unsigned long nuwlsMaxFlips = 2000000000;
+unsigned long nuwlsMaxNonImprove = 10000000;
+unsigned long nuwlsTimeLimit = 15;
+vector<vector<TLit>> rawHardClauses;
+vector<pair<uint64_t, vector<TLit>>> rawSoftClauses;
+vector<int> nuwlsImprovedModel; // Holds the model if NuWLS improves it
+long long lastWeight = -1;
+
+static std::chrono::steady_clock::time_point gSolverStartTime = std::chrono::steady_clock::now();
+
+double MainWallTimePassed()
+{
+	return std::chrono::duration<double>(std::chrono::steady_clock::now() - gSolverStartTime).count();
+}
 
 struct TRelaxVars
 {
@@ -146,6 +167,7 @@ int OnFinishingSolving(TTopor& topor, TToporReturnVal ret, bool printModel, bool
 					cost += (unsigned long long)rv.Weight;
 				}
 			}
+			bestCost = cost;
 			cout << "o " << cost << endl;
 		}
 
@@ -250,6 +272,7 @@ int OnFinishingSolving(TTopor& topor, TToporReturnVal ret, bool printModel, bool
 
 int main(int argc, char** argv)
 {
+	gSolverStartTime = std::chrono::steady_clock::now();
 	if (argc == 1 || strcmp(argv[1], "-help") == 0 || strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)
 	{
 		cout << print_as_color <ansi_color_code::red>("c Usage:") << endl;
@@ -832,6 +855,26 @@ int main(int argc, char** argv)
 							return true;
 						}
 					}
+					else if (param == "nuwls/enable")
+					{
+						string errMsg; enableNuwls = ReadBoolParam(errMsg);
+						if (!errMsg.empty()) { cout << errMsg; return true; }
+						}
+					else if (param == "nuwls/max_flips")
+					{
+						string errMsg; nuwlsMaxFlips = ReadULongParam(errMsg);
+						if (!errMsg.empty()) { cout << errMsg; return true; }
+						}
+					else if (param == "nuwls/max_non_improve")
+					{
+						string errMsg; nuwlsMaxNonImprove = ReadULongParam(errMsg);
+						if (!errMsg.empty()) { cout << errMsg; return true; }
+						}
+					else if (param == "nuwls/time_limit")
+					{
+						string errMsg; nuwlsTimeLimit = ReadULongParam(errMsg);
+						if (!errMsg.empty()) { cout << errMsg; return true; }
+						}
 					else
 					{
 						cout << "c ERROR: unrecognized /topor_tool/ parameter: " << paramNameStr << endl;
@@ -975,6 +1018,7 @@ int main(int argc, char** argv)
 	auto Solve = [&](vector<TLit>* assumpsPtr)
 	{
 		vector<TLit> assumpsEmpty;
+		if (isMaxsat) printModel = false;
 		ret = ToporSolve(assumpsPtr ? *assumpsPtr : assumpsEmpty, nextSolveToInSecIsCpuTime, nextSolveConfThr);
 		nextSolveToInSecIsCpuTime = make_pair(numeric_limits<double>::max(), false);
 		nextSolveConfThr = numeric_limits<uint64_t>::max();
@@ -1010,6 +1054,67 @@ int main(int argc, char** argv)
 				cout << "ret == " << to_string(retValBasedOnLatestSolve) << ": UNSAT CORE BUG!!!!!\n";
 				return BadRetVal;
 			}
+		}
+		if (isMaxsat && enableNuwls && retValBasedOnLatestSolve == 10)
+		{
+			NUWLS nuwls_solver;
+			nuwls_solver.problem_weighted = (int)isWeighted;
+			nuwls_solver.param_max_flips = nuwlsMaxFlips;
+			nuwls_solver.param_max_non_improve_flip = nuwlsMaxNonImprove;
+			nuwls_solver.param_time_limit = nuwlsTimeLimit;
+
+			int numVars = maxLit;
+			unsigned long long topClauseWeight = cumulativeWeight + 1;
+
+			auto built = nuwls::SanitizeAndBuildNuwlsInstance(
+				numVars,
+				topClauseWeight,
+				rawHardClauses,
+				rawSoftClauses,
+				assumpsPtr);
+
+			nuwls_solver.build_instance(
+				built.numVars,
+				built.numClauses,
+				built.topClauseWeight,
+				built.clauseLit,
+				built.clauseLitCount,
+				built.clauseWeight);
+
+			nuwls_solver.settings();
+
+			// Initialize NuWLS with Topor's model
+			vector<int> init_solu(numVars + 1);
+			for (int i = 1; i <= numVars; ++i) {
+				init_solu[i] = (ToporGetLitValue(i) == TToporLitVal::VAL_SATISFIED) ? 1 : 0;
+			}
+
+			nuwls_solver.init(init_solu);
+
+			unsigned long long current_cost = bestCost;
+			// We populate this array so we can extract the improved model
+			nuwlsImprovedModel.resize(numVars + 1);
+			for (int i = 1; i <= numVars; ++i) {
+				int val = (ToporGetLitValue(i) == TToporLitVal::VAL_SATISFIED) ? 1 : 0;
+				init_solu[i] = val;
+				nuwlsImprovedModel[i] = val;
+			}
+
+			nuwls_solver.RunLocalSearch(nuwlsImprovedModel, current_cost, 1);
+
+			if (current_cost < bestCost)
+			{
+				cout << "o " << current_cost << endl;
+			}
+			// Print the improved model
+			cout << "v ";
+			for (int i = 1; i <= numVars; ++i) {
+				cout << (nuwlsImprovedModel[i] == 1 ? 1 : 0) << " ";
+			}
+			cout << endl;
+
+			nuwls::FreeNuwlsBuiltInstance(built);
+			nuwls_solver.free_memory();
 		}
 		return retValBasedOnLatestSolve;
 	};
@@ -1622,6 +1727,7 @@ int main(int argc, char** argv)
 				{
 					vmClss.push_back(cls);
 				}
+				rawHardClauses.push_back(cls);
 				ToporAddClause(cls);
 			}
 			else
@@ -1642,7 +1748,11 @@ int main(int argc, char** argv)
 				{
 					cout << "c topor_tool ERROR: Cumulative weight limit exceeded in line " << to_string(lineNum);
 					return BadRetVal;
+
 				}
+				if (lastWeight == -1) lastWeight = weight;
+				if (weight != lastWeight) isWeighted = true;
+
 				cumulativeWeight += weight;
 				SkipWhitespaces();
 				auto [errString, cls] = BufferToLits();
@@ -1651,7 +1761,7 @@ int main(int argc, char** argv)
 					cout << errString;
 					return BadRetVal;
 				}
-
+				rawSoftClauses.push_back({ weight, cls });
 				cls.pop_back();
 				cls.push_back(TLit(currRelaxLit));
 				cls.push_back(0);
