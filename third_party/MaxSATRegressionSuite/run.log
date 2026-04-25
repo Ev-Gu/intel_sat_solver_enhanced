@@ -1,0 +1,2134 @@
+[H[2J[3JtestSolver.py 2024 by Tobias Paxian; run with --help for more information.
+Checks a list of wcnfs (with the expected o-value) if the solver runs without errors.
+
+STARTING IN MSE 2024 --> the solver must return one of the following exit codes:
+	0 	if it cannot find a solution satisfying the hard clauses or prove unsatisfiability.
+	10	if the solver finds a solution satisfying the hard clauses but does not prove it to be unsatisfiable.
+	20	if it finds that the hard clauses are unsatisfiable.
+	30	if it finds an optimal solution.
+
+Skipping files due to: upper_bound_violation: 30;
+
+Start searching in 249 instances for issues.
+
+COUNTER: [1/249], next: MSE23Unique/6a40a8d4872ddb84f33df7f9b6dd2250dd91009073729001f4ebe066c8accd79.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/6a40a8d4872ddb84f33df7f9b6dd2250dd91009073729001f4ebe066c8accd79.wcnf -M 1
+
+
+COUNTER: [2/249], next: MSE23Unique/ceea6464223ad27846d19f9db69b27719b433b72f6c30f57570c10eded7ecb22.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/ceea6464223ad27846d19f9db69b27719b433b72f6c30f57570c10eded7ecb22.wcnf -M 1
+
+
+COUNTER: [3/249], next: MSE23Unique/7cba02300948c1e708adfa89ec3cee5ce0b06c10bbf9586ac97c454b670d7f83.wcnf        COUNTER: [4/249], next: MSE23Unique/5df9eb4ad9e225241c74a35059f0abffdb4c44cbe9ac0d07dd0b7c969db1dfd4.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/5df9eb4ad9e225241c74a35059f0abffdb4c44cbe9ac0d07dd0b7c969db1dfd4.wcnf -M 1
+
+
+COUNTER: [5/249], next: MSE23Unique/c8d22fa76c0d5c555ddea06e2aa38cef12172017b40b1b72bfd313ff140fa33a.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/c8d22fa76c0d5c555ddea06e2aa38cef12172017b40b1b72bfd313ff140fa33a.wcnf -M 1
+
+
+COUNTER: [6/249], next: MSE23Unique/e2330a1d4dc26aa7e4e98b403feb623326b3112e2f6eeba2d94ed21db69b2b7d.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/e2330a1d4dc26aa7e4e98b403feb623326b3112e2f6eeba2d94ed21db69b2b7d.wcnf -M 1
+
+
+COUNTER: [7/249], next: MSE23Unique/6b94c354ac7fba344dd1aebf593d43b50ac3beba204e20be256a4a5a0d323036.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/6b94c354ac7fba344dd1aebf593d43b50ac3beba204e20be256a4a5a0d323036.wcnf -M 1
+
+
+COUNTER: [8/249], next: MSE23Unique/c931b11903edcc43968058c8c2bf44848d4f77283c15212ca7e616c5e6233d07.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/c931b11903edcc43968058c8c2bf44848d4f77283c15212ca7e616c5e6233d07.wcnf -M 1
+
+
+COUNTER: [9/249], next: MSE23Unique/f82184337c34cadff39dbf97bbd9e181d7c0bb2e002c8d58f5317aa640e17f63.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/f82184337c34cadff39dbf97bbd9e181d7c0bb2e002c8d58f5317aa640e17f63.wcnf -M 1
+
+
+COUNTER: [10/249], next: MSE23Unique/6ea9fc5f0b4f61260644a4f4d231bc61556e2ea4d2e657f655c05c007fdd1155.wcnf        COUNTER: [11/249], next: MSE23Unique/74a870a3abd4aa3ecc4ba94532f44deb5d4c6867de1aec2210124401dfb17ac9.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/74a870a3abd4aa3ecc4ba94532f44deb5d4c6867de1aec2210124401dfb17ac9.wcnf -M 1
+
+
+COUNTER: [12/249], next: MSE23Unique/a055d71700182d9e0cf0bdc9622bf216d419ea444bbc441f7ab0fabb776de1fe.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/a055d71700182d9e0cf0bdc9622bf216d419ea444bbc441f7ab0fabb776de1fe.wcnf -M 1
+
+
+COUNTER: [13/249], next: MSE23Unique/2b6e8bf22e78aabd057e691964e7a897ca69c27f8b414586491e490ef72d948f.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/2b6e8bf22e78aabd057e691964e7a897ca69c27f8b414586491e490ef72d948f.wcnf -M 1
+
+
+COUNTER: [14/249], next: MSE23Unique/7e7035ba964a8a09ea39caa45274bbbba8b4b3eaf04bd033087cb9475328b156.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/7e7035ba964a8a09ea39caa45274bbbba8b4b3eaf04bd033087cb9475328b156.wcnf -M 1
+
+
+COUNTER: [15/249], next: MSE23Unique/5cbd7297edd4d351c428194640cb09160a299384a002aaf686133e90b2b84b47.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/5cbd7297edd4d351c428194640cb09160a299384a002aaf686133e90b2b84b47.wcnf -M 1
+
+
+COUNTER: [16/249], next: MSE23Unique/9fcf6d3cb279522d5bb068e5f59c4ed6753cb7f80bc84bd2934937d463f60d4a.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/9fcf6d3cb279522d5bb068e5f59c4ed6753cb7f80bc84bd2934937d463f60d4a.wcnf -M 1
+
+
+COUNTER: [17/249], next: MSE23Unique/84d0ddcc25da8a4acb545a3f65ecb38a3a0ccfd08dfc78e95f6935f06f918dc1.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/84d0ddcc25da8a4acb545a3f65ecb38a3a0ccfd08dfc78e95f6935f06f918dc1.wcnf -M 1
+
+
+COUNTER: [18/249], next: MSE23Unique/46ec517cf9ad91efebf212a3bcb799bda69b08e69545842d01c2a134c67bae88.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/46ec517cf9ad91efebf212a3bcb799bda69b08e69545842d01c2a134c67bae88.wcnf -M 1
+
+
+COUNTER: [19/249], next: MSE23Unique/890167157632bc2d9c41186c0110c1da6519ea4127dbb42df81e6a1b1675d670.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/890167157632bc2d9c41186c0110c1da6519ea4127dbb42df81e6a1b1675d670.wcnf -M 1
+
+
+COUNTER: [20/249], next: MSE23Unique/1e0ab68567ef42c2e9f7cec9b54b507b8467ffd0ae9a6db92b8769fe6ceb8be4.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/1e0ab68567ef42c2e9f7cec9b54b507b8467ffd0ae9a6db92b8769fe6ceb8be4.wcnf -M 1
+
+
+COUNTER: [21/249], next: MSE23Unique/4489c757f994b77f7afbf95634dd29b8220d24c5c307e661d3f24de4bd4f8702.wcnf        COUNTER: [22/249], next: MSE23Unique/940bcc19057824f3735cf7e15172af3ff2ee100ca5adcca286600f8af094b34e.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/940bcc19057824f3735cf7e15172af3ff2ee100ca5adcca286600f8af094b34e.wcnf -M 1
+
+
+COUNTER: [23/249], next: MSE23Unique/6e1395ff517fa3dcf6c8cd6b1b2e77f245b7e1510a6d5a09d02c366bbbcdd5ee.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/6e1395ff517fa3dcf6c8cd6b1b2e77f245b7e1510a6d5a09d02c366bbbcdd5ee.wcnf -M 1
+
+
+COUNTER: [24/249], next: MSE23Unique/b8c429bee1671180c2473420af6d71344ec70abac05a47a7301b9caef692132d.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/b8c429bee1671180c2473420af6d71344ec70abac05a47a7301b9caef692132d.wcnf -M 1
+
+
+COUNTER: [25/249], next: MSE23Unique/8ffc10bddefda8b6ea6ba8925726b0c5350f4254e3f08a9a101c9caabadd5f19.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/8ffc10bddefda8b6ea6ba8925726b0c5350f4254e3f08a9a101c9caabadd5f19.wcnf -M 1
+
+
+COUNTER: [26/249], next: MSE23Unique/85bd38546b40086508a73260dd180bcbbbae778d498dc578685ec7dd1bac3ce4.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/85bd38546b40086508a73260dd180bcbbbae778d498dc578685ec7dd1bac3ce4.wcnf -M 1
+
+
+COUNTER: [27/249], next: MSE23Unique/b6bbd44e3291917860bb804d979fb3dbea3593a8a74ccf6712fa91db91d58a8a.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/b6bbd44e3291917860bb804d979fb3dbea3593a8a74ccf6712fa91db91d58a8a.wcnf -M 1
+
+
+COUNTER: [28/249], next: MSE23Unique/a049c16051846733cdba15761d7c3f8f84b3b36118c37497754236f3c0c3ce7e.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/a049c16051846733cdba15761d7c3f8f84b3b36118c37497754236f3c0c3ce7e.wcnf -M 1
+
+
+COUNTER: [29/249], next: MSE23Unique/ac5f4cfac193b97c39572ea9d790083ea306e6f02feb25161984748ac56bff54.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/ac5f4cfac193b97c39572ea9d790083ea306e6f02feb25161984748ac56bff54.wcnf -M 1
+
+
+COUNTER: [30/249], next: MSE23Unique/61c7039835a4a9da260d3a92f69881b5d1babd9ff630f314753cd5482809d349.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/61c7039835a4a9da260d3a92f69881b5d1babd9ff630f314753cd5482809d349.wcnf -M 1
+
+
+COUNTER: [31/249], next: MSE23Unique/91902183db8498d620c10ba616b5997240682b4622432bb5e016ab03f70c8248.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/91902183db8498d620c10ba616b5997240682b4622432bb5e016ab03f70c8248.wcnf -M 1
+
+
+COUNTER: [32/249], next: MSE23Unique/3a61944169aa1042f7df97a2439faac991995d7f3c4d845814e9d7949d9cb808.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/3a61944169aa1042f7df97a2439faac991995d7f3c4d845814e9d7949d9cb808.wcnf -M 1
+
+
+COUNTER: [33/249], next: MSE23Unique/926f5c7f7eb3360e18ce47ee9bc106501af456c48f0b0d0c6004532223783c2d.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/926f5c7f7eb3360e18ce47ee9bc106501af456c48f0b0d0c6004532223783c2d.wcnf -M 1
+
+
+COUNTER: [34/249], next: MSE23Unique/28124e3c06a4e42caafeda28ef47df923b0a01a518d2b360982c4e5b7542d2e5.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/28124e3c06a4e42caafeda28ef47df923b0a01a518d2b360982c4e5b7542d2e5.wcnf -M 1
+
+
+COUNTER: [35/249], next: MSE23Unique/48b56ad0bebc545765ee6a7a1025000372ec2882f083e7d7f4d9f912934b5c2e.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/48b56ad0bebc545765ee6a7a1025000372ec2882f083e7d7f4d9f912934b5c2e.wcnf -M 1
+
+
+COUNTER: [36/249], next: MSE23Unique/48d439a384d48fa9d3b2548051304a82a8b65b03c90a71b36913e6ab97763019.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/48d439a384d48fa9d3b2548051304a82a8b65b03c90a71b36913e6ab97763019.wcnf -M 1
+
+
+COUNTER: [37/249], next: MSE23Unique/84c0232e874c04c6c9211bfcfd6fb5ad2f173efb364a67114e8bb736663da3d2.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/84c0232e874c04c6c9211bfcfd6fb5ad2f173efb364a67114e8bb736663da3d2.wcnf -M 1
+
+
+COUNTER: [38/249], next: MSE23Unique/bcb8652ea6ad7da48da6f052970b36686629cb5bf4142485adf535cbc4e86d77.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/bcb8652ea6ad7da48da6f052970b36686629cb5bf4142485adf535cbc4e86d77.wcnf -M 1
+
+
+COUNTER: [39/249], next: MSE23Unique/d93a76d0993ec8dc4da0f2da05671b8ea1654b2a25414a359686d31f23e46af9.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/d93a76d0993ec8dc4da0f2da05671b8ea1654b2a25414a359686d31f23e46af9.wcnf -M 1
+
+
+COUNTER: [40/249], next: MSE23Unique/f13789547742213d8fb9c4da454e25fac12e7290f617de8664fd0d0980e8f0d0.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/f13789547742213d8fb9c4da454e25fac12e7290f617de8664fd0d0980e8f0d0.wcnf -M 1
+
+
+COUNTER: [41/249], next: MSE23Unique/4fb5d5a954c08051a9e5434036fafa9ecf43aa3b7be4bd488434016e9cf29612.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/4fb5d5a954c08051a9e5434036fafa9ecf43aa3b7be4bd488434016e9cf29612.wcnf -M 1
+
+
+COUNTER: [42/249], next: MSE23Unique/00bd7d9c0c5bf25512fe29055d8fcee3e7369a7812cf9af06d9969fdf79e5e46.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/00bd7d9c0c5bf25512fe29055d8fcee3e7369a7812cf9af06d9969fdf79e5e46.wcnf -M 1
+
+
+COUNTER: [43/249], next: MSE23Unique/85559dbfd605ef50460207940b3c5ef05be53f69192eb06afe4427de5df361ba.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/85559dbfd605ef50460207940b3c5ef05be53f69192eb06afe4427de5df361ba.wcnf -M 1
+
+
+COUNTER: [44/249], next: MSE23Unique/74875eb4fe942bbc6a517c21fd11c432979bc11edc117f81d2afd9c8be384e2e.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/74875eb4fe942bbc6a517c21fd11c432979bc11edc117f81d2afd9c8be384e2e.wcnf -M 1
+
+
+COUNTER: [45/249], next: MSE23Unique/6cbbe79d60a029aed014a8194d9ee2e33090ab69efc544e9a362ce12d1469d42.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/6cbbe79d60a029aed014a8194d9ee2e33090ab69efc544e9a362ce12d1469d42.wcnf -M 1
+
+
+COUNTER: [46/249], next: MSE23Unique/3df88dc5ca1bc34c5d025308afb4085c5aa9ea9eea5f40cdcdc2616871f4b0eb.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/3df88dc5ca1bc34c5d025308afb4085c5aa9ea9eea5f40cdcdc2616871f4b0eb.wcnf -M 1
+
+
+COUNTER: [47/249], next: MSE23Unique/603ff6696738a63ea875d92228c4cdb7ddb5eb69aefb4cb554e16a38dfdd5b77.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/603ff6696738a63ea875d92228c4cdb7ddb5eb69aefb4cb554e16a38dfdd5b77.wcnf -M 1
+
+
+COUNTER: [48/249], next: MSE23Unique/99a4ef3cea9d28f7eb53b70b32854a21b60e29f34fe46e8ab00462b6c314e13b.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/99a4ef3cea9d28f7eb53b70b32854a21b60e29f34fe46e8ab00462b6c314e13b.wcnf -M 1
+
+
+COUNTER: [49/249], next: MSE23Unique/88d79e456975b687b283498d9044bdc6fa414ce786562539e544618d4653ff11.wcnf        COUNTER: [50/249], next: MSE23Unique/08d8060de915de336b116031ff93a8ab20195e2f2167bd0d7e8f6cb4679cfd68.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/08d8060de915de336b116031ff93a8ab20195e2f2167bd0d7e8f6cb4679cfd68.wcnf -M 1
+
+
+COUNTER: [51/249], next: MSE23Unique/91a489367b8b4c8316354a1760ea583b4cdc91624710b7438b9c4a9f22030fdd.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/91a489367b8b4c8316354a1760ea583b4cdc91624710b7438b9c4a9f22030fdd.wcnf -M 1
+
+
+COUNTER: [52/249], next: MSE23Unique/716992b02716429de1dd9db327f4d4ff5122db9bcea3a84652e09ca0a4983966.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/716992b02716429de1dd9db327f4d4ff5122db9bcea3a84652e09ca0a4983966.wcnf -M 1
+
+
+COUNTER: [53/249], next: MSE23Unique/18fee9259ae33be218a99a9775749e40e5954edea5598e980cc60077f7920010.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/18fee9259ae33be218a99a9775749e40e5954edea5598e980cc60077f7920010.wcnf -M 1
+
+
+COUNTER: [54/249], next: MSE23Unique/c3cebf36476c102fb06890f5fa874e77e831e0a031ca892693618cfa64f82fe8.wcnf        COUNTER: [55/249], next: MSE23Unique/e5b6eda571cd88c7f8abae7258e6108eba69f495e63935ba19672923430c5da0.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/e5b6eda571cd88c7f8abae7258e6108eba69f495e63935ba19672923430c5da0.wcnf -M 1
+
+
+COUNTER: [56/249], next: MSE23Unique/73cbf85e160ed72f4a2015be1025da42f0ee69a154e8c83fd3789808345f4074.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/73cbf85e160ed72f4a2015be1025da42f0ee69a154e8c83fd3789808345f4074.wcnf -M 1
+
+
+COUNTER: [57/249], next: MSE23Unique/66f1a0e3814ebcc924e3fe41018bd6745e8df79ef46c27a6c5e7a6f6d4ba5704.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/66f1a0e3814ebcc924e3fe41018bd6745e8df79ef46c27a6c5e7a6f6d4ba5704.wcnf -M 1
+
+
+COUNTER: [58/249], next: MSE23Unique/911075d576d9f8b856c3d2327a83c5bb5f4f8ee5b8c581333b60b0c0b645f6de.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/911075d576d9f8b856c3d2327a83c5bb5f4f8ee5b8c581333b60b0c0b645f6de.wcnf -M 1
+
+
+COUNTER: [59/249], next: MSE23Unique/8ef3b1fc2ae05d43abec6e6a1fff687508fe7549e4833bfd774c50a57a12e7bf.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/8ef3b1fc2ae05d43abec6e6a1fff687508fe7549e4833bfd774c50a57a12e7bf.wcnf -M 1
+
+
+COUNTER: [60/249], next: MSE23Unique/3498015f06180b7f5ecc18b9aa2f1920cbc5c7e9cfeca315f1f42963ab4f62c3.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/3498015f06180b7f5ecc18b9aa2f1920cbc5c7e9cfeca315f1f42963ab4f62c3.wcnf -M 1
+
+
+COUNTER: [61/249], next: MSE23Unique/b7a42f88448843b6d19fc6c3b3705349641d3af01c58359998bc53371993fc5e.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/b7a42f88448843b6d19fc6c3b3705349641d3af01c58359998bc53371993fc5e.wcnf -M 1
+
+
+COUNTER: [62/249], next: MSE23Unique/9ab444e484e8fe6a523b6d95650527cc9bcf38daff208cab45940d6d727110c0.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/9ab444e484e8fe6a523b6d95650527cc9bcf38daff208cab45940d6d727110c0.wcnf -M 1
+
+
+COUNTER: [63/249], next: MSE23Unique/49e44cf7598e3dc14c10a19e85f8844a0b7fabbc7c0b60bf0153c9382904f714.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/49e44cf7598e3dc14c10a19e85f8844a0b7fabbc7c0b60bf0153c9382904f714.wcnf -M 1
+
+
+COUNTER: [64/249], next: MSE23Unique/08ee157a64eacdb0c19278b7651360023e3bdedc611cbe0b3cf1ff80f275e7e6.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/08ee157a64eacdb0c19278b7651360023e3bdedc611cbe0b3cf1ff80f275e7e6.wcnf -M 1
+
+
+COUNTER: [65/249], next: MSE23Unique/cff7ec5ebf605942b308af1b8ff7bf32397f029dbeb935d36324deeeb308056c.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/cff7ec5ebf605942b308af1b8ff7bf32397f029dbeb935d36324deeeb308056c.wcnf -M 1
+
+
+COUNTER: [66/249], next: MSE23Unique/636715ca14aa0794667894c1250060818ef6f4a42794a82c999b1a9aec8bdb9b.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/636715ca14aa0794667894c1250060818ef6f4a42794a82c999b1a9aec8bdb9b.wcnf -M 1
+
+
+COUNTER: [67/249], next: MSE23Unique/82d442589cc545fb97b40757ce8933dfabb07b3ba2843c6dec261ef9066ff1c1.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/82d442589cc545fb97b40757ce8933dfabb07b3ba2843c6dec261ef9066ff1c1.wcnf -M 1
+
+
+COUNTER: [68/249], next: MSE23Unique/9494ce3829d5dfbaa58e9156972e346dc99ede90176777dfb0098e67061c4f0b.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/9494ce3829d5dfbaa58e9156972e346dc99ede90176777dfb0098e67061c4f0b.wcnf -M 1
+
+
+COUNTER: [69/249], next: MSE23Unique/1be7f7a112d4b1a4bb085590c258244885369d2b3332a3fc04bcab61c9b3d87a.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/1be7f7a112d4b1a4bb085590c258244885369d2b3332a3fc04bcab61c9b3d87a.wcnf -M 1
+
+
+COUNTER: [70/249], next: MSE23Unique/10dfa20ba1161cb32dcfd770b5eea3362b6147327c80bb9fe9cee5e1465a7aa5.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/10dfa20ba1161cb32dcfd770b5eea3362b6147327c80bb9fe9cee5e1465a7aa5.wcnf -M 1
+
+
+COUNTER: [71/249], next: MSE23Unique/e43311e870c032059281e9070b08bed39ea9a84919625ca21f7aff7a9bfce9d3.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/e43311e870c032059281e9070b08bed39ea9a84919625ca21f7aff7a9bfce9d3.wcnf -M 1
+
+
+COUNTER: [72/249], next: MSE23Unique/8dd2ce238649e2c6452497c5f4acb0aa50a6276aa41d0d01e655c11c0ebd252f.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/8dd2ce238649e2c6452497c5f4acb0aa50a6276aa41d0d01e655c11c0ebd252f.wcnf -M 1
+
+
+COUNTER: [73/249], next: MSE23Unique/485c3a7c85a50caff585aa7500131cc49e04a274e1756e0f6de5d02a26ca7ab2.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/485c3a7c85a50caff585aa7500131cc49e04a274e1756e0f6de5d02a26ca7ab2.wcnf -M 1
+
+
+COUNTER: [74/249], next: MSE23Unique/4f634db6b034f141672ec7858251fb6b99604f261408bcda97bdff75467de101.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/4f634db6b034f141672ec7858251fb6b99604f261408bcda97bdff75467de101.wcnf -M 1
+
+
+COUNTER: [75/249], next: MSE23Unique/9a14f8a8a91b42db9d09a79a68aaa8262c0bc7156157c504614b49dc367fc5e1.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/9a14f8a8a91b42db9d09a79a68aaa8262c0bc7156157c504614b49dc367fc5e1.wcnf -M 1
+
+
+COUNTER: [76/249], next: MSE23Unique/a53b77816d28765ee3d6890bc49c232ab059c6d141f7def0f5f70d472148fde7.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/a53b77816d28765ee3d6890bc49c232ab059c6d141f7def0f5f70d472148fde7.wcnf -M 1
+
+
+COUNTER: [77/249], next: MSE23Unique/3d312dcc922c714cf1390e1117645a58defe415d46bb6f4990e12b028d26dc68.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/3d312dcc922c714cf1390e1117645a58defe415d46bb6f4990e12b028d26dc68.wcnf -M 1
+
+
+COUNTER: [78/249], next: MSE23Unique/6064027f658bb59433f16758550d08d47eed75ca98509cc4c509a26c262a4195.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/6064027f658bb59433f16758550d08d47eed75ca98509cc4c509a26c262a4195.wcnf -M 1
+
+
+COUNTER: [79/249], next: MSE23Unique/ca92d3b0890c75d8f729ac3fdae66e87dfc00a5abdb2cea5ded8c889034c6b21.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/ca92d3b0890c75d8f729ac3fdae66e87dfc00a5abdb2cea5ded8c889034c6b21.wcnf -M 1
+
+
+COUNTER: [80/249], next: MSE23Unique/1204332fba21e4530831fed62f828debd0cbbd81f02cd195db34271155a6cc09.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/1204332fba21e4530831fed62f828debd0cbbd81f02cd195db34271155a6cc09.wcnf -M 1
+
+
+COUNTER: [81/249], next: MSE23Unique/68e979e0688339eea55de6e93f591f1b90ea9d21a032c7e6b6a3a8a6b2a44598.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/68e979e0688339eea55de6e93f591f1b90ea9d21a032c7e6b6a3a8a6b2a44598.wcnf -M 1
+
+
+COUNTER: [82/249], next: MSE23Unique/2402cebb866fb22df70c8d3a18cff4813bb968fead05072892af14f1259e2521.wcnf        COUNTER: [83/249], next: MSE23Unique/c2901d67ea1471f9e2b47a48582a08f3c4a133b716ac9881d96a1e95776c70be.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/c2901d67ea1471f9e2b47a48582a08f3c4a133b716ac9881d96a1e95776c70be.wcnf -M 1
+
+
+COUNTER: [84/249], next: MSE23Unique/eef9696a360adc7fb75ce6542c20d884faa89d86e3854dc3fe753640334b6443.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/eef9696a360adc7fb75ce6542c20d884faa89d86e3854dc3fe753640334b6443.wcnf -M 1
+
+
+COUNTER: [85/249], next: MSE23Unique/f6d9f73d9ed3174e5b28d7f4f1044bc2ea91ea2cc308d47ac2882206a166b44e.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/f6d9f73d9ed3174e5b28d7f4f1044bc2ea91ea2cc308d47ac2882206a166b44e.wcnf -M 1
+
+
+COUNTER: [86/249], next: MSE23Unique/7fc41fb2ed1a5824e2c2f231a5c2946600a8c74234ddedf83fcb43bed0880d16.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/7fc41fb2ed1a5824e2c2f231a5c2946600a8c74234ddedf83fcb43bed0880d16.wcnf -M 1
+
+
+COUNTER: [87/249], next: MSE23Unique/8aa4aa3c8031d012b4bca961f4c185d4d24b6d781040a72e339c772fd7874267.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/8aa4aa3c8031d012b4bca961f4c185d4d24b6d781040a72e339c772fd7874267.wcnf -M 1
+
+
+COUNTER: [88/249], next: MSE23Unique/0e9343698ca18dcb64177e5199254f087011396aa4a6944b43133835f3939e35.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/0e9343698ca18dcb64177e5199254f087011396aa4a6944b43133835f3939e35.wcnf -M 1
+
+
+COUNTER: [89/249], next: MSE23Unique/820ac8c39a810d1c62fe32af6cca289489e3f0af55ac00c1aa94eb2f13971db6.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/820ac8c39a810d1c62fe32af6cca289489e3f0af55ac00c1aa94eb2f13971db6.wcnf -M 1
+
+
+COUNTER: [90/249], next: MSE23Unique/1a5ce2cf0a10e67dc2695e3ab683c82f030599f888d3721c36b32a55f6036df8.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/1a5ce2cf0a10e67dc2695e3ab683c82f030599f888d3721c36b32a55f6036df8.wcnf -M 1
+
+
+COUNTER: [91/249], next: MSE23Unique/94341a39bcd71eede7dc59d8b59b04fdd101633ca859efbce2786b6115fcc863.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/94341a39bcd71eede7dc59d8b59b04fdd101633ca859efbce2786b6115fcc863.wcnf -M 1
+
+
+COUNTER: [92/249], next: MSE23Unique/63e9513edcd96636e7a78d2dc432a9d971f3ca5de1d1bcb4c8ffd2bcac8dd7c2.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/63e9513edcd96636e7a78d2dc432a9d971f3ca5de1d1bcb4c8ffd2bcac8dd7c2.wcnf -M 1
+
+
+COUNTER: [93/249], next: MSE23Unique/6ea014d9d97acc59e04d532d5895917c2ff09c2881e2cbdefb7993a0f5583189.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/6ea014d9d97acc59e04d532d5895917c2ff09c2881e2cbdefb7993a0f5583189.wcnf -M 1
+
+
+COUNTER: [94/249], next: MSE23Unique/67b88f7467c5be0f6c70983af9672babacd7c888b4ca92bbeb0dda7dd7ecc4b5.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/67b88f7467c5be0f6c70983af9672babacd7c888b4ca92bbeb0dda7dd7ecc4b5.wcnf -M 1
+
+
+COUNTER: [95/249], next: MSE23Unique/575a87f3215d29dd1555f3ab7ef5bc1e0ef9a93db4669ae162af9296c75a8800.wcnf        COUNTER: [96/249], next: MSE23Unique/92604e0a8985a88ffec567b50a5de79d64b5a56a3315d88de267cb8ab69f3f96.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/92604e0a8985a88ffec567b50a5de79d64b5a56a3315d88de267cb8ab69f3f96.wcnf -M 1
+
+
+COUNTER: [97/249], next: MSE23Unique/76328f65c7f7a918d6b9efe8e9f089fbead3c37a91ebf1c57f42108bdda93436.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/76328f65c7f7a918d6b9efe8e9f089fbead3c37a91ebf1c57f42108bdda93436.wcnf -M 1
+
+
+COUNTER: [98/249], next: MSE23Unique/30d8f8e43d7ddebe22369cc7cdb18772e9a7a4221d8be47de168dc78bfc9268a.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/30d8f8e43d7ddebe22369cc7cdb18772e9a7a4221d8be47de168dc78bfc9268a.wcnf -M 1
+
+
+COUNTER: [99/249], next: MSE23Unique/dc0dc1cf82f573036e01d71637ef1dd232d417dbd2d9773a24b16d5b13216fcb.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/dc0dc1cf82f573036e01d71637ef1dd232d417dbd2d9773a24b16d5b13216fcb.wcnf -M 1
+
+
+COUNTER: [100/249], next: MSE23Unique/f6bc6fad72f419cf566bdb4dc19cd52ba7af7b9e8f3ee1919afa45c80dee92d4.wcnf        COUNTER: [101/249], next: MSE23Unique/6b8405dfcc84a48b26b54cf31efa6a23080af65853185eb839ccec4e17efd7b6.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/6b8405dfcc84a48b26b54cf31efa6a23080af65853185eb839ccec4e17efd7b6.wcnf -M 1
+
+
+COUNTER: [102/249], next: MSE23Unique/52a9701eb5ff75516e7f7bfd80e4d0859c9f4bc30a97785e9afce776126d88f6.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/52a9701eb5ff75516e7f7bfd80e4d0859c9f4bc30a97785e9afce776126d88f6.wcnf -M 1
+
+
+COUNTER: [103/249], next: MSE23Unique/ab27f8137fb4e9993de26217dad4d9f6b3c60defa9f8fea2ef678fb7413a4eb6.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/ab27f8137fb4e9993de26217dad4d9f6b3c60defa9f8fea2ef678fb7413a4eb6.wcnf -M 1
+
+
+COUNTER: [104/249], next: MSE23Unique/be5f23131c48d274fca77b8d866c674808aafc54bb3ce47b5365d446086300df.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/be5f23131c48d274fca77b8d866c674808aafc54bb3ce47b5365d446086300df.wcnf -M 1
+
+
+COUNTER: [105/249], next: MSE23Unique/a1d10bea49df03a317ed0d320947bc00d635febbee95ec83ef5fcc2a353a6c83.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/a1d10bea49df03a317ed0d320947bc00d635febbee95ec83ef5fcc2a353a6c83.wcnf -M 1
+
+
+COUNTER: [106/249], next: MSE23Unique/f9897c33c76f60e969237c9582ed8aee28e42430d1c2c47c79c64ca19c1b7551.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/f9897c33c76f60e969237c9582ed8aee28e42430d1c2c47c79c64ca19c1b7551.wcnf -M 1
+
+
+COUNTER: [107/249], next: MSE23Unique/7d3de19bdb887b5eeb9dc0cb6d93864def57593721c83afbcf063036053d6e6c.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/7d3de19bdb887b5eeb9dc0cb6d93864def57593721c83afbcf063036053d6e6c.wcnf -M 1
+
+
+COUNTER: [108/249], next: MSE23Unique/febad0f2129321bf4c44d4df1ba0a7007c2f1624ab742af77fbb51a2303b3dca.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/febad0f2129321bf4c44d4df1ba0a7007c2f1624ab742af77fbb51a2303b3dca.wcnf -M 1
+
+
+COUNTER: [109/249], next: MSE23Unique/c2155d7614fa077361418c78b9eca8e077168f4e1ee5e47169f93b2795016152.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/c2155d7614fa077361418c78b9eca8e077168f4e1ee5e47169f93b2795016152.wcnf -M 1
+
+
+COUNTER: [110/249], next: MSE23Unique/7603135af3b75ea8aa94ce47f3d896872e6df04e4806b52b35dd91b1f4ba6198.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/7603135af3b75ea8aa94ce47f3d896872e6df04e4806b52b35dd91b1f4ba6198.wcnf -M 1
+
+
+COUNTER: [111/249], next: MSE23Unique/f59d47fb20021bf271805031ec8ddfbbb1d03a52be760631aade1e5bfc19565f.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/f59d47fb20021bf271805031ec8ddfbbb1d03a52be760631aade1e5bfc19565f.wcnf -M 1
+
+
+COUNTER: [112/249], next: MSE23Unique/6bba377cf7ee2dac66965930cc3db6eb55fa8cc6164a387a4af35e8584a8fc7b.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/6bba377cf7ee2dac66965930cc3db6eb55fa8cc6164a387a4af35e8584a8fc7b.wcnf -M 1
+
+
+COUNTER: [113/249], next: MSE23Unique/1de2f7c8bfaa72c3e9837903e6045518ec6dab38c13d88709fa2633d1cec1309.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE23Unique/1de2f7c8bfaa72c3e9837903e6045518ec6dab38c13d88709fa2633d1cec1309.wcnf -M 1
+
+
+COUNTER: [114/249], next: MSE22Unique/2ecc67e3f3538b792a6929d455e1f55618e0bea66b8e612720fa3ab9e2d7b01a.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/2ecc67e3f3538b792a6929d455e1f55618e0bea66b8e612720fa3ab9e2d7b01a.wcnf -M 1
+
+
+COUNTER: [115/249], next: MSE22Unique/289decc5ea211c4215bb21e15d1eaeedb5844e417f63b3351bb0962cc805f9d1.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/289decc5ea211c4215bb21e15d1eaeedb5844e417f63b3351bb0962cc805f9d1.wcnf -M 1
+
+
+COUNTER: [116/249], next: MSE22Unique/78b87ecc5a5c11537b58926ccf083c2e0e1d1ddcb512b463f799f8080c1a8cd4.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/78b87ecc5a5c11537b58926ccf083c2e0e1d1ddcb512b463f799f8080c1a8cd4.wcnf -M 1
+
+
+COUNTER: [117/249], next: MSE22Unique/bccf74a9309e2c6c52091971a90e95f48575166cd915116a3c5ec83f5eb393e1.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/bccf74a9309e2c6c52091971a90e95f48575166cd915116a3c5ec83f5eb393e1.wcnf -M 1
+
+
+COUNTER: [118/249], next: MSE22Unique/480adc45c51948e4275c98b0c8cd2208a82a53063ff9aa146468234f46df1de2.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/480adc45c51948e4275c98b0c8cd2208a82a53063ff9aa146468234f46df1de2.wcnf -M 1
+
+
+COUNTER: [119/249], next: MSE22Unique/31060eadcddafe2a7bdd6e308a1a8ba44b5c93cd730c97c5bc82c798d0c5d527.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/31060eadcddafe2a7bdd6e308a1a8ba44b5c93cd730c97c5bc82c798d0c5d527.wcnf -M 1
+
+
+COUNTER: [120/249], next: MSE22Unique/a70a244c9fcc056972f7f9bc947a3bd5ce9d7a80179b95176b4de4c9e52bcee1.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/a70a244c9fcc056972f7f9bc947a3bd5ce9d7a80179b95176b4de4c9e52bcee1.wcnf -M 1
+
+
+COUNTER: [121/249], next: MSE22Unique/15bf71fabf83debe41132a3c8a60eb7049965db4fc0c3b42454dc5c26bedcf00.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/15bf71fabf83debe41132a3c8a60eb7049965db4fc0c3b42454dc5c26bedcf00.wcnf -M 1
+
+
+COUNTER: [122/249], next: MSE22Unique/14a7b1db5a1f0a53ffaebf07ca17a417ce1585fe18e97c800b603e6573be710d.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/14a7b1db5a1f0a53ffaebf07ca17a417ce1585fe18e97c800b603e6573be710d.wcnf -M 1
+
+
+COUNTER: [123/249], next: MSE22Unique/8feb6fa6bfd5d9e45cf7c3aab41c9af05a8f1840776dae38817e39c73d8e8f94.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/8feb6fa6bfd5d9e45cf7c3aab41c9af05a8f1840776dae38817e39c73d8e8f94.wcnf -M 1
+
+
+COUNTER: [124/249], next: MSE22Unique/0faffbb32f65db19790a47b11e211921c5fdd403781a3de04bd862e1cbc96483.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/0faffbb32f65db19790a47b11e211921c5fdd403781a3de04bd862e1cbc96483.wcnf -M 1
+
+
+COUNTER: [125/249], next: MSE22Unique/89aa158e32c5bea93e7211e7b52c44ac3b8dcacc0aa4357f4f4f7a1895c9ace5.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/89aa158e32c5bea93e7211e7b52c44ac3b8dcacc0aa4357f4f4f7a1895c9ace5.wcnf -M 1
+
+
+COUNTER: [126/249], next: MSE22Unique/257dd0122b9b2a103b90804b7a97a7d75095babb909c03bde8bb215e46d5229a.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/257dd0122b9b2a103b90804b7a97a7d75095babb909c03bde8bb215e46d5229a.wcnf -M 1
+
+
+COUNTER: [127/249], next: MSE22Unique/44591450071516235e4f6ce3bb8fc60a23b9249bbea7ac1b3f3b50e9c311845b.wcnf        COUNTER: [128/249], next: MSE22Unique/6a4037d8f1777eb806ba3b0511b0c31d06752c617477ceac35c1b26367b60867.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/6a4037d8f1777eb806ba3b0511b0c31d06752c617477ceac35c1b26367b60867.wcnf -M 1
+
+
+COUNTER: [129/249], next: MSE22Unique/8e48e83caa37a04af0dcf04521f0529e1602f40a0028736aca5f03fb79161ab6.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/8e48e83caa37a04af0dcf04521f0529e1602f40a0028736aca5f03fb79161ab6.wcnf -M 1
+
+
+COUNTER: [130/249], next: MSE22Unique/b77c3724622b8f5139d73f346924d2f4de1f1dbd85f60bc80d6d20feee38ec85.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/b77c3724622b8f5139d73f346924d2f4de1f1dbd85f60bc80d6d20feee38ec85.wcnf -M 1
+
+
+COUNTER: [131/249], next: MSE22Unique/51d10addb5086760fe1382e32684ac276e5016294c0091d9920dd5d2c3b9079f.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/51d10addb5086760fe1382e32684ac276e5016294c0091d9920dd5d2c3b9079f.wcnf -M 1
+
+
+COUNTER: [132/249], next: MSE22Unique/e47c83d39c502ba5803aa8ecd751208b071a0cc391ccc219703e367ab9b64ce7.wcnf        COUNTER: [133/249], next: MSE22Unique/a8bbc038481bc44f7dff4407dd18d6733110b8d4e4e697835650064f6973f731.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/a8bbc038481bc44f7dff4407dd18d6733110b8d4e4e697835650064f6973f731.wcnf -M 1
+
+
+COUNTER: [134/249], next: MSE22Unique/579c1082327d86d92ff63ed24a31f8234ba857780c84480458cb181729a01357.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/579c1082327d86d92ff63ed24a31f8234ba857780c84480458cb181729a01357.wcnf -M 1
+
+
+COUNTER: [135/249], next: MSE22Unique/06431c5de2fb8311afc5f1bf802bc908e465e682ad44536e8ca7a4c116afac37.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/06431c5de2fb8311afc5f1bf802bc908e465e682ad44536e8ca7a4c116afac37.wcnf -M 1
+
+
+COUNTER: [136/249], next: MSE22Unique/d278353a0ba5644e229d121ffd4ca5a60c5da64278898551649ff22e7b290195.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/d278353a0ba5644e229d121ffd4ca5a60c5da64278898551649ff22e7b290195.wcnf -M 1
+
+
+COUNTER: [137/249], next: MSE22Unique/f3b8ed7dc683c85ef0b098fd5a476e86dab0db7f8e2982fd9c3819e2f8e090dc.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/f3b8ed7dc683c85ef0b098fd5a476e86dab0db7f8e2982fd9c3819e2f8e090dc.wcnf -M 1
+
+
+COUNTER: [138/249], next: MSE22Unique/8e206c358bfb51f50f508b8db29b679fe11df77c5a1cb88bf259aebcdd5ae5a2.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/8e206c358bfb51f50f508b8db29b679fe11df77c5a1cb88bf259aebcdd5ae5a2.wcnf -M 1
+
+
+COUNTER: [139/249], next: MSE22Unique/4661d9945dfba9e05c6c0456e187e8deb46046f79d9ae27e93950a4e6c57a768.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/4661d9945dfba9e05c6c0456e187e8deb46046f79d9ae27e93950a4e6c57a768.wcnf -M 1
+
+
+COUNTER: [140/249], next: MSE22Unique/a1f2a8954ce4ea694307e25c56f22758c2879f2b40c052be27d3d6bf3c79a8f5.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/a1f2a8954ce4ea694307e25c56f22758c2879f2b40c052be27d3d6bf3c79a8f5.wcnf -M 1
+
+
+COUNTER: [141/249], next: MSE22Unique/03f18bba3cdf95cbe182bd81cdccd6c840ab1cdfc764212379bd961513568f7f.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/03f18bba3cdf95cbe182bd81cdccd6c840ab1cdfc764212379bd961513568f7f.wcnf -M 1
+
+
+COUNTER: [142/249], next: MSE22Unique/6cd903bfaead7ac94c3a8dd0f775931874e3ba4342c7297a8ded5d6001c1791f.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/6cd903bfaead7ac94c3a8dd0f775931874e3ba4342c7297a8ded5d6001c1791f.wcnf -M 1
+
+
+COUNTER: [143/249], next: MSE22Unique/bf0c23333b1fb6054fcb2333011f1a92be71e4450c7d2899afbfbc70ecc2c20d.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/bf0c23333b1fb6054fcb2333011f1a92be71e4450c7d2899afbfbc70ecc2c20d.wcnf -M 1
+
+
+COUNTER: [144/249], next: MSE22Unique/40a009b13178b06d2bf21783b8a1496a93ff0379d7cac260f48d368133a86b0d.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/40a009b13178b06d2bf21783b8a1496a93ff0379d7cac260f48d368133a86b0d.wcnf -M 1
+
+
+COUNTER: [145/249], next: MSE22Unique/52a875e6e651bde1a6e8b6158fc1366e0b2209bada132c432a3d8c5713e74469.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/52a875e6e651bde1a6e8b6158fc1366e0b2209bada132c432a3d8c5713e74469.wcnf -M 1
+
+
+COUNTER: [146/249], next: MSE22Unique/b9834d8cfad8dba291d0f4dd6bde934986bf6bb607c8ad66f7f28980e55a68ee.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/b9834d8cfad8dba291d0f4dd6bde934986bf6bb607c8ad66f7f28980e55a68ee.wcnf -M 1
+
+
+COUNTER: [147/249], next: MSE22Unique/67f7c76ad2125268d82236abe0c9bc867fc8519f2820fbbeb3fe217252312d24.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/67f7c76ad2125268d82236abe0c9bc867fc8519f2820fbbeb3fe217252312d24.wcnf -M 1
+
+
+COUNTER: [148/249], next: MSE22Unique/68a4cf20bdb84f895c20a04ada384644eea23c5b01192f52fd3da6edb9fcdf84.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/68a4cf20bdb84f895c20a04ada384644eea23c5b01192f52fd3da6edb9fcdf84.wcnf -M 1
+
+
+COUNTER: [149/249], next: MSE22Unique/1110be03bdb621acaf894672f320965d05d2b52f3d2cebaca8874f1da952496a.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/1110be03bdb621acaf894672f320965d05d2b52f3d2cebaca8874f1da952496a.wcnf -M 1
+
+
+COUNTER: [150/249], next: MSE22Unique/7fab7b29243ff9e75fb53fc8ff24036ac5efd33ab5ebb0d6defb49a58c464918.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/7fab7b29243ff9e75fb53fc8ff24036ac5efd33ab5ebb0d6defb49a58c464918.wcnf -M 1
+
+
+COUNTER: [151/249], next: MSE22Unique/cb991de787518ed73069b302e3463ea4c04ca40bd8a7bcf1f9301b1e6c1d911d.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/cb991de787518ed73069b302e3463ea4c04ca40bd8a7bcf1f9301b1e6c1d911d.wcnf -M 1
+
+
+COUNTER: [152/249], next: MSE22Unique/e447eba1f2614e295bb70e3a9b466d79654b6fb491c349965f20aa52022f2bb6.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/e447eba1f2614e295bb70e3a9b466d79654b6fb491c349965f20aa52022f2bb6.wcnf -M 1
+
+
+COUNTER: [153/249], next: MSE22Unique/64442f305749236c30de05dbf56674089b167e679af22b03151a42db7559ab7d.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/64442f305749236c30de05dbf56674089b167e679af22b03151a42db7559ab7d.wcnf -M 1
+
+
+COUNTER: [154/249], next: MSE22Unique/eb58e9d4ff900607963cdaa97c669061bee89344b7fa8df39a0fce49260e56a0.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/eb58e9d4ff900607963cdaa97c669061bee89344b7fa8df39a0fce49260e56a0.wcnf -M 1
+
+
+COUNTER: [155/249], next: MSE22Unique/0196572140d7df84cd27162cf2567ad3a07c645dc7f12fbd5401da4f5c38180d.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/0196572140d7df84cd27162cf2567ad3a07c645dc7f12fbd5401da4f5c38180d.wcnf -M 1
+
+
+COUNTER: [156/249], next: MSE22Unique/5bae2c382a10044c5f5c94b86a44686d427f391567290a64d0646219dcf648c4.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/5bae2c382a10044c5f5c94b86a44686d427f391567290a64d0646219dcf648c4.wcnf -M 1
+
+
+COUNTER: [157/249], next: MSE22Unique/c5db76ffb470a4985ae827f23b269baff4135eb4c10475dc9c97f09fb9f0c0d2.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/c5db76ffb470a4985ae827f23b269baff4135eb4c10475dc9c97f09fb9f0c0d2.wcnf -M 1
+
+
+COUNTER: [158/249], next: MSE22Unique/0188bc598bc510afa7a4084708fe7fc180ecf1c1468a9bb8238aac8f12423905.wcnf        COUNTER: [159/249], next: MSE22Unique/530613acb5f5353cfe527a69cab924bc6b1fa5e17bd7c968b145afab1d38ea05.wcnf        COUNTER: [160/249], next: MSE22Unique/f945ee706c7c774d13609dd05dd20a97581c4679799977a292b2df27251c8b77.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/f945ee706c7c774d13609dd05dd20a97581c4679799977a292b2df27251c8b77.wcnf -M 1
+
+
+COUNTER: [161/249], next: MSE22Unique/770d9f242b5318900e5f09b3eec778d7ed0beb0159f965ec89cfd40ebd38a9a0.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/770d9f242b5318900e5f09b3eec778d7ed0beb0159f965ec89cfd40ebd38a9a0.wcnf -M 1
+
+
+COUNTER: [162/249], next: MSE22Unique/0201556cc43dae1e94e0568763639f6288417dd436a2fe362824662b653a1d7e.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/0201556cc43dae1e94e0568763639f6288417dd436a2fe362824662b653a1d7e.wcnf -M 1
+
+
+COUNTER: [163/249], next: MSE22Unique/e1d7641daa2c4ec98e03d1a833d50a7daf42a46b6773565ab31353b5c5f56423.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/e1d7641daa2c4ec98e03d1a833d50a7daf42a46b6773565ab31353b5c5f56423.wcnf -M 1
+
+
+COUNTER: [164/249], next: MSE22Unique/18d1c26912b457ab7efaff137a1d278810e2dc065ce35a08807a87109d55eeb0.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/18d1c26912b457ab7efaff137a1d278810e2dc065ce35a08807a87109d55eeb0.wcnf -M 1
+
+
+COUNTER: [165/249], next: MSE22Unique/e0feee424cf718cc2634004f5964876c2f294c2ef37aa213e955a0fddbe5ad1c.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/e0feee424cf718cc2634004f5964876c2f294c2ef37aa213e955a0fddbe5ad1c.wcnf -M 1
+
+
+COUNTER: [166/249], next: MSE22Unique/d65c8b5daa1e4bf7b52cf23933a2b49a3f6aef4f81c4433a840023e30ffd90e0.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/d65c8b5daa1e4bf7b52cf23933a2b49a3f6aef4f81c4433a840023e30ffd90e0.wcnf -M 1
+
+
+COUNTER: [167/249], next: MSE22Unique/0a810a005c5f0d1ce9f246e2f74ab615155156079f7db71b9f9d3eb611904e4e.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/0a810a005c5f0d1ce9f246e2f74ab615155156079f7db71b9f9d3eb611904e4e.wcnf -M 1
+
+
+COUNTER: [168/249], next: MSE22Unique/8c73518baa2a909972a020636a5bec9bec9e1ec6dec3df25949e6368711ee5ad.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/8c73518baa2a909972a020636a5bec9bec9e1ec6dec3df25949e6368711ee5ad.wcnf -M 1
+
+
+COUNTER: [169/249], next: MSE22Unique/94306f47dab54d212a61dd053c81b132b51d2b4e0e701504b62fcc6ab1b0c1d9.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/94306f47dab54d212a61dd053c81b132b51d2b4e0e701504b62fcc6ab1b0c1d9.wcnf -M 1
+
+
+COUNTER: [170/249], next: MSE22Unique/d2070595038852bee4fe852be813efa5395d5d68b0b6404d7b77739842a5a24a.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/d2070595038852bee4fe852be813efa5395d5d68b0b6404d7b77739842a5a24a.wcnf -M 1
+
+
+COUNTER: [171/249], next: MSE22Unique/7abbe83e647e77221c6d93ef0019af001606c1ca1460b8d7831beef4014e1529.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/7abbe83e647e77221c6d93ef0019af001606c1ca1460b8d7831beef4014e1529.wcnf -M 1
+
+
+COUNTER: [172/249], next: MSE22Unique/3d17729e3d7c47675ba993dc31c77049ee64ae5299b2f7bec221418bc71b949f.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/3d17729e3d7c47675ba993dc31c77049ee64ae5299b2f7bec221418bc71b949f.wcnf -M 1
+
+
+COUNTER: [173/249], next: MSE22Unique/d218465e09a28774137b4f22df179e02a6fb3fdb13b0e9430d46f0a51d7176b2.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/d218465e09a28774137b4f22df179e02a6fb3fdb13b0e9430d46f0a51d7176b2.wcnf -M 1
+
+
+COUNTER: [174/249], next: MSE22Unique/5953aa253684aa113f7cd4dbad4291971b5c195acb8149ae83a4c1ee410aa229.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/5953aa253684aa113f7cd4dbad4291971b5c195acb8149ae83a4c1ee410aa229.wcnf -M 1
+
+
+COUNTER: [175/249], next: MSE22Unique/d1a14f047e46b13429f81f85250e523be202992c49962f564022115f37e014bb.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/d1a14f047e46b13429f81f85250e523be202992c49962f564022115f37e014bb.wcnf -M 1
+
+
+COUNTER: [176/249], next: MSE22Unique/085ea1fe6b2a2a8357da4fc02e7c1b25840e3caf38c6281db6e08f2943ba4297.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/085ea1fe6b2a2a8357da4fc02e7c1b25840e3caf38c6281db6e08f2943ba4297.wcnf -M 1
+
+
+COUNTER: [177/249], next: MSE22Unique/32941e743af364d9d0e53a60b907fc732865ca9b2a3b772b0d30f99a303d1655.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/32941e743af364d9d0e53a60b907fc732865ca9b2a3b772b0d30f99a303d1655.wcnf -M 1
+
+
+COUNTER: [178/249], next: MSE22Unique/99a4ef3cea9d28f7eb53b70b32854a21b60e29f34fe46e8ab00462b6c314e13b.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/99a4ef3cea9d28f7eb53b70b32854a21b60e29f34fe46e8ab00462b6c314e13b.wcnf -M 1
+
+
+COUNTER: [179/249], next: MSE22Unique/270d457da0655b01251223aaa3dfcca474e3f0a363b7dbcab16ab6702060335f.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/270d457da0655b01251223aaa3dfcca474e3f0a363b7dbcab16ab6702060335f.wcnf -M 1
+
+
+COUNTER: [180/249], next: MSE22Unique/be4b30c5de1693f2ad52c7d6c1256192b70bda83073d8d37f42d7dce13f7418d.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/be4b30c5de1693f2ad52c7d6c1256192b70bda83073d8d37f42d7dce13f7418d.wcnf -M 1
+
+
+COUNTER: [181/249], next: MSE22Unique/3e74e9438964ee1294ab4f9a9bca9c53c885fd101f26723058a8184d9450f94b.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/3e74e9438964ee1294ab4f9a9bca9c53c885fd101f26723058a8184d9450f94b.wcnf -M 1
+
+
+COUNTER: [182/249], next: MSE22Unique/e5437d9b2aaf8b55e2e17fa39bf6e2518cbae3c63c00dbbd643bce04e17e4443.wcnf        COUNTER: [183/249], next: MSE22Unique/08d927cd3c119fa7daf5a326f91adcaabb22d11c9fc930f22eb25f9169c65d70.wcnf        COUNTER: [184/249], next: MSE22Unique/faf04697cf8b5259f39428c3eb01cded33dee842e143e4460d74683ae22e4004.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/faf04697cf8b5259f39428c3eb01cded33dee842e143e4460d74683ae22e4004.wcnf -M 1
+
+
+COUNTER: [185/249], next: MSE22Unique/56ab58613e9a4db030d7858df5ae08fde66175b7ebecf32deec33f60abb0aad5.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/56ab58613e9a4db030d7858df5ae08fde66175b7ebecf32deec33f60abb0aad5.wcnf -M 1
+
+
+COUNTER: [186/249], next: MSE22Unique/40ee4420689a6648d215ef1d6ce6ea208a68f1469ae9e91165885c0c9c578fa0.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/40ee4420689a6648d215ef1d6ce6ea208a68f1469ae9e91165885c0c9c578fa0.wcnf -M 1
+
+
+COUNTER: [187/249], next: MSE22Unique/652c546c84b067756b5290e059845b84c6696f011abd89c602cdb19b5d5091e3.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/652c546c84b067756b5290e059845b84c6696f011abd89c602cdb19b5d5091e3.wcnf -M 1
+
+
+COUNTER: [188/249], next: MSE22Unique/9b51ec82891824e053c0181969a6d00bdeb631937563fa6514429a620eb44a10.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/9b51ec82891824e053c0181969a6d00bdeb631937563fa6514429a620eb44a10.wcnf -M 1
+
+
+COUNTER: [189/249], next: MSE22Unique/c0cb236df45b4fa4181b25bf4e2d74e214a7c3b4504c460938b85b1c06e9bdcd.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/c0cb236df45b4fa4181b25bf4e2d74e214a7c3b4504c460938b85b1c06e9bdcd.wcnf -M 1
+
+
+COUNTER: [190/249], next: MSE22Unique/356300fffe3bf019bd9e3f0908e46bcb3b28df8b16ce29932847f7948dca404a.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/356300fffe3bf019bd9e3f0908e46bcb3b28df8b16ce29932847f7948dca404a.wcnf -M 1
+
+
+COUNTER: [191/249], next: MSE22Unique/97be625a746924165a5575af1627d643d366d819be42a83a133c5d721b94c03a.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/97be625a746924165a5575af1627d643d366d819be42a83a133c5d721b94c03a.wcnf -M 1
+
+
+COUNTER: [192/249], next: MSE22Unique/4995300f19984d61980392431e816b9589ecca5fa9e3b175502e53dc63bcc516.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/4995300f19984d61980392431e816b9589ecca5fa9e3b175502e53dc63bcc516.wcnf -M 1
+
+
+COUNTER: [193/249], next: MSE22Unique/062c22df89fdcf6924e192acb2bb71fcb8f9ef624cef482e95696b65c9963858.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/062c22df89fdcf6924e192acb2bb71fcb8f9ef624cef482e95696b65c9963858.wcnf -M 1
+
+
+COUNTER: [194/249], next: MSE22Unique/70d39fcdac73b5f03dc02ded91be7fd99464644d43baedc038318f0ba9d45165.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/70d39fcdac73b5f03dc02ded91be7fd99464644d43baedc038318f0ba9d45165.wcnf -M 1
+
+
+COUNTER: [195/249], next: MSE22Unique/390b399ecdd001bf4c03018574f4885bbd3cceeda21d55e0804f15774b8d3c66.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/390b399ecdd001bf4c03018574f4885bbd3cceeda21d55e0804f15774b8d3c66.wcnf -M 1
+
+
+COUNTER: [196/249], next: MSE22Unique/741e107bbd878df7f6fc196e3ea4a2c4250311c764e4a566af7a64e82381bc30.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/741e107bbd878df7f6fc196e3ea4a2c4250311c764e4a566af7a64e82381bc30.wcnf -M 1
+
+
+COUNTER: [197/249], next: MSE22Unique/b2cdbaa1548f3e65c6b27792887e929378d1bf38ab8a8e62e3ea9a0fa90b2703.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/b2cdbaa1548f3e65c6b27792887e929378d1bf38ab8a8e62e3ea9a0fa90b2703.wcnf -M 1
+
+
+COUNTER: [198/249], next: MSE22Unique/c96cfac7d8c9951d0b1f2bde01085267c8e9bc4ed8731e8788f2984f37696490.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/c96cfac7d8c9951d0b1f2bde01085267c8e9bc4ed8731e8788f2984f37696490.wcnf -M 1
+
+
+COUNTER: [199/249], next: MSE22Unique/db619cc5b936480be85decdf1fa9fd820468448632eb6064a41f6785d228b582.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/db619cc5b936480be85decdf1fa9fd820468448632eb6064a41f6785d228b582.wcnf -M 1
+
+
+COUNTER: [200/249], next: MSE22Unique/0e3f6fe9ec7bac0571af0484b0510190b31a8382f22281244e8b84f4f154a8f9.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/0e3f6fe9ec7bac0571af0484b0510190b31a8382f22281244e8b84f4f154a8f9.wcnf -M 1
+
+
+COUNTER: [201/249], next: MSE22Unique/440813e19d0c54850068c27d5e8fc35625a9e2c3be407cdb02cfa07bd1f0ef7f.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/440813e19d0c54850068c27d5e8fc35625a9e2c3be407cdb02cfa07bd1f0ef7f.wcnf -M 1
+
+
+COUNTER: [202/249], next: MSE22Unique/943c95d6b9ab398276d4ff9b4dab261dcddb2b5673809ca13e11e4fc4975b05d.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/943c95d6b9ab398276d4ff9b4dab261dcddb2b5673809ca13e11e4fc4975b05d.wcnf -M 1
+
+
+COUNTER: [203/249], next: MSE22Unique/b488d332b8b17549add3c5cada139884ea20797acaa672c66e87c2af14beb802.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/b488d332b8b17549add3c5cada139884ea20797acaa672c66e87c2af14beb802.wcnf -M 1
+
+
+COUNTER: [204/249], next: MSE22Unique/13d67ad4d016a9bc7b46df9e2b36ffdb2fe0938db3a9d8fb6a52dcd0d2d16dab.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/13d67ad4d016a9bc7b46df9e2b36ffdb2fe0938db3a9d8fb6a52dcd0d2d16dab.wcnf -M 1
+
+
+COUNTER: [205/249], next: MSE22Unique/86db83ff8b25868a0f9a46aae8a042bc6fff64b2d543f920120e944835764f12.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/86db83ff8b25868a0f9a46aae8a042bc6fff64b2d543f920120e944835764f12.wcnf -M 1
+
+
+COUNTER: [206/249], next: MSE22Unique/bb1d79aaf5758ca5da4f8a9bf6c848b19d39881da61cc1b2188d599e403bfd78.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/bb1d79aaf5758ca5da4f8a9bf6c848b19d39881da61cc1b2188d599e403bfd78.wcnf -M 1
+
+
+COUNTER: [207/249], next: MSE22Unique/fe841eb69ade2f92ceeab5949487e52a1706d770d5d0b44259f4ffa528591d3f.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/fe841eb69ade2f92ceeab5949487e52a1706d770d5d0b44259f4ffa528591d3f.wcnf -M 1
+
+
+COUNTER: [208/249], next: MSE22Unique/d06457f6592eeefdb1ccfd19cd9439b2714f619add615394d637ecfc7312a169.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/d06457f6592eeefdb1ccfd19cd9439b2714f619add615394d637ecfc7312a169.wcnf -M 1
+
+
+COUNTER: [209/249], next: MSE22Unique/9e72a74e177ddff7996533872fc402e5990faa3ca5937db264069685872d4342.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/9e72a74e177ddff7996533872fc402e5990faa3ca5937db264069685872d4342.wcnf -M 1
+
+
+COUNTER: [210/249], next: MSE22Unique/c0b1276d6c264c6e920711544f14cf100225268a9de0f828c0c36c24ae9b8796.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/c0b1276d6c264c6e920711544f14cf100225268a9de0f828c0c36c24ae9b8796.wcnf -M 1
+
+
+COUNTER: [211/249], next: MSE22Unique/17537c693089212d191263176a7d341780742a5c86c352af67d59636dd1e7e03.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/17537c693089212d191263176a7d341780742a5c86c352af67d59636dd1e7e03.wcnf -M 1
+
+
+COUNTER: [212/249], next: MSE22Unique/432b9235a2ccb8a1c762792a9fbf83cc85c04043b825cf98f6fe7b85890a0f50.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/432b9235a2ccb8a1c762792a9fbf83cc85c04043b825cf98f6fe7b85890a0f50.wcnf -M 1
+
+
+COUNTER: [213/249], next: MSE22Unique/ee4e51cb854f38201dd242324634c6f3551fc90116a7996b74bb00c99b6cc362.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/ee4e51cb854f38201dd242324634c6f3551fc90116a7996b74bb00c99b6cc362.wcnf -M 1
+
+
+COUNTER: [214/249], next: MSE22Unique/4dd0f8f3d400eb2ac541a5c0a98594fcd82d368389fe5e640bdb2ba5f2bdf06a.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/4dd0f8f3d400eb2ac541a5c0a98594fcd82d368389fe5e640bdb2ba5f2bdf06a.wcnf -M 1
+
+
+COUNTER: [215/249], next: MSE22Unique/cdea91fae6a87a89b320d59320ad257fdfc46c33480c91779c7d9d1af82e55c9.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/cdea91fae6a87a89b320d59320ad257fdfc46c33480c91779c7d9d1af82e55c9.wcnf -M 1
+
+
+COUNTER: [216/249], next: MSE22Unique/67682954fbda0fd367d586006fb9dcdac8069d268fd6a823993ddb213177f68d.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/67682954fbda0fd367d586006fb9dcdac8069d268fd6a823993ddb213177f68d.wcnf -M 1
+
+
+COUNTER: [217/249], next: MSE22Unique/728f970ec9dd3aec40caa107668d1e148f586a4ee3dc91d99c9ee109c891af9a.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/728f970ec9dd3aec40caa107668d1e148f586a4ee3dc91d99c9ee109c891af9a.wcnf -M 1
+
+
+COUNTER: [218/249], next: MSE22Unique/ceea6464223ad27846d19f9db69b27719b433b72f6c30f57570c10eded7ecb22.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/ceea6464223ad27846d19f9db69b27719b433b72f6c30f57570c10eded7ecb22.wcnf -M 1
+
+
+COUNTER: [219/249], next: MSE22Unique/377d05900c00116220e59af1697f83d5a1267769dfb5decefbc1d7c3e40ffc1e.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/377d05900c00116220e59af1697f83d5a1267769dfb5decefbc1d7c3e40ffc1e.wcnf -M 1
+
+
+COUNTER: [220/249], next: MSE22Unique/0d41dc297fe389a8eb0b448905ff846d8d9b15bffd6dd2a180a9ea4ff742a342.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/0d41dc297fe389a8eb0b448905ff846d8d9b15bffd6dd2a180a9ea4ff742a342.wcnf -M 1
+
+
+COUNTER: [221/249], next: MSE22Unique/fbe6b6e60eab9e2cc72f9637a3e3866a847d15c6e197e6e885e6d243b64fde9e.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/fbe6b6e60eab9e2cc72f9637a3e3866a847d15c6e197e6e885e6d243b64fde9e.wcnf -M 1
+
+
+COUNTER: [222/249], next: MSE22Unique/d02346710f7e93d78bf9e2e440b649cd39dad799f25eac0cdd61158d679ad851.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/d02346710f7e93d78bf9e2e440b649cd39dad799f25eac0cdd61158d679ad851.wcnf -M 1
+
+
+COUNTER: [223/249], next: MSE22Unique/58d7cbf9c8c0cc946439fff45673dcec55bd32bf6f5dbae33d78fa4d24d277ae.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/58d7cbf9c8c0cc946439fff45673dcec55bd32bf6f5dbae33d78fa4d24d277ae.wcnf -M 1
+
+
+COUNTER: [224/249], next: MSE22Unique/4c20958e3d276cd7bf993102e2f1b34fd4d07f7d37cecc34607d4595f0a1e752.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/4c20958e3d276cd7bf993102e2f1b34fd4d07f7d37cecc34607d4595f0a1e752.wcnf -M 1
+
+
+COUNTER: [225/249], next: MSE22Unique/81d2b458e0b0e3751bed8a489ee7fc0addc6c1815dc786b41bbc49de0aca73b7.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/81d2b458e0b0e3751bed8a489ee7fc0addc6c1815dc786b41bbc49de0aca73b7.wcnf -M 1
+
+
+COUNTER: [226/249], next: MSE22Unique/25ceee63f7dad940506a268be87814c805a7589d125696f9df4dfa082bf4e81f.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/25ceee63f7dad940506a268be87814c805a7589d125696f9df4dfa082bf4e81f.wcnf -M 1
+
+
+COUNTER: [227/249], next: MSE22Unique/06332614c15a5e898a290b4ac3aebbd6de030eeff2214465b85cfa829b6bf679.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/06332614c15a5e898a290b4ac3aebbd6de030eeff2214465b85cfa829b6bf679.wcnf -M 1
+
+
+COUNTER: [228/249], next: MSE22Unique/e9289745d841a5403eb75d4ed946af4f6ae2986154d176c294eb96da7c66a7aa.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/e9289745d841a5403eb75d4ed946af4f6ae2986154d176c294eb96da7c66a7aa.wcnf -M 1
+
+
+COUNTER: [229/249], next: MSE22Unique/2035b3b615c82c806620a9e390a349d124e14cc9abd0d5a00b3b4d5aca6aa8ac.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/2035b3b615c82c806620a9e390a349d124e14cc9abd0d5a00b3b4d5aca6aa8ac.wcnf -M 1
+
+
+COUNTER: [230/249], next: MSE22Unique/9c10d3bbff2cba8d3ac57faadcd04214d6b62f9e0346f5db9f0874986808851b.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/9c10d3bbff2cba8d3ac57faadcd04214d6b62f9e0346f5db9f0874986808851b.wcnf -M 1
+
+
+COUNTER: [231/249], next: MSE22Unique/b086b2286cd589ec2c35834022ca2480b9a3055bcea342801cb95e84e4620535.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/b086b2286cd589ec2c35834022ca2480b9a3055bcea342801cb95e84e4620535.wcnf -M 1
+
+
+COUNTER: [232/249], next: MSE22Unique/6d02fd606bdc659046ecb9571cc5b2d2c5b78407e217c377c2359869215eaf4e.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/6d02fd606bdc659046ecb9571cc5b2d2c5b78407e217c377c2359869215eaf4e.wcnf -M 1
+
+
+COUNTER: [233/249], next: MSE22Unique/ed606141faae696f79f627da0225fad52befc91ceb3cbb692a3bc39347d31869.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/ed606141faae696f79f627da0225fad52befc91ceb3cbb692a3bc39347d31869.wcnf -M 1
+
+
+COUNTER: [234/249], next: MSE22Unique/0f5bb13c16cc31e11ebc98fb594ec7c15cb0aeeac097fa42a1b070c6f1d2d934.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/0f5bb13c16cc31e11ebc98fb594ec7c15cb0aeeac097fa42a1b070c6f1d2d934.wcnf -M 1
+
+
+COUNTER: [235/249], next: MSE22Unique/11cef99bdb31d9cae2698b70ef8e2977c74947b32f464ebca402532ca94d8d0a.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/11cef99bdb31d9cae2698b70ef8e2977c74947b32f464ebca402532ca94d8d0a.wcnf -M 1
+
+
+COUNTER: [236/249], next: MSE22Unique/9459977e4122f109fc1e571165f25f69438129e4ba276225f6c96817a59daeab.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/9459977e4122f109fc1e571165f25f69438129e4ba276225f6c96817a59daeab.wcnf -M 1
+
+
+COUNTER: [237/249], next: MSE22Unique/126c5e850cc91c2968236dc69159e349f08eb529a60e1d904b1353932f96b456.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/126c5e850cc91c2968236dc69159e349f08eb529a60e1d904b1353932f96b456.wcnf -M 1
+
+
+COUNTER: [238/249], next: MSE22Unique/9d81041e30889b71e2df4bab7f16970a4c3a2b0849de3ba81b414aadaa7d9968.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/9d81041e30889b71e2df4bab7f16970a4c3a2b0849de3ba81b414aadaa7d9968.wcnf -M 1
+
+
+COUNTER: [239/249], next: MSE22Unique/0530102976e7c008364ae1132f843edfb40f4388bac8010cb96d136974155847.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/0530102976e7c008364ae1132f843edfb40f4388bac8010cb96d136974155847.wcnf -M 1
+
+
+COUNTER: [240/249], next: MSE22Unique/7a2faca44be5495873a9976f81fc4d8753ebc3645cde7643531861c27f682a63.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/7a2faca44be5495873a9976f81fc4d8753ebc3645cde7643531861c27f682a63.wcnf -M 1
+
+
+COUNTER: [241/249], next: MSE22Unique/c4ed93c22a5892f2eac867fdca5df1976db2947e481016b783745b1d2fed58c7.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/c4ed93c22a5892f2eac867fdca5df1976db2947e481016b783745b1d2fed58c7.wcnf -M 1
+
+
+COUNTER: [242/249], next: MSE22Unique/63e94c74f5b6bed45fe01efb2e201086f28c4724cda1af45add73ace207f2542.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/63e94c74f5b6bed45fe01efb2e201086f28c4724cda1af45add73ace207f2542.wcnf -M 1
+
+
+COUNTER: [243/249], next: MSE22Unique/49a9772bb5fd03cf6aec775cb5a0dbe544d2bc00c378d24eeebfcc61cb710f28.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/49a9772bb5fd03cf6aec775cb5a0dbe544d2bc00c378d24eeebfcc61cb710f28.wcnf -M 1
+
+
+COUNTER: [244/249], next: MSE22Unique/4d2b545b7575f706c361a2dbaa28c608c771442188869a9e41db85a17910fdc7.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/4d2b545b7575f706c361a2dbaa28c608c771442188869a9e41db85a17910fdc7.wcnf -M 1
+
+
+COUNTER: [245/249], next: MSE22Unique/51a60a2e0774fb90e4aaeb3229e1fc3fef872cde4ab5d58618bd54e17c70c0e4.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/51a60a2e0774fb90e4aaeb3229e1fc3fef872cde4ab5d58618bd54e17c70c0e4.wcnf -M 1
+
+
+COUNTER: [246/249], next: MSE22Unique/2027faed6e13a7bce7747c26b6a856a78bf9d1a185213de69c80f3247cbfd2d9.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/2027faed6e13a7bce7747c26b6a856a78bf9d1a185213de69c80f3247cbfd2d9.wcnf -M 1
+
+
+COUNTER: [247/249], next: MSE22Unique/26f3255f8be7058a4ed3e6f3346b4943fde3a43d5726e5dab38a436fdf3f9898.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/26f3255f8be7058a4ed3e6f3346b4943fde3a43d5726e5dab38a436fdf3f9898.wcnf -M 1
+
+
+COUNTER: [248/249], next: MSE22Unique/693fccf464cd95ed4ce385da86927d540e02b6d5f1c40ed02ac8c6991da5d8c1.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/693fccf464cd95ed4ce385da86927d540e02b6d5f1c40ed02ac8c6991da5d8c1.wcnf -M 1
+
+
+COUNTER: [249/249], next: MSE22Unique/d9923588b063373751e1a509cf1f6e28377660993c1f5678144109edf79942f6.wcnf        
+
+	ISSUE DETECTED:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.
+
+	Solver call to reproduce error: 
+		/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/intel_sat_solver_enhanced_release /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSATRegressionSuite/MSE22Unique/d9923588b063373751e1a509cf1f6e28377660993c1f5678144109edf79942f6.wcnf -M 1
+
+
+Overall Evaluation:                                                                                             
+	Found Issues in 235/249 instances:
+		exit code 10 --> (new MSE24 rules) this means that the solver only found a non-optimal solution.: 235
+
+Total runtime of script: 48.44s
+
