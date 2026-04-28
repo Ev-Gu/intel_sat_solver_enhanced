@@ -4,6 +4,8 @@
 #include <string>
 #include <unordered_map>
 #include <cstdint>
+#include <cmath>
+#include "algorithms/Alg_nuwls.h"
 
 using namespace std;
 
@@ -14,33 +16,45 @@ namespace Topor
     public:
         void AddHard(int lit_or_zero)
         {
+            m_Result.valid = false;
+
             if (lit_or_zero == 0)
             {
                 if (!m_CurrHardCls.empty())
                 {
                     AddClause(m_CurrHardCls);
+                    m_AllHardClauses.push_back(m_CurrHardCls); // keep for post-solvers
                     m_CurrHardCls.clear();
                 }
             }
             else
             {
                 m_CurrHardCls.emplace_back(lit_or_zero);
+                const int v = lit_or_zero > 0 ? lit_or_zero : -lit_or_zero;
+                if (v > m_MaxVarSeen) m_MaxVarSeen = v;
             }
         }
 
         void AddSoftLit(int lit, uint64_t weight)
         {
-            // Store/override weight for soft literal
+            m_Result.valid = false;
+
             m_SoftLit2Weight[lit] = weight;
 
-            // Ensure the variable exists internally so val_lit/val_obj can query it
             const int v = lit > 0 ? lit : -lit;
+            if (v > m_MaxVarSeen) m_MaxVarSeen = v;
+
             CreateInternalLit(v);
-			FixPolarity(-lit, false);
+            FixPolarity(-lit, false);
         }
 
         void Assume(int lit)
         {
+            m_Result.valid = false;
+
+            const int v = lit > 0 ? lit : -lit;
+            if (v > m_MaxVarSeen) m_MaxVarSeen = v;
+
             if (m_Assump2Ind.find(lit) == m_Assump2Ind.end())
             {
                 m_Assump2Ind.insert(make_pair(lit, m_CurrAssumps.size()));
@@ -50,59 +64,57 @@ namespace Topor
 
         int Solve()
         {
+            const vector<int> assumpsForPost = m_CurrAssumps;
+
             TToporReturnVal trv = CTopor::Solve(m_CurrAssumps);
 
-            // Keep previous assumption map for potential future extensions; clear current
             m_PrevAssump2Ind = move(m_Assump2Ind);
             m_Assump2Ind.clear();
             m_CurrAssumps.clear();
 
-            // Compute objective value over the current model if SAT
-            m_LastObj = 0;
+            m_Result = TSolverResult(); // reset
+
             if (trv == Topor::TToporReturnVal::RET_SAT)
             {
-                for (const auto& p : m_SoftLit2Weight)
-                {
-                    const int lit = p.first;
-                    const uint64_t w = p.second;
-                    const TToporLitVal lv = GetLitValue(lit);
-                    if (lv == TToporLitVal::VAL_SATISFIED)
-                    {
-                        m_LastObj += w;
-                    }
-                }
-				if (m_LastObj == 0) return 30; // all soft clauses satisfied with zero cost
-                return 10; // feasible solution found
+                CaptureToporAssignment();
+                ComputeObjFromAssignment();
+
+                RunNuwlsPostSolve(assumpsForPost);
+
+                m_Result.is_optimal = (m_Result.cost == 0);
+                return m_Result.is_optimal ? 30 : 10;
             }
             else if (trv == Topor::TToporReturnVal::RET_UNSAT)
             {
-                return 20; // infeasible (no feasible solution)
+                return 20;
             }
             else
             {
-                return 0; // interrupted or other
+                return 0;
             }
         }
 
         uint64_t ValObj() const
         {
-            return m_LastObj;
+            return m_Result.cost;
         }
 
         int ValLit(int lit)
         {
-            TToporLitVal tlv = GetLitValue(lit);
-            switch (tlv)
+            if (!m_Result.valid)
             {
-            case Topor::TToporLitVal::VAL_SATISFIED:
-                return lit;
-            case Topor::TToporLitVal::VAL_UNSATISFIED:
-                return -lit;
-            case Topor::TToporLitVal::VAL_DONT_CARE:
-            case Topor::TToporLitVal::VAL_UNASSIGNED:
-            default:
                 return 0;
             }
+
+            const int v = lit > 0 ? lit : -lit;
+            if (v <= 0 || v >= (int)m_Result.assignment.size())
+            {
+                return 0;
+            }
+
+            const int val = m_Result.assignment[v]; // 0/1
+            const bool litSatisfied = (lit > 0) ? (val == 1) : (val == 0);
+            return litSatisfied ? lit : -lit;
         }
 
         void SetTerminate(void* state, int (*terminate)(void* state))
@@ -133,16 +145,119 @@ namespace Topor
         }
 
     protected:
+        struct TSolverResult
+        {
+            vector<int> assignment;   // index by var id, [1..maxVar], value in {0,1}
+            uint64_t cost = 0;
+            bool is_optimal = false;
+            bool valid = false;
+        };
+
+        static bool IsLitSatisfiedByAssignment(int lit, const vector<int>& assignment)
+        {
+            const int v = lit > 0 ? lit : -lit;
+            if (v <= 0 || v >= (int)assignment.size()) return false;
+            return lit > 0 ? assignment[v] == 1 : assignment[v] == 0;
+        }
+
+        void CaptureToporAssignment()
+        {
+            m_Result.assignment.assign(m_MaxVarSeen + 1, 0);
+
+            for (int v = 1; v <= m_MaxVarSeen; ++v)
+            {
+                const TToporLitVal lv = GetLitValue(v);
+                if (lv == TToporLitVal::VAL_SATISFIED) m_Result.assignment[v] = 1;
+                else m_Result.assignment[v] = 0; // UNSAT/DONT_CARE/UNASSIGNED -> 0
+            }
+
+            m_Result.valid = true;
+        }
+
+        void ComputeObjFromAssignment()
+        {
+            uint64_t c = 0;
+            for (const auto& p : m_SoftLit2Weight)
+            {
+                if (IsLitSatisfiedByAssignment(p.first, m_Result.assignment))
+                {
+                    c += p.second;
+                }
+            }
+            m_Result.cost = c;
+        }
+
+        void RunNuwlsPostSolve(const vector<int>& assumpsForPost)
+        {
+            if (m_MaxVarSeen <= 0) return;
+            if (m_AllHardClauses.empty() && m_SoftLit2Weight.empty()) return;
+
+            vector<pair<uint64_t, vector<int>>> softClauses;
+            softClauses.reserve(m_SoftLit2Weight.size());
+
+            unsigned long long sumW = 0;
+            bool isWeighted = false;
+            for (const auto& p : m_SoftLit2Weight)
+            {
+                // soft lit 'l' => penalty if l=true => soft clause (~l)
+                softClauses.push_back({ p.second, vector<int>{ -p.first } });
+                sumW += (unsigned long long)p.second;
+                if (p.second != 1) isWeighted = true;
+            }
+
+            const unsigned long long topClauseWeight = sumW + 1ULL;
+
+            auto built = nuwls::SanitizeAndBuildNuwlsInstance(
+                m_MaxVarSeen,
+                topClauseWeight,
+                m_AllHardClauses,
+                softClauses,
+                &assumpsForPost);
+
+            if (built.numClauses > 0)
+            {
+                NUWLS nuwls_solver;
+                nuwls_solver.problem_weighted = isWeighted ? 1 : 0;
+                nuwls_solver.build_instance(
+                    built.numVars,
+                    built.numClauses,
+                    built.topClauseWeight,
+                    built.clauseLit,
+                    built.clauseLitCount,
+                    built.clauseWeight);
+                nuwls_solver.settings();
+
+                nuwls_solver.init(m_Result.assignment);
+
+                unsigned long long improvedCost = m_Result.cost;
+                nuwls_solver.RunLocalSearch(m_Result.assignment, improvedCost, 0);
+
+                if (improvedCost < m_Result.cost)
+                {
+                    m_Result.cost = improvedCost;
+                }
+
+                nuwls_solver.free_memory();
+            }
+
+            nuwls::FreeNuwlsBuiltInstance(built);
+        }
+
         vector<int> m_CurrHardCls;
         vector<int> m_CurrAssumps;
         unordered_map<int, size_t> m_Assump2Ind;
         unordered_map<int, size_t> m_PrevAssump2Ind;
 
         unordered_map<int, uint64_t> m_SoftLit2Weight;
-        uint64_t m_LastObj = 0;
+
+        TSolverResult m_Result;
+        int m_MaxVarSeen = 0;
 
         void* m_CurrTerminateState = nullptr;
         int (*m_CurrTerminateFunc)(void* state) = nullptr;
+
+        // post-solver inputs
+        vector<vector<int>> m_AllHardClauses;
     };
 }
 
