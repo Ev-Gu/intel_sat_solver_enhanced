@@ -1063,7 +1063,7 @@ int main(int argc, char** argv)
 			nuwls_solver.param_max_non_improve_flip = nuwlsMaxNonImprove;
 			nuwls_solver.param_time_limit = nuwlsTimeLimit;
 
-			int numVars = maxLit;
+			int numVars = currRelaxLit - 1;
 			unsigned long long topClauseWeight = cumulativeWeight + 1;
 
 			auto built = nuwls::SanitizeAndBuildNuwlsInstance(
@@ -1113,7 +1113,7 @@ int main(int argc, char** argv)
 			}
 			cout << endl;
 
-			nuwls::FreeNuwlsBuiltInstance(built);
+			//nuwls::FreeNuwlsBuiltInstance(built);
 			nuwls_solver.free_memory();
 		}
 		return retValBasedOnLatestSolve;
