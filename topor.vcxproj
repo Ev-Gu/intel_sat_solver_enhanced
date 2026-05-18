@@ -233,7 +233,6 @@
     <ClCompile Include="Topor.cc" />
     <ClCompile Include="ToporIpamir.cc" Condition="$(Configuration.Contains('WithAPIs'))" />
     <ClCompile Include="ToporIpasir.cc" Condition="$(Configuration.Contains('WithAPIs'))" />
-    <ClCompile Include="Totalizer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="algorithms\Alg_nuwls.h" />

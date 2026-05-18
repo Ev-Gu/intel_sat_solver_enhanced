@@ -87,8 +87,9 @@ int main() {
         
         // Note: run_optimization() requires Totalizer to be properly implemented
         // For now, we just verify the manager is created and can be called
-        cout << "\nLSUManager ready for optimization." << endl;
-        cout << "Best weight before optimization: " << lsu_manager.get_best_weight() << endl;
+        cout << "\n=== Running LSU optimization ===" << endl;
+        lsu_manager.run_optimization();
+        cout << "Best weight after optimization: " << lsu_manager.get_best_weight() << endl;
         
         cout << "\n=== Test Case 1 PASSED ===" << endl;
         

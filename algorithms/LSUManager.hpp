@@ -1,40 +1,127 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
+#include <span>
 
-// Forward declarations or inclusion of necessary header files only
 #include "Totalizer.hpp"
-#include "../Topor.hpp" 
+#include "../Topor.hpp"
 
 /**
- * LSUManager implements the Linear SAT-UNSAT optimization loop.
- * It manages relaxation variables and uses the Totalizer to tighten the bound
- * based on the weights of found solutions.
+ * LSUManager — Linear SAT-UNSAT for unweighted partial MaxSAT.
+ * Relaxation vars r_i per soft clause; Totalizer encodes sum(r_i) <= k.
  */
+template <typename TTopor>
 class LSUManager {
 private:
-    Topor::CTopor<>& solver;          // Reference to the Topor solver instance
-    int& next_var;                    // Global variable counter
+    TTopor& solver;
+    int& next_var;
 
-    std::vector<int> relaxation_vars; // r_i variables for each soft clause
-    int best_weight;                  // Lowest weight (number of violated soft clauses)
-    std::vector<int> best_model;      // Best assignment found so far
+    std::vector<int> relaxation_vars;
+    int best_weight;
+    std::vector<int> best_model;
+    bool has_best;
 
 public:
-    // Constructor - Keeping a short constructor with an initialization list 
-    // in the header is standard practice for inline optimization.
-    LSUManager(Topor::CTopor<>& s, int& nv, const std::vector<int>& existingRelaxVars);
+    LSUManager(TTopor& s, int& nv, const std::vector<int>& existingRelaxVars)
+        : solver(s), next_var(nv), relaxation_vars(existingRelaxVars),
+          best_weight(-1), has_best(false) {}
 
-    // Public API Methods - Declarations only (Implementation resides in the .cpp file)
-    void add_hard_clause(const std::vector<int>& lits);
-    void add_soft_clause(const std::vector<int>& lits);
-    void run_optimization();
+    void add_hard_clause(const std::vector<int>& lits) {
+        std::vector<int> clause = lits;
+        if (clause.empty() || clause.back() != 0) {
+            clause.push_back(0);
+        }
+        solver.AddClause(std::span<int>(clause.data(), clause.size() - 1));
+    }
 
-    // Short const Getter - Can safely remain inline in the header for performance reasons
+    void add_soft_clause(const std::vector<int>& lits) {
+        int r_i = ++next_var;
+        relaxation_vars.push_back(r_i);
+
+        std::vector<int> transformed_clause = lits;
+        transformed_clause.push_back(r_i);
+        transformed_clause.push_back(0);
+        solver.AddClause(std::span<int>(transformed_clause.data(), transformed_clause.size() - 1));
+    }
+
+    void run_optimization() {
+        if (relaxation_vars.empty()) {
+            return;
+        }
+
+        Totalizer totalizer(next_var, relaxation_vars);
+        totalizer.build();
+
+        const auto& encoding_clauses = totalizer.get_clauses();
+        for (const auto& clause : encoding_clauses) {
+            if (clause.empty()) continue;
+            solver.AddClause(std::span<int>(const_cast<int*>(clause.data()), clause.size()));
+        }
+
+        int current_bound = -1;
+
+        while (true) {
+            std::vector<int> assumps;
+            if (current_bound >= 0) {
+                int bound_lit = totalizer.get_output_lit(current_bound);
+                if (bound_lit == -1) {
+                    break;
+                }
+                assumps.push_back(-bound_lit);
+            }
+
+            Topor::TToporReturnVal res = assumps.empty()
+                ? solver.Solve()
+                : solver.Solve(std::span<int>(assumps));
+
+            if (res == Topor::TToporReturnVal::RET_SAT) {
+                save_best_model();
+                int current_weight = calculate_current_weight();
+
+                std::cout << "o " << current_weight << std::endl;
+
+                if (current_weight == 0) {
+                    break;
+                }
+
+                current_bound = current_weight;
+            } else if (res == Topor::TToporReturnVal::RET_UNSAT) {
+                break;
+            } else {
+                break;
+            }
+        }
+    }
+
     int get_best_weight() const { return best_weight; }
     const std::vector<int>& get_best_model() const { return best_model; }
+    bool has_best_model() const { return has_best; }
+
 private:
-    // Private Helper Methods - Declarations only
-    int calculate_current_weight();
-    void save_best_model();
+    int calculate_current_weight() {
+        int weight = 0;
+        for (int r_i : relaxation_vars) {
+            if (solver.GetLitValue(r_i) == Topor::TToporLitVal::VAL_SATISFIED) {
+                weight++;
+            }
+        }
+        return weight;
+    }
+
+    void save_best_model() {
+        best_model.clear();
+
+        for (int i = 1; i <= next_var; ++i) {
+            auto val = solver.GetLitValue(i);
+
+            if (val == Topor::TToporLitVal::VAL_SATISFIED) {
+                best_model.push_back(i);
+            } else if (val == Topor::TToporLitVal::VAL_UNSATISFIED) {
+                best_model.push_back(-i);
+            }
+        }
+        best_weight = calculate_current_weight();
+        has_best = true;
+    }
 };

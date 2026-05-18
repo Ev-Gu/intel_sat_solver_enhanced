@@ -216,7 +216,7 @@ namespace Topor
 
             if (built.numClauses > 0)
             {
-                NUWLS nuwls_solver;
+                nuwls::NUWLS nuwls_solver;
                 nuwls_solver.problem_weighted = isWeighted ? 1 : 0;
                 nuwls_solver.build_instance(
                     built.numVars,

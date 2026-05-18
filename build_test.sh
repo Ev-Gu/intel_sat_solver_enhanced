@@ -9,7 +9,7 @@ CXXFLAGS="-std=c++20 -DSKIP_ZLIB -Wall -g -O0"
 LDFLAGS="-lpthread"
 
 # Source files needed
-SOURCE_FILES="test_lsu_totalizer.cpp Topor.cc Topi.cc TopiAsg.cc TopiBacktrack.cc TopiBcp.cc TopiBitCompression.cc TopiCompression.cc TopiConflictAnalysis.cc TopiDebugPrinting.cc TopiDecision.cc TopiInprocess.cc TopiRestart.cc TopiStatistics.cc TopiVarScores.cc TopiWL.cc"
+SOURCE_FILES="test_lsu_totalizer.cpp LSUManager.cpp Topor.cc Topi.cc TopiAsg.cc TopiBacktrack.cc TopiBcp.cc TopiBitCompression.cc TopiCompression.cc TopiConflictAnalysis.cc TopiDebugPrinting.cc TopiDecision.cc TopiInprocess.cc TopiRestart.cc TopiWL.cc"
 
 # Output executable
 OUTPUT="test_lsu_totalizer"

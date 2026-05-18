@@ -465,6 +465,38 @@ int main(int argc, char** argv)
 
 	auto AllToporsNull = [&] { return topor32 == nullptr && topor64 == nullptr && toporc == nullptr; };
 
+	// Linear SAT-UNSAT (LSU) for unweighted partial MaxSAT. Run after WCNF parse only.
+	auto RunUnweightedLSU = [&]() -> int
+	{
+		std::vector<int> relaxLits;
+		relaxLits.reserve(relaxVars.size());
+		for (const auto& rv : relaxVars) {
+			relaxLits.push_back((int)rv.RelaxVar);
+		}
+		if (relaxLits.empty()) {
+			return -1;
+		}
+
+		int nextVarIdx = (int)(currRelaxLit - 1);
+
+		if (topor32 != nullptr) {
+			LSUManager<Topor::CTopor<int32_t, uint32_t, false>> mgr(*topor32, nextVarIdx, relaxLits);
+			mgr.run_optimization();
+			return mgr.get_best_weight();
+		}
+		if (topor64 != nullptr) {
+			LSUManager<Topor::CTopor<int32_t, uint64_t, false>> mgr(*topor64, nextVarIdx, relaxLits);
+			mgr.run_optimization();
+			return mgr.get_best_weight();
+		}
+		if (toporc != nullptr) {
+			LSUManager<Topor::CTopor<int32_t, uint64_t, true>> mgr(*toporc, nextVarIdx, relaxLits);
+			mgr.run_optimization();
+			return mgr.get_best_weight();
+		}
+		return -1;
+	};
+
 	auto ToporSetParam = [&](const std::string& paramName, double newVal)
 		{
 			assert(!AllToporsNull());
@@ -1130,37 +1162,7 @@ int main(int argc, char** argv)
 				nuwls::FreeNuwlsBuiltInstance(built);
 				nuwls_solver.free_memory();
 			}
-			if (isMaxsat && enableLsu && retValBasedOnLatestSolve == 10)
-			{
-				// 1. הגדרת הפניה מוגנת לאובייקט ה-Topor הפעיל הנוכחי
-				if (!AllToporsNull())
-				{
-					Topor::CTopor<> active_solver;
-							
-
-					// לפני הפעלת ה-LSU, נרצה לוודא ש-lsuNextVarCounter מעודכן לפחות כמו maxLit
-					if (lsuNextVarCounter < (int)maxLit) {
-						lsuNextVarCounter = (int)maxLit;
-					}
-
-					// 2. בניית מנהל ה-LSU על בסיס המשתנים הגלובליים שיועדו לכך
-					LSUManager lsu_manager(active_solver, lsuNextVarCounter, lsuRelaxationVars);
-
-					// 3. הרצת לולאת האופטימיזציה היורדת (Descending Linear Search)
-					lsu_manager.run_optimization();
-
-					// 4. שליפת התוצאות הטובות ביותר שנמצאו ועדכון המשתנים הגלובליים של המערכת
-					lsuBestWeight = lsu_manager.get_best_weight();
-					lsuBestModel = lsu_manager.get_best_model();
-
-
-					// במידה והגענו ל-0 חריגות, המודל אופטימלי לחלוטין
-					if (lsuBestWeight == 0) {
-						retValBasedOnLatestSolve = 10; // נשאר SAT (אופטימום גלובלי)
-					}
-					
-				}
-			}
+			// Unweighted LSU runs once after full WCNF parse (see end of main), not per Solve() call.
 
 			return retValBasedOnLatestSolve;
 		};
@@ -1861,12 +1863,35 @@ int main(int argc, char** argv)
 		}
 		else
 		{
-			if (Solve(nullptr) == BadRetVal)
+			// Unweighted partial MaxSAT via LSU + Totalizer (-M 1, equal soft weights).
+			if (isMaxsat && !isWeighted)
+			{
+				const int lsuBestWeight = RunUnweightedLSU();
+				if (lsuBestWeight >= 0)
+				{
+					ret = Topor::TToporReturnVal::RET_SAT;
+					bestCost = (unsigned long long)lsuBestWeight;
+					retValBasedOnLatestSolve = topor32
+						? OnFinishingSolving(*topor32, ret, true, printUcore, isMaxsat, (TLit)maxLit, relaxVars)
+						: topor64
+						? OnFinishingSolving(*topor64, ret, true, printUcore, isMaxsat, (TLit)maxLit, relaxVars)
+						: OnFinishingSolving(*toporc, ret, true, printUcore, isMaxsat, (TLit)maxLit, relaxVars);
+				}
+				else
+				{
+					ret = Topor::TToporReturnVal::RET_UNSAT;
+					retValBasedOnLatestSolve = topor32
+						? OnFinishingSolving(*topor32, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars)
+						: topor64
+						? OnFinishingSolving(*topor64, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars)
+						: OnFinishingSolving(*toporc, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars);
+				}
+			}
+			else if (Solve(nullptr) == BadRetVal)
 			{
 				return BadRetVal;
 			}
 		}
-
 	}
 
 	return retValBasedOnLatestSolve;

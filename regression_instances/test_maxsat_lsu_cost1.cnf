@@ -1,0 +1,7 @@
+c Unweighted partial MaxSAT: minimum cost 1 (one soft must be relaxed)
+c Hard: x1, not x2
+c Soft: (x2), (-x3)
+h 1 0
+h -2 0
+1 2 0
+1 -3 0

@@ -57,9 +57,6 @@
     <ClCompile Include="TopiInprocess.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Totalizer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LSUManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
