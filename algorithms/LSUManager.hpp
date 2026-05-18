@@ -32,7 +32,7 @@ public:
 
     // Short const Getter - Can safely remain inline in the header for performance reasons
     int get_best_weight() const { return best_weight; }
-
+    const std::vector<int>& get_best_model() const { return best_model; }
 private:
     // Private Helper Methods - Declarations only
     int calculate_current_weight();
