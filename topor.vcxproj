@@ -216,6 +216,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="LSUManager.cpp" />
     <ClCompile Include="Main.cc" />
     <ClCompile Include="Topi.cc" />
     <ClCompile Include="TopiAsg.cc" />
@@ -232,9 +233,12 @@
     <ClCompile Include="Topor.cc" />
     <ClCompile Include="ToporIpamir.cc" Condition="$(Configuration.Contains('WithAPIs'))" />
     <ClCompile Include="ToporIpasir.cc" Condition="$(Configuration.Contains('WithAPIs'))" />
+    <ClCompile Include="Totalizer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="algorithms\Alg_nuwls.h" />
+    <ClInclude Include="algorithms\LSUManager.hpp" />
+    <ClInclude Include="algorithms\Totalizer.hpp" />
     <ClInclude Include="BasicMemoryUsage.h" />
     <ClInclude Include="BitArray.hpp" />
     <ClInclude Include="ColorPrint.h" />

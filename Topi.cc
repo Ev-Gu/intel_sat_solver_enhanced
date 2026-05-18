@@ -48,7 +48,7 @@ void CTopi<TLit, TUInd, Compress>::DumpSetUp(const char* filePrefix)
 template <typename TLit, typename TUInd, bool Compress>
 void CTopi<TLit, TUInd, Compress>::ReadAnyParamsFromFile()
 {
-	const char* configFileName = getenv("TOPOR_CONFIG_FILE");
+	const char* configFileName = getenv("Topor_CONFIG_FILE");
 	if (configFileName == nullptr)
 	{
 		return;
@@ -128,9 +128,9 @@ m_Stat([&]() { return Compress ? m_BC.size() : 1; }, [&]() { return Compress ? B
 	m_AssignmentInfo.reserve_exactly(m_InitVarNumAlloc, (size_t)0);
 
 	static bool diamondInvokedTopor = false;
-	DIAMOND("topor", diamondInvokedTopor);
+	DIAMOND("Topor", diamondInvokedTopor);
 
-	const char* dumpFileName = getenv("TOPOR_DUMP_NAME");
+	const char* dumpFileName = getenv("Topor_DUMP_NAME");
 	if (dumpFileName != nullptr)
 	{
 		DumpSetUp(dumpFileName);
@@ -1696,5 +1696,5 @@ template class Topor::CTopi<int32_t, uint64_t, true>;
 * Future
 */
 
-// #topor: conflict clause analysis: 1) vivification: see Kissat paper; 2) replace glue with 2glue?
+// #Topor: conflict clause analysis: 1) vivification: see Kissat paper; 2) replace glue with 2glue?
 

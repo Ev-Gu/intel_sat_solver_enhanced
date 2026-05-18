@@ -57,10 +57,10 @@
     <ClCompile Include="TopiInprocess.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ToporIpamir.cc">
+    <ClCompile Include="Totalizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ToporIpasir.cc">
+    <ClCompile Include="LSUManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -119,13 +119,13 @@
     <ClInclude Include="TopiStatistics.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="ToporIpamir.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ToporIpasir.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="algorithms\Alg_nuwls.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="algorithms\LSUManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="algorithms\Totalizer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

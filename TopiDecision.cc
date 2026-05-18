@@ -9,7 +9,7 @@ using namespace std;
 template <typename TLit, typename TUInd, bool Compress>
 CTopi<TLit, TUInd, Compress>::TULit CTopi<TLit,TUInd,Compress>::Decide()
 {
-	// #topor : we should try other decision heuristics
+	// #Topor : we should try other decision heuristics
 	// Maple uses DISTANCE for the first 50000 conflicts, then switches between VSIDS and LRB
 	// Cadical switches between VSIDS and VMTF
 	// Fiver uses CBH
@@ -41,13 +41,13 @@ string CTopi<TLit, TUInd, Compress>::ChangeConfigToGiven(uint16_t configNum)
 	auto newMode = (m_Mode + configNum) % m_Modes;
 	SetParam("/mode/value", (double)newMode);
 	
-	string ret = "/topor/mode/value " + to_string(newMode);
+	string ret = "/Topor/mode/value " + to_string(newMode);
 
 	uint16_t flipCategory = configNum / (uint16_t)m_Modes;
 	if (flipCategory != 0)
 	{
 		SetParam("/decision/polarity/flip_factor", 1000 + flipCategory);
-		ret = ret + " /topor/decision/polarity/flip_factor " + to_string(1000 + flipCategory);
+		ret = ret + " /Topor/decision/polarity/flip_factor " + to_string(1000 + flipCategory);
 	}	
 	return ret;
 }

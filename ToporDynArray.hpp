@@ -338,7 +338,7 @@ namespace Topor
 		static constexpr size_t MaxCapacity = (std::numeric_limits<size_t>::max)() / TSize;		
 		T* InitAlloc(size_t initCap, unsigned char initVal) 
 		{
-			// #topor: are there more page-fault-friendly ways to allocate: (1) 0-initialized memory; (2) non-initialized memory?
+			// #Topor: are there more page-fault-friendly ways to allocate: (1) 0-initialized memory; (2) non-initialized memory?
 			// For non-initialized memory, see: https://stackoverflow.com/questions/56411164/can-i-ask-the-kernel-to-populate-fault-in-a-range-of-anonymous-pages
 			// For 0-initialized initialized memory, first note that gcc now rewrites malloc & memset(0) into calloc. 
 			// However, once this change in gcc has been made, there was a substantial deterioration in the performance of a random-access hash-table in FB (see https://github.com/facebook/folly/issues/1508)
