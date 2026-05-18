@@ -465,9 +465,12 @@ int main(int argc, char** argv)
 
 	auto AllToporsNull = [&] { return topor32 == nullptr && topor64 == nullptr && toporc == nullptr; };
 
-	// Linear SAT-UNSAT (LSU) for unweighted partial MaxSAT. Run after WCNF parse only.
+	// Linear SAT-UNSAT (LSU) for unweighted partial MaxSAT.
+	// Must run only after WCNF parsing: Topor already holds hard/soft clauses and relaxVars is populated.
+	// Returns best violation count (number of true relaxation literals), or -1 if LSU cannot run.
 	auto RunUnweightedLSU = [&]() -> int
 	{
+		// LSUManager expects plain relaxation literal ids, not TRelaxVars structs.
 		std::vector<int> relaxLits;
 		relaxLits.reserve(relaxVars.size());
 		for (const auto& rv : relaxVars) {
@@ -477,6 +480,7 @@ int main(int argc, char** argv)
 			return -1;
 		}
 
+		// Highest variable index allocated so far (relaxation vars were created during parse).
 		int nextVarIdx = (int)(currRelaxLit - 1);
 
 		if (topor32 != nullptr) {
@@ -1863,12 +1867,14 @@ int main(int argc, char** argv)
 		}
 		else
 		{
-			// Unweighted partial MaxSAT via LSU + Totalizer (-M 1, equal soft weights).
+			// Unweighted partial MaxSAT via LSU + Totalizer (instructor step c).
+			// Trigger: -M 1 and all soft clause weights equal (isWeighted stays false).
 			if (isMaxsat && !isWeighted)
 			{
 				const int lsuBestWeight = RunUnweightedLSU();
 				if (lsuBestWeight >= 0)
 				{
+					// LSU found a model; emit standard MaxSAT lines (o / s / v) via OnFinishingSolving.
 					ret = Topor::TToporReturnVal::RET_SAT;
 					bestCost = (unsigned long long)lsuBestWeight;
 					retValBasedOnLatestSolve = topor32

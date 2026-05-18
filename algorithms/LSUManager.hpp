@@ -9,7 +9,12 @@
 
 /**
  * LSUManager — Linear SAT-UNSAT for unweighted partial MaxSAT.
- * Relaxation vars r_i per soft clause; Totalizer encodes sum(r_i) <= k.
+ *
+ * Each soft clause (C) is relaxed to (C OR r_i). Violation cost = number of r_i assigned true.
+ * A Totalizer encodes sum(r_i) <= k. Each SAT result prints "o <cost>"; the bound k is tightened
+ * via assumptions on Totalizer outputs until UNSAT (then the last SAT model is optimal).
+ *
+ * Templated over TTopor so the same code works with Topor32 / Topor64 / Toporc from Main.cc.
  */
 template <typename TTopor>
 class LSUManager {
@@ -53,13 +58,14 @@ public:
         Totalizer totalizer(next_var, relaxation_vars);
         totalizer.build();
 
+        // Cardinality encoding is permanent; bound tightening is done with assumptions (incremental LSU).
         const auto& encoding_clauses = totalizer.get_clauses();
         for (const auto& clause : encoding_clauses) {
             if (clause.empty()) continue;
             solver.AddClause(std::span<int>(const_cast<int*>(clause.data()), clause.size()));
         }
 
-        int current_bound = -1;
+        int current_bound = -1; // after SAT with cost w, next solve assumes sum(r_i) <= w-1
 
         while (true) {
             std::vector<int> assumps;
@@ -68,6 +74,7 @@ public:
                 if (bound_lit == -1) {
                     break;
                 }
+                // Falsify output literal at index current_bound => at most current_bound violations.
                 assumps.push_back(-bound_lit);
             }
 
@@ -87,6 +94,7 @@ public:
 
                 current_bound = current_weight;
             } else if (res == Topor::TToporReturnVal::RET_UNSAT) {
+                // No model better than the last SAT model; last saved model is optimal.
                 break;
             } else {
                 break;

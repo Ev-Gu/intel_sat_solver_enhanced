@@ -9,7 +9,8 @@ PWD        = $(shell pwd)
 EXEC      ?= $(notdir $(PWD))
 LIB       ?= $(notdir $(PWD))
 
-# MaxSAT.cc / Totalizer.cpp: legacy or header-only; not linked into Main (LSU lives in LSUManager.cpp + algorithms/)
+# Exclude MaxSAT.cc (missing MaxSAT.h) and root Totalizer.cpp (duplicate; use algorithms/Totalizer.hpp).
+# LSU implementation is header-only in algorithms/LSUManager.hpp; LSUManager.cpp is an empty stub for the build.
 CSRCS      = $(filter-out MaxSAT.cc Totalizer.cpp,$(wildcard *.cc)) 
 DSRCS      = $(foreach dir, $(DEPDIR), $(filter-out $(MROOT)/$(dir)/Main.cc, $(wildcard $(MROOT)/$(dir)/%.cc)))
 CHDRS      = $(wildcard *.h)
