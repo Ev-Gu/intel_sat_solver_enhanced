@@ -13,6 +13,13 @@
 //#include <sys/times.h> //these two h files are for timing in linux
 #include <chrono>
 //#include <unistd.h>
+
+#ifdef DPRINT
+#define DPRINTF(fmt, ...) printf("c [DPRINT] " fmt "\n", ##__VA_ARGS__)
+#else
+#define DPRINTF(fmt, ...) // Compiles to literally nothing when DPRINT is off
+#endif
+
 double MainWallTimePassed();
 namespace nuwls{
 
@@ -1232,6 +1239,7 @@ inline void NUWLS::soft_increase_weights_not_partial()
 
 inline void NUWLS::update_clause_weights()
 {
+    //DPRINTF("NuWLS hit a local minimum. Updating clause weights...");
     if (num_hclauses > 0)
     {
         // update hard clause weight
@@ -1728,6 +1736,7 @@ inline void NUWLS::sat(int clause)
 inline void NUWLS::RunLocalSearch(vector<int>& solver_model, unsigned long long& current_cost, int verbosity)
 {
     opt_unsat_weight = current_cost;
+    DPRINTF("NuWLS Initialized. Warm-start cost from Topor: %llu", opt_unsat_weight);
     int time_limit_for_ls = get_runtime() + param_time_limit;
     static unsigned breakTest = 0;
 
@@ -1812,6 +1821,7 @@ inline void NUWLS::RunLocalSearch(vector<int>& solver_model, unsigned long long&
             }
         }
     }
+    DPRINTF("NuWLS Exiting. Finished with best cost %d after %d flips.", opt_unsat_weight, step);
 }
 
 }

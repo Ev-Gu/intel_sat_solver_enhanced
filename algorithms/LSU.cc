@@ -5,6 +5,12 @@
 #include <iostream>
 #include <cmath>
 
+#ifdef DPRINT
+#define DLOG(x) std::cout << "c [DPRINT] " << x << std::endl
+#else
+#define DLOG(x) // Compiles to literally nothing when DPRINT is off
+#endif
+
 extern double MainWallTimePassed();
 
 namespace lsu
@@ -79,6 +85,8 @@ namespace lsu
                         }
                     }
                 }
+
+                DLOG("  [Builder] Merged branches: Left=" << L.size() << " nodes, Right=" << R.size() << " nodes -> Output=" << out.size() << " nodes.");
                 return out;
             }
         };
@@ -156,6 +164,8 @@ namespace lsu
                 std::vector<NodeOut> res;
                 res.reserve(outMap.size());
                 for (auto& kv : outMap) res.push_back(NodeOut{ kv.first, kv.second });
+
+                DLOG("  [Builder] Merged branches: Left=" << L.size() << " nodes, Right=" << R.size() << " nodes -> Output=" << res.size() << " nodes.");
                 return res;
             }
         };
@@ -167,16 +177,29 @@ namespace lsu
 
     TLinearSUResult RunUnweightedLinearSatUnsat(
         const std::vector<int32_t>& relaxLits, const std::vector<int32_t>& baseAssumps,
-        int32_t firstFreeVar, int32_t maxUserVarToStore, uint64_t initialCost,
+		int32_t firstFreeVar, int32_t maxUserVarToStore, uint64_t initialCost, uint64_t commonWeight,
         const TAddClauseFn& addClause, const TSolveFn& solve, const TGetLitValueFn& getLitValue, const TLinearSUOptions& options)
     {
         TLinearSUResult res{ true, false, initialCost, initialCost, {}, firstFreeVar, Topor::TToporReturnVal::RET_SAT };
         if (maxUserVarToStore > 0) res.BestModel01 = SnapshotModel01(maxUserVarToStore, getLitValue);
-        if (relaxLits.empty() || initialCost == 0) return res;
 
+        DLOG("=== ENTERING LSU (UNWEIGHTED) ===");
+        DLOG("  Initial Upper Bound (Best Cost): " << initialCost);
+        DLOG("  Active Soft Clauses (Relax Lits): " << relaxLits.size());
+
+        if (relaxLits.empty() || initialCost == 0) {
+            DLOG("  Nothing to do. Exiting LSU early.");
+            return res;
+        }
+
+        DLOG("  Building Bounded Totalizer Tree...");
         BoundedUnweightedTotalizerBuilder builder(firstFreeVar, initialCost, addClause);
         auto root = builder.Build(relaxLits);
         res.NextFreeVar = builder.NextFreeVar();
+
+        DLOG("  Totalizer Built Successfully!");
+        DLOG("  Root Nodes (Sum caps): " << root.size());
+        DLOG("  Auxiliary Variables Injected into Topor: " << (res.NextFreeVar - firstFreeVar));
 
         std::vector<int32_t> base;
         for (auto a : baseAssumps) if (a != 0) base.push_back(a);
@@ -191,26 +214,60 @@ namespace lsu
                 if (elapsed >= options.TimeLimitSeconds) break;
             }
 
-            uint64_t target = best - 1;
+            uint64_t target = best/commonWeight - 1;
             std::vector<int32_t> assumps = base;
 
             // root[target] represents sum >= target + 1. We falsify it to cap the penalty.
             if (target < root.size()) assumps.push_back(-root[target]);
 
+            DLOG("---------------------------------------------------");
+            DLOG("  [LSU Step] Current Best: " << best << " | Forcing Target <= " << target*commonWeight);
+            DLOG("  [LSU Step] Passing " << assumps.size() << " assumptions to Topor ("
+                << base.size() << " base, " << (assumps.size() - base.size()) << " totalizer caps).");
+            DLOG("  [LSU Step] Calling ToporSolve()...");
+
+            auto step_start = std::chrono::steady_clock::now();
             res.LastSolveRet = solve(assumps);
+            auto step_end = std::chrono::steady_clock::now();
+            auto step_ms = std::chrono::duration_cast<std::chrono::milliseconds>(step_end - step_start).count();
+
+            DLOG("  [LSU Step] Topor returned Code " << (int)res.LastSolveRet
+                << " (0=SAT, 1=UNSAT) in " << step_ms << " ms.");
+
             if (res.LastSolveRet != Topor::TToporReturnVal::RET_SAT) break;
 
             uint64_t cost = 0;
             for (auto r : relaxLits) {
-                if (getLitValue(r) == Topor::TToporLitVal::VAL_SATISFIED) cost++;
+                if (getLitValue(r) == Topor::TToporLitVal::VAL_SATISFIED) cost+=commonWeight;
             }
-            if (cost >= best) break;
+
+            DLOG("  [LSU Step] Model extracted. Actual penalty cost verified: " << cost);
+            if (cost >= best) {
+                DLOG("  [WARNING] Topor returned SAT, but the cost (" << cost << ") is NOT better than the current best (" << best << "). Breaking loop!");
+                break;
+            }
+            else {
+                DLOG("  [LSU Step] SUCCESS! Bound improved from " << best << " -> " << cost);
+            }
 
             best = cost;
             res.BestCost = cost;
             res.Improved = true;
             if (maxUserVarToStore > 0) res.BestModel01 = SnapshotModel01(maxUserVarToStore, getLitValue);
+
+            std::cout << "o " << best << std::endl;
+            std::cout << "c timeo " << (unsigned)std::ceil(MainWallTimePassed()) << " " << best << std::endl;
         }
+
+        DLOG("=== EXITING LSU ===");
+        if (res.LastSolveRet == Topor::TToporReturnVal::RET_UNSAT) {
+            DLOG("  Mathematical Optimality PROVEN at Cost: " << res.BestCost);
+        }
+        else {
+            DLOG("  LSU Terminated early. Best Cost found: " << res.BestCost);
+        }
+        DLOG("===================");
+
         return res;
     }
 
@@ -221,11 +278,24 @@ namespace lsu
     {
         TLinearSUResult res{ true, false, initialCost, initialCost, {}, firstFreeVar, Topor::TToporReturnVal::RET_SAT };
         if (maxUserVarToStore > 0) res.BestModel01 = SnapshotModel01(maxUserVarToStore, getLitValue);
-        if (relaxLits.empty() || initialCost == 0) return res;
 
+        DLOG("=== ENTERING LSU (WEIGHTED) ===");
+        DLOG("  Initial Upper Bound (Best Cost): " << initialCost);
+        DLOG("  Active Soft Clauses (Relax Lits): " << relaxLits.size());
+
+        if (relaxLits.empty() || initialCost == 0) {
+            DLOG("  Nothing to do. Exiting LSU early.");
+            return res;
+        }
+
+        DLOG("  Building Bounded Totalizer Tree...");
         BoundedWeightedTotalizerBuilder builder(firstFreeVar, initialCost, addClause);
         auto root = builder.Build(relaxLits);
         res.NextFreeVar = builder.NextFreeVar();
+
+        DLOG("  Totalizer Built Successfully!");
+        DLOG("  Root Nodes (Sum caps): " << root.size());
+        DLOG("  Auxiliary Variables Injected into Topor: " << (res.NextFreeVar - firstFreeVar));
 
         std::vector<int32_t> base;
         for (auto a : baseAssumps) if (a != 0) base.push_back(a);
@@ -246,22 +316,54 @@ namespace lsu
                 if (o.Sum > target) assumps.push_back(-o.Lit);
             }
 
+            DLOG("---------------------------------------------------");
+            DLOG("  [LSU Step] Current Best: " << best << " | Forcing Target <= " << target);
+            DLOG("  [LSU Step] Passing " << assumps.size() << " assumptions to Topor ("
+                << base.size() << " base, " << (assumps.size() - base.size()) << " totalizer caps).");
+            DLOG("  [LSU Step] Calling ToporSolve()...");
+
+            auto step_start = std::chrono::steady_clock::now();
             res.LastSolveRet = solve(assumps);
+            auto step_end = std::chrono::steady_clock::now();
+            auto step_ms = std::chrono::duration_cast<std::chrono::milliseconds>(step_end - step_start).count();
+
+            DLOG("  [LSU Step] Topor returned Code " << (int)res.LastSolveRet
+                << " (10=SAT, 20=UNSAT) in " << step_ms << " ms.");
+
             if (res.LastSolveRet != Topor::TToporReturnVal::RET_SAT) break;
 
             uint64_t cost = 0;
             for (const auto& r : relaxLits) {
                 if (getLitValue(r.Lit) == Topor::TToporLitVal::VAL_SATISFIED) cost += r.Weight;
             }
-            if (cost >= best) break;
+
+            DLOG("  [LSU Step] Model extracted. Actual penalty cost verified: " << cost);
+            if (cost >= best) {
+                DLOG("  [WARNING] Topor returned SAT, but the cost (" << cost << ") is NOT better than the current best (" << best << "). Breaking loop!");
+                break;
+            }
+            else {
+                DLOG("  [LSU Step] SUCCESS! Bound improved from " << best << " -> " << cost);
+            }
 
             best = cost;
             res.BestCost = cost;
             res.Improved = true;
             if (maxUserVarToStore > 0) res.BestModel01 = SnapshotModel01(maxUserVarToStore, getLitValue);
 
+            std::cout << "o " << best << std::endl;
             std::cout << "c timeo " << (unsigned)std::ceil(MainWallTimePassed()) << " " << best << std::endl;
         }
+
+        DLOG("=== EXITING LSU ===");
+        if (res.LastSolveRet == Topor::TToporReturnVal::RET_UNSAT) {
+            DLOG("  Mathematical Optimality PROVEN at Cost: " << res.BestCost);
+        }
+        else {
+            DLOG("  LSU Terminated early. Best Cost found: " << res.BestCost);
+        }
+        DLOG("===================");
+
         return res;
     }
 }

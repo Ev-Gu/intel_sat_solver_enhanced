@@ -48,6 +48,7 @@ namespace lsu
         int32_t firstFreeVar,
         int32_t maxUserVarToStore,
         uint64_t initialCost,
+        uint64_t commonWeight,
         const TAddClauseFn& addClause,
         const TSolveFn& solve,
         const TGetLitValueFn& getLitValue,

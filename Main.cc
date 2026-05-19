@@ -1,6 +1,12 @@
 // Copyright(C) 2021 Intel Corporation
 // SPDX - License - Identifier: MIT
 
+#ifdef DPRINT
+#define DLOG(x) std::cout << "c [DPRINT] " << x << std::endl
+#else
+#define DLOG(x) // Compiles to literally nothing when DPRINT is off
+#endif
+
 #include <iostream>
 #include <cassert>
 #include <fstream>
@@ -116,6 +122,8 @@ int minAllowedWeight = 1;
 long long maxLit = 0;
 long long currRelaxLit;
 unsigned long long bestCost = numeric_limits<unsigned long long>::max();
+vector<int> globalBestModel;
+bool optimal = false;
 
 // NuWLS variables
 bool enableNuwls = true;
@@ -125,7 +133,6 @@ unsigned long nuwlsMaxNonImprove = 10000000;
 unsigned long nuwlsTimeLimit = 15;
 vector<vector<TLit>> rawHardClauses;
 vector<pair<uint64_t, vector<TLit>>> rawSoftClauses;
-vector<int> nuwlsImprovedModel; // Holds the model if NuWLS improves it
 long long lastWeight = -1;
 
 static std::chrono::steady_clock::time_point gSolverStartTime = std::chrono::steady_clock::now();
@@ -1038,6 +1045,8 @@ int main(int argc, char** argv)
 	auto Solve = [&](vector<TLit>* assumpsPtr)
 	{
 		vector<TLit> assumpsEmpty;
+		optimal = false;
+		bestCost = numeric_limits<unsigned long long>::max();
 		if (isMaxsat) printModel = false;
 		ret = ToporSolve(assumpsPtr ? *assumpsPtr : assumpsEmpty, nextSolveToInSecIsCpuTime, nextSolveConfThr);
 		nextSolveToInSecIsCpuTime = make_pair(numeric_limits<double>::max(), false);
@@ -1075,8 +1084,16 @@ int main(int argc, char** argv)
 				return BadRetVal;
 			}
 		}
-		if (isMaxsat && enableNuwls && retValBasedOnLatestSolve == 10)
+		if (isMaxsat && retValBasedOnLatestSolve == 10) {
+			globalBestModel.resize(currRelaxLit+1, 0);
+			if(bestCost==0){optimal=true;}
+			for (int i = 1; i <= currRelaxLit; ++i) {
+				globalBestModel[i] = (ToporGetLitValue(i) == TToporLitVal::VAL_SATISFIED) ? 1 : 0;
+			}
+		}
+		if (isMaxsat && enableNuwls && retValBasedOnLatestSolve == 10 && !optimal)
 		{
+			DLOG(">> Handing off to NuWLS. Topor's initial upper bound: " << bestCost);
 			NUWLS nuwls_solver;
 			nuwls_solver.problem_weighted = (int)isWeighted;
 			nuwls_solver.param_max_flips = nuwlsMaxFlips;
@@ -1103,29 +1120,19 @@ int main(int argc, char** argv)
 
 			nuwls_solver.settings();
 
-			// Initialize NuWLS with Topor's model
-			vector<int> init_solu(numVars + 1);
-			for (int i = 1; i <= numVars; ++i) {
-				init_solu[i] = (ToporGetLitValue(i) == TToporLitVal::VAL_SATISFIED) ? 1 : 0;
-			}
-
-			nuwls_solver.init(init_solu);
-
+			nuwls_solver.init(globalBestModel);
 			unsigned long long current_cost = bestCost;
-			// We populate this array so we can extract the improved model
-			nuwlsImprovedModel.resize(numVars + 1);
-			for (int i = 1; i <= numVars; ++i) {
-				int val = (ToporGetLitValue(i) == TToporLitVal::VAL_SATISFIED) ? 1 : 0;
-				init_solu[i] = val;
-				nuwlsImprovedModel[i] = val;
-			}
 
-			nuwls_solver.RunLocalSearch(nuwlsImprovedModel, current_cost, 1);
-			bestCost = current_cost;
+			nuwls_solver.RunLocalSearch(globalBestModel, current_cost, 1);
+			if (current_cost < bestCost) {
+				bestCost = current_cost;
+				if (bestCost == 0) { optimal = true; }
+			}
 			nuwls_solver.free_memory();
 		}
-		if (isMaxsat && enableLSU && retValBasedOnLatestSolve == 10)
+		if (isMaxsat && enableLSU && retValBasedOnLatestSolve == 10 && !optimal)
 		{
+			DLOG(">> Handing off to LSU. NuWLS's best upper bound: " << bestCost);
 			lsu::TLinearSUOptions opt;
 			opt.Verbose = (lsuVerbosity != 0);
 			opt.TimeLimitSeconds = lsuTimeLimit;
@@ -1152,13 +1159,14 @@ int main(int argc, char** argv)
 					if (rv.Weight > 0 && rv.RelaxVar != 0)
 						ur.push_back((int32_t)rv.RelaxVar);
 				}
-
+				uint64_t commonWeight = (lastWeight > 0) ? (uint64_t)lastWeight : 1;
 				lsuRes = lsu::RunUnweightedLinearSatUnsat(
 					ur,
 					assumpsPtr ? *assumpsPtr : std::vector<TLit>{},
 					(int32_t)currRelaxLit,
 					(int32_t)maxLit,
 					bestCost,
+					commonWeight,
 					addClauseCb,
 					solveCb,
 					getValCb,
@@ -1191,22 +1199,17 @@ int main(int argc, char** argv)
 				currRelaxLit = lsuRes.NextFreeVar;
 			}
 
-			bestCost = lsuRes.BestCost;
-			cout << "o " << bestCost << endl;
-
-			if (!lsuRes.BestModel01.empty())
-			{
-				cout << "v ";
-				for (int i = 1; i <= (int)maxLit; ++i)
-					cout << (lsuRes.BestModel01[i] ? 1 : 0) << " ";
-				cout << endl;
+			if (lsuRes.Improved) {
+				bestCost = lsuRes.BestCost;
+				DLOG("LSU found a better model! Updating globalBestModel.");
+				globalBestModel = std::move(lsuRes.BestModel01);
 			}
 
 			// Report final execution status for grading scripts
 			if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_UNSAT || bestCost == 0)
 			{
-				cout << "s OPTIMUM FOUND" << endl;
-				retValBasedOnLatestSolve = 30; // MaxSAT optimum exit code
+				optimal = true;
+				retValBasedOnLatestSolve = 30;
 			}
 			else if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_TIMEOUT_LOCAL ||
 				lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_TIMEOUT_GLOBAL)
@@ -1214,6 +1217,16 @@ int main(int argc, char** argv)
 				cout << "c TIME LIMIT REACHED DURING LSU" << endl;
 			}
 		}
+		if (isMaxsat && retValBasedOnLatestSolve == 30 || retValBasedOnLatestSolve == 10) {
+			cout << "o " << bestCost << endl;
+			cout << "v";
+			for (int i = 1; i <= (int)maxLit; ++i) {
+				cout << " " << globalBestModel[i];
+			}
+			cout << endl;
+			cout << "s" << (optimal ? " OPTIMUM FOUND" : " SATISFIABLE") << endl;
+		}
+		cout << endl;
 		return retValBasedOnLatestSolve;
 	};
 

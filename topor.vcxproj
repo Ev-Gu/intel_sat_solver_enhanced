@@ -189,7 +189,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>SKIP_ZLIB;NOMINMAX;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SKIP_ZLIB;NOMINMAX;_CRT_SECURE_NO_WARNINGS;DPRINT</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <DisableSpecificWarnings>4660;4661</DisableSpecificWarnings>
     </ClCompile>
