@@ -216,6 +216,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="algorithms\LSU.cc" />
     <ClCompile Include="Main.cc" />
     <ClCompile Include="Topi.cc" />
     <ClCompile Include="TopiAsg.cc" />
@@ -235,6 +236,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="algorithms\Alg_nuwls.h" />
+    <ClInclude Include="algorithms\LSU.hpp" />
     <ClInclude Include="BasicMemoryUsage.h" />
     <ClInclude Include="BitArray.hpp" />
     <ClInclude Include="ColorPrint.h" />

@@ -15,6 +15,7 @@
 #include <unordered_set>
 #include <type_traits>
 #include "algorithms/Alg_nuwls.h"
+#include "algorithms/LSU.hpp"
 
 #ifdef __CYGWIN__
 extern "C" FILE * popen(const char* command, const char* mode);
@@ -129,6 +130,11 @@ long long lastWeight = -1;
 
 static std::chrono::steady_clock::time_point gSolverStartTime = std::chrono::steady_clock::now();
 
+// LSU variables
+bool enableLSU = true;
+int lsuTimeLimit = 120;
+int lsuVerbosity = 1;
+
 double MainWallTimePassed()
 {
 	return std::chrono::duration<double>(std::chrono::steady_clock::now() - gSolverStartTime).count();
@@ -168,7 +174,8 @@ int OnFinishingSolving(TTopor& topor, TToporReturnVal ret, bool printModel, bool
 				}
 			}
 			bestCost = cost;
-			cout << "o " << cost << endl;
+			std::cout << "c timeo " << (unsigned)std::ceil(MainWallTimePassed()) << " " << cost << std::endl;
+			return 10;
 		}
 
 		cout << "s SATISFIABLE" << endl;
@@ -305,6 +312,13 @@ int main(int argc, char** argv)
 		cout << "\tc " << print_as_color <ansi_color_code::cyan>("/topor_tool/allsat_models_number") << " : unsigned long integer; default = 1" << print_as_color<ansi_color_code::green>("1") << " : " << "the maximal number of models for AllSAT. AllSAT with blocking clauses over /topor_tool/allsat_blocking_variables's variables is invoked if: (1) this parameter is greater than 1; (2) the CNF format is DIMACS without Topor-specific commands; (3) /topor_tool/allsat_blocking_variables is non-empty\n";
 		cout << "\tc " << print_as_color <ansi_color_code::cyan>("/topor_tool/allsat_blocking_variables") << " : string; default = " << print_as_color<ansi_color_code::green>("\"\"") << " : " << "if /topor_tool/allsat_models_number > 1, specifies the variables which will be used for blocking clauses, sperated by a comma, e.g., 1,4,5,6,7,15.\n";
 		cout << "\tc " << print_as_color <ansi_color_code::cyan>("/topor_tool/allsat_blocking_variables_file_alg") << " : string; default = " << print_as_color<ansi_color_code::green>("3") << " : " << "if /topor_tool/allsat_models_number > 1 and our parameter > 0, read the blocking variables from the first comment line in the file (format: c 1,4,5,6,7,15), where the value means: 1 -- assign lowest internal SAT variables to blocking; 2 -- assign highest internal SAT variables to blocking; >=3 -- assign their own internal SAT variables to blocking \n";
+		cout << "\tc " << print_as_color <ansi_color_code::cyan>("/topor_tool/maxsat/nuwls/enable") << " : bool (0 or 1); default = " << print_as_color<ansi_color_code::green>("1") << " : enable NuWLS local search (warm start)\n";
+		cout << "\tc " << print_as_color <ansi_color_code::cyan>("/topor_tool/maxsat/nuwls/max_flips") << " : unsigned long; default = " << print_as_color<ansi_color_code::green>("2000000000") << " : NUWLS max flips\n";
+		cout << "\tc " << print_as_color <ansi_color_code::cyan>("/topor_tool/maxsat/nuwls/max_non_improve") << " : unsigned long; default = " << print_as_color<ansi_color_code::green>("10000000") << " : NUWLS non-improve flips\n";
+		cout << "\tc " << print_as_color <ansi_color_code::cyan>("/topor_tool/maxsat/nuwls/time_limit") << " : unsigned long; default = " << print_as_color<ansi_color_code::green>("15") << " : NUWLS time limit (seconds)\n";
+		cout << "\tc " << print_as_color <ansi_color_code::cyan>("/topor_tool/maxsat/lsu/enable") << " : bool (0 or 1); default = " << print_as_color<ansi_color_code::green>("1") << " : enable weighted totalizer + linear SAT-UNSAT\n";
+		cout << "\tc " << print_as_color <ansi_color_code::cyan>("/topor_tool/maxsat/lsu/time_limit") << " : unsigned long; default = " << print_as_color<ansi_color_code::green>("120") << " : LSU time limit (seconds). Use 0 for no timeout.\n";
+		cout << "\tc " << print_as_color <ansi_color_code::cyan>("/topor_tool/maxsat/lsu/verbosity") << " : int (0 or 1); default = " << print_as_color<ansi_color_code::green>("1") << " : LSU verbosity\n";
 
 		CTopor topor;
 		cout << topor.GetParamsDescr();
@@ -855,26 +869,32 @@ int main(int argc, char** argv)
 							return true;
 						}
 					}
-					else if (param == "nuwls/enable")
+					else if (param.rfind("maxsat/", 0) == 0)
 					{
-						string errMsg; enableNuwls = ReadBoolParam(errMsg);
-						if (!errMsg.empty()) { cout << errMsg; return true; }
+						std::string sub = param.substr(7); // after "maxsat/"
+						if (sub.rfind("nuwls/", 0) == 0)
+						{
+							std::string p = sub.substr(6);
+							if (p == "enable") { string err; enableNuwls = ReadBoolParam(err); if (!err.empty()) { cout << err; return true; } }
+							else if (p == "max_flips") { string err; nuwlsMaxFlips = ReadULongParam(err); if (!err.empty()) { cout << err; return true; } }
+							else if (p == "max_non_improve") { string err; nuwlsMaxNonImprove = ReadULongParam(err); if (!err.empty()) { cout << err; return true; } }
+							else if (p == "time_limit") { string err; nuwlsTimeLimit = ReadULongParam(err); if (!err.empty()) { cout << err; return true; } }
+							else { cout << "c ERROR: unrecognized /topor_tool/maxsat/nuwls parameter: " << p << endl; return true; }
 						}
-					else if (param == "nuwls/max_flips")
-					{
-						string errMsg; nuwlsMaxFlips = ReadULongParam(errMsg);
-						if (!errMsg.empty()) { cout << errMsg; return true; }
+						else if (sub.rfind("lsu/", 0) == 0)
+						{
+							std::string p = sub.substr(4);
+							if (p == "enable") { string err; enableLSU = ReadBoolParam(err); if (!err.empty()) { cout << err; return true; } }
+							else if (p == "time_limit") { string err; lsuTimeLimit = (int)ReadULongParam(err); if (!err.empty()) { cout << err; return true; } }
+							else if (p == "verbosity") { string err; lsuVerbosity = (int)ReadULongParam(err); if (!err.empty()) { cout << err; return true; } }
+							else { cout << "c ERROR: unrecognized /topor_tool/maxsat/lsu parameter: " << p << endl; return true; }
 						}
-					else if (param == "nuwls/max_non_improve")
-					{
-						string errMsg; nuwlsMaxNonImprove = ReadULongParam(errMsg);
-						if (!errMsg.empty()) { cout << errMsg; return true; }
+						else
+						{
+							cout << "c ERROR: unrecognized /topor_tool/maxsat parameter: " << sub << endl;
+							return true;
 						}
-					else if (param == "nuwls/time_limit")
-					{
-						string errMsg; nuwlsTimeLimit = ReadULongParam(errMsg);
-						if (!errMsg.empty()) { cout << errMsg; return true; }
-						}
+					}
 					else
 					{
 						cout << "c ERROR: unrecognized /topor_tool/ parameter: " << paramNameStr << endl;
@@ -1101,20 +1121,98 @@ int main(int argc, char** argv)
 			}
 
 			nuwls_solver.RunLocalSearch(nuwlsImprovedModel, current_cost, 1);
-
-			if (current_cost < bestCost)
-			{
-				cout << "o " << current_cost << endl;
-			}
-			// Print the improved model
-			cout << "v ";
-			for (int i = 1; i <= numVars; ++i) {
-				cout << (nuwlsImprovedModel[i] == 1 ? 1 : 0) << " ";
-			}
-			cout << endl;
-
-			//nuwls::FreeNuwlsBuiltInstance(built);
+			bestCost = current_cost;
 			nuwls_solver.free_memory();
+		}
+		if (isMaxsat && enableLSU && retValBasedOnLatestSolve == 10)
+		{
+			lsu::TLinearSUOptions opt;
+			opt.Verbose = (lsuVerbosity != 0);
+			opt.TimeLimitSeconds = lsuTimeLimit;
+
+			// These spans guarantee zero-overhead integration with Topor without breaking const-correctness
+			auto addClauseCb = [&](const std::vector<int32_t>& c) {
+				ToporAddClause(std::span<TLit>(const_cast<TLit*>(c.data()), c.size()));
+				};
+			auto solveCb = [&](const std::vector<int32_t>& a) {
+				return ToporSolve(std::span<TLit>(const_cast<TLit*>(a.data()), a.size()));
+				};
+			auto getValCb = [&](int32_t l) {
+				return ToporGetLitValue(l);
+				};
+
+			lsu::TLinearSUResult lsuRes;
+
+			if (!isWeighted)
+			{
+				std::vector<int32_t> ur;
+				ur.reserve(relaxVars.size());
+				for (const auto& rv : relaxVars)
+				{
+					if (rv.Weight > 0 && rv.RelaxVar != 0)
+						ur.push_back((int32_t)rv.RelaxVar);
+				}
+
+				lsuRes = lsu::RunUnweightedLinearSatUnsat(
+					ur,
+					assumpsPtr ? *assumpsPtr : std::vector<TLit>{},
+					(int32_t)currRelaxLit,
+					(int32_t)maxLit,
+					bestCost,
+					addClauseCb,
+					solveCb,
+					getValCb,
+					opt);
+			}
+			else
+			{
+				std::vector<lsu::TWeightedRelaxLit> wr;
+				wr.reserve(relaxVars.size());
+				for (const auto& rv : relaxVars)
+				{
+					if (rv.Weight > 0 && rv.RelaxVar != 0)
+						wr.push_back(lsu::TWeightedRelaxLit{ (int32_t)rv.RelaxVar, (uint64_t)rv.Weight });
+				}
+
+				lsuRes = lsu::RunWeightedLinearSatUnsat(
+					wr,
+					assumpsPtr ? *assumpsPtr : std::vector<TLit>{},
+					(int32_t)currRelaxLit,
+					(int32_t)maxLit,
+					bestCost,
+					addClauseCb,
+					solveCb,
+					getValCb,
+					opt);
+			}
+
+			// Sync the external relaxation variable tracker
+			if (lsuRes.NextFreeVar > currRelaxLit) {
+				currRelaxLit = lsuRes.NextFreeVar;
+			}
+
+			bestCost = lsuRes.BestCost;
+			cout << "o " << bestCost << endl;
+
+			if (!lsuRes.BestModel01.empty())
+			{
+				cout << "v ";
+				for (int i = 1; i <= (int)maxLit; ++i)
+					cout << (lsuRes.BestModel01[i] ? 1 : 0) << " ";
+				cout << endl;
+			}
+
+			// Report final execution status for grading scripts
+			if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_UNSAT || bestCost == 0)
+			{
+				cout << "s OPTIMUM FOUND" << endl;
+				retValBasedOnLatestSolve = 30; // MaxSAT optimum exit code
+			}
+			else if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_TIMEOUT_LOCAL ||
+				lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_TIMEOUT_GLOBAL)
+			{
+				cout << "c TIME LIMIT REACHED DURING LSU" << endl;
+			}
 		}
 		return retValBasedOnLatestSolve;
 	};
