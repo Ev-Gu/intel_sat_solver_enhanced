@@ -1,5 +1,7 @@
 __pycache__
 .mypy_cache
 .vscode
+.venv
 Logs
 configPrivate.py
+MaxSATSolver/

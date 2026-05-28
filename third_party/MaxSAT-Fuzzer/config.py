@@ -28,9 +28,15 @@ mem_limit_for_one_solver_call = 32000
 
 # Attention MIP solver have all their own output format. You have to transform that to the new MSE format first
 solvers = {
+    "IntelTopor": {
+        "solver_call": "bash /mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSAT-Fuzzer/Scripts/intel_topor_maxsat.sh",
+        "input_format": "wcnf",
+        "type": "complete",
+        "short": "ITP",
+    },
     ## MSE 22 solver
     "MSE22-EvalMaxSAT": {
-        "solver_call": "/usr/local/scratch/paxiant/MaxSATFuzzer/MaxSATSolver/MSE22/EvalMaxSAT/bin/EvalMaxSAT_bin",
+        "solver_call": "/mnt/c/Users/gal13/Documents/INtelMaxSat/intel_sat_solver_enhanced/third_party/MaxSAT-Fuzzer/MaxSATSolver/MSE22/EvalMaxSAT/build/main/EvalMaxSAT_bin",
         "input_format": "wcnf",
         "type": "complete",
         "short": "EMS",
