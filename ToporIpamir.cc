@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <cmath>
 #include "algorithms/Alg_nuwls.h"
+#include "algorithms/LSU.hpp"
 
 using namespace std;
 
@@ -65,6 +66,34 @@ namespace Topor
         int Solve()
         {
             const vector<int> assumpsForPost = m_CurrAssumps;
+
+            if (!m_SoftLit2Weight.empty())
+            {
+                lsu::TLinearSUResult lsuResult = RunLsuOptimization();
+
+                m_PrevAssump2Ind = move(m_Assump2Ind);
+                m_Assump2Ind.clear();
+                m_CurrAssumps.clear();
+
+                m_Result = TSolverResult();
+
+                if (lsuResult.LastSolveRet == Topor::TToporReturnVal::RET_SAT)
+                {
+                    m_Result.assignment = lsuResult.BestModel01;
+                    m_Result.cost = lsuResult.BestCost;
+                    m_Result.valid = true;
+                    m_Result.is_optimal = (m_Result.cost == 0);
+
+                    return m_Result.is_optimal ? 30 : 10;
+                }
+
+                if (lsuResult.LastSolveRet == Topor::TToporReturnVal::RET_UNSAT)
+                {
+                    return 20;
+                }
+
+                return 0;
+            }
 
             TToporReturnVal trv = CTopor::Solve(m_CurrAssumps);
 
@@ -186,6 +215,85 @@ namespace Topor
             }
             m_Result.cost = c;
         }
+
+        uint64_t InitialSoftCost() const
+        {
+            uint64_t cost = 0;
+
+            for (const auto& p : m_SoftLit2Weight)
+            {
+                cost += p.second;
+            }
+
+            return cost;
+        }
+
+        lsu::TLinearSUResult RunLsuOptimization()
+        {
+            CTopor<> lsuTopor(m_MaxVarSeen);
+
+            vector<lsu::TWeightedRelaxLit> relaxLits;
+            relaxLits.reserve(m_SoftLit2Weight.size());
+
+            int32_t nextFreeVar = m_MaxVarSeen + 1;
+
+            for (const vector<int>& hardClause : m_AllHardClauses)
+            {
+                lsuTopor.AddClause(hardClause);
+            }
+
+            for (const auto& p : m_SoftLit2Weight)
+            {
+                const int softLit = p.first;
+                const uint64_t weight = p.second;
+
+                const int32_t relaxLit = nextFreeVar++;
+
+                // IPAMIR soft literal 'lit' means cost is paid when lit is true.
+                // This is equivalent to the soft clause (-lit).
+                vector<int> relaxedSoftClause;
+                relaxedSoftClause.push_back(-softLit);
+                relaxedSoftClause.push_back(relaxLit);
+
+                lsuTopor.AddClause(relaxedSoftClause);
+
+                relaxLits.push_back(lsu::TWeightedRelaxLit{ relaxLit, weight });
+            }
+
+            const lsu::TAddClauseFn addClause =
+                [&lsuTopor](const vector<int32_t>& clause)
+                {
+                    lsuTopor.AddClause(clause);
+                };
+
+            const lsu::TSolveFn solve =
+                [&lsuTopor](const vector<int32_t>& assumptions)
+                {
+                    return lsuTopor.Solve(assumptions);
+                };
+
+            const lsu::TGetLitValueFn getLitValue =
+                [&lsuTopor](int32_t lit)
+                {
+                    return lsuTopor.GetLitValue(lit);
+                };
+
+            lsu::TLinearSUOptions options;
+            options.Verbose = false;
+
+            return lsu::RunWeightedLinearSatUnsat(
+                relaxLits,
+                m_CurrAssumps,
+                nextFreeVar,
+                m_MaxVarSeen,
+                InitialSoftCost(),
+                addClause,
+                solve,
+                getLitValue,
+                options
+            );
+        }
+
 
         void RunNuwlsPostSolve(const vector<int>& assumpsForPost)
         {
