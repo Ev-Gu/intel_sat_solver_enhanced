@@ -189,7 +189,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>SKIP_ZLIB;NOMINMAX;_CRT_SECURE_NO_WARNINGS;DPRINT</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SKIP_ZLIB;NOMINMAX;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <DisableSpecificWarnings>4660;4661</DisableSpecificWarnings>
     </ClCompile>
@@ -217,6 +217,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="algorithms\LSU.cc" />
+    <ClCompile Include="algorithms\MrsBeaver.cc" />
     <ClCompile Include="Main.cc" />
     <ClCompile Include="Topi.cc" />
     <ClCompile Include="TopiAsg.cc" />
@@ -237,6 +238,7 @@
   <ItemGroup>
     <ClInclude Include="algorithms\Alg_nuwls.h" />
     <ClInclude Include="algorithms\LSU.hpp" />
+    <ClInclude Include="algorithms\MrsBeaver.hpp" />
     <ClInclude Include="BasicMemoryUsage.h" />
     <ClInclude Include="BitArray.hpp" />
     <ClInclude Include="ColorPrint.h" />
