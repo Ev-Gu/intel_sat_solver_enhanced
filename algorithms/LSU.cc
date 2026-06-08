@@ -328,7 +328,7 @@ namespace lsu
             auto step_ms = std::chrono::duration_cast<std::chrono::milliseconds>(step_end - step_start).count();
 
             DLOG("  [LSU Step] Topor returned Code " << (int)res.LastSolveRet
-                << " (10=SAT, 20=UNSAT) in " << step_ms << " ms.");
+                << " (0=SAT, 1=UNSAT) in " << step_ms << " ms.");
 
             if (res.LastSolveRet != Topor::TToporReturnVal::RET_SAT) break;
 
