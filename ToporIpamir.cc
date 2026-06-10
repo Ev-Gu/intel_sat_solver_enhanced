@@ -1,3 +1,4 @@
+#include <utility>
 #include "ToporIpamir.h"
 #include "Topor.hpp"
 #include <vector>
@@ -6,7 +7,8 @@
 #include <cstdint>
 #include <cmath>
 #include "algorithms/Alg_nuwls.h"
-
+#include "algorithms/LSU.hpp"
+#include "algorithms/MrsBeaver.hpp"
 using namespace std;
 
 namespace Topor
@@ -68,30 +70,69 @@ namespace Topor
 
             TToporReturnVal trv = CTopor::Solve(m_CurrAssumps);
 
-            m_PrevAssump2Ind = move(m_Assump2Ind);
-            m_Assump2Ind.clear();
-            m_CurrAssumps.clear();
+            m_Result = TSolverResult();
 
-            m_Result = TSolverResult(); // reset
+            int retVal = 0;
 
             if (trv == Topor::TToporReturnVal::RET_SAT)
             {
                 CaptureToporAssignment();
                 ComputeObjFromAssignment();
 
-                RunNuwlsPostSolve(assumpsForPost);
+                const int postSolveRounds = 5;
 
-                m_Result.is_optimal = (m_Result.cost == 0);
-                return m_Result.is_optimal ? 30 : 10;
+                for (int i = 0; i < postSolveRounds && m_Result.valid && m_Result.cost > 0; ++i)
+                {
+                    const uint64_t beforeCost = m_Result.cost;
+
+                    RunNuwlsPostSolve(assumpsForPost);
+                    RunMrsBeaverPostSolve(assumpsForPost);
+
+                    if (m_Result.cost >= beforeCost)
+                    {
+                        break;
+                    }
+                }
+
+                if (!m_SoftLit2Weight.empty() && m_Result.cost > 0)
+                {
+                    lsu::TLinearSUResult lsuResult = RunLsuOptimization();
+
+                    if (lsuResult.LastSolveRet == Topor::TToporReturnVal::RET_SAT)
+                    {
+                        if (lsuResult.BestCost < m_Result.cost)
+                        {
+                            m_Result.assignment = lsuResult.BestModel01;
+                            m_Result.cost = lsuResult.BestCost;
+                            m_Result.valid = true;
+                        }
+                    }
+                    else if (lsuResult.LastSolveRet == Topor::TToporReturnVal::RET_UNSAT)
+                    {
+                        retVal = 20;
+                    }
+                }
+
+                if (retVal != 20)
+                {
+                    m_Result.is_optimal = (m_Result.cost == 0);
+                    retVal = m_Result.is_optimal ? 30 : 10;
+                }
             }
             else if (trv == Topor::TToporReturnVal::RET_UNSAT)
             {
-                return 20;
+                retVal = 20;
             }
             else
             {
-                return 0;
+                retVal = 0;
             }
+
+            m_PrevAssump2Ind = move(m_Assump2Ind);
+            m_Assump2Ind.clear();
+            m_CurrAssumps.clear();
+
+            return retVal;
         }
 
         uint64_t ValObj() const
@@ -185,6 +226,159 @@ namespace Topor
                 }
             }
             m_Result.cost = c;
+        }
+
+        uint64_t InitialSoftCost() const
+        {
+            uint64_t cost = 0;
+
+            for (const auto& p : m_SoftLit2Weight)
+            {
+                cost += p.second;
+            }
+
+            return cost;
+        }
+
+        lsu::TLinearSUResult RunLsuOptimization()
+        {
+            CTopor<> lsuTopor(m_MaxVarSeen);
+
+            vector<lsu::TWeightedRelaxLit> relaxLits;
+            relaxLits.reserve(m_SoftLit2Weight.size());
+
+            int32_t nextFreeVar = m_MaxVarSeen + 1;
+
+            for (const vector<int>& hardClause : m_AllHardClauses)
+            {
+                lsuTopor.AddClause(hardClause);
+            }
+
+            for (const auto& p : m_SoftLit2Weight)
+            {
+                const int softLit = p.first;
+                const uint64_t weight = p.second;
+
+                const int32_t relaxLit = nextFreeVar++;
+
+                // IPAMIR soft literal 'lit' means cost is paid when lit is true.
+                // This is equivalent to the soft clause (-lit).
+                vector<int> relaxedSoftClause;
+                relaxedSoftClause.push_back(-softLit);
+                relaxedSoftClause.push_back(relaxLit);
+
+                lsuTopor.AddClause(relaxedSoftClause);
+
+                relaxLits.push_back(lsu::TWeightedRelaxLit{ relaxLit, weight });
+            }
+
+            const lsu::TAddClauseFn addClause =
+                [&lsuTopor](const vector<int32_t>& clause)
+                {
+                    lsuTopor.AddClause(clause);
+                };
+
+            const lsu::TSolveFn solve =
+                [&lsuTopor](const vector<int32_t>& assumptions)
+                {
+                    return lsuTopor.Solve(assumptions);
+                };
+
+            const lsu::TGetLitValueFn getLitValue =
+                [&lsuTopor](int32_t lit)
+                {
+                    return lsuTopor.GetLitValue(lit);
+                };
+
+            lsu::TLinearSUOptions options;
+            options.Verbose = false;
+
+            return lsu::RunWeightedLinearSatUnsat(
+                relaxLits,
+                m_CurrAssumps,
+                nextFreeVar,
+                m_MaxVarSeen,
+                InitialSoftCost(),
+                addClause,
+                solve,
+                getLitValue,
+                options
+            );
+        }
+
+        void RunMrsBeaverPostSolve(const vector<int>& assumpsForPost)
+        {
+            if (m_MaxVarSeen <= 0) return;
+            if (m_SoftLit2Weight.empty()) return;
+            if (!m_Result.valid) return;
+
+            CTopor<> wmbTopor(m_MaxVarSeen);
+
+            vector<lsu::TWeightedRelaxLit> relaxLits;
+            relaxLits.reserve(m_SoftLit2Weight.size());
+
+            bool isWeighted = false;
+            int32_t nextFreeVar = m_MaxVarSeen + 1;
+
+            for (const vector<int>& hardClause : m_AllHardClauses)
+            {
+                wmbTopor.AddClause(hardClause);
+            }
+
+            for (const auto& p : m_SoftLit2Weight)
+            {
+                const int softLit = p.first;
+                const uint64_t weight = p.second;
+
+                if (weight != 1)
+                {
+                    isWeighted = true;
+                }
+
+                const int32_t relaxLit = nextFreeVar++;
+
+                vector<int> relaxedSoftClause;
+                relaxedSoftClause.push_back(-softLit);
+                relaxedSoftClause.push_back(relaxLit);
+
+                wmbTopor.AddClause(relaxedSoftClause);
+                relaxLits.push_back(lsu::TWeightedRelaxLit{ relaxLit, weight });
+            }
+
+            const lsu::TSolveFn solve =
+                [&wmbTopor](const vector<int32_t>& assumptions)
+                {
+                    return wmbTopor.Solve(assumptions);
+                };
+
+            const lsu::TGetLitValueFn getLitValue =
+                [&wmbTopor](int32_t lit)
+                {
+                    return wmbTopor.GetLitValue(lit);
+                };
+
+            wmb::WMBOptions options;
+            options.enable = true;
+            options.gtl = 10;
+
+            wmb::WMBResult wmbResult = wmb::RunMrsBeaver(
+                isWeighted,
+                relaxLits,
+                assumpsForPost,
+                m_Result.cost,
+                m_Result.assignment,
+                solve,
+                getLitValue,
+                options,
+                false
+            );
+
+            if (wmbResult.bestCost < m_Result.cost)
+            {
+                m_Result.cost = wmbResult.bestCost;
+                m_Result.assignment = std::move(wmbResult.bestModel01);
+                m_Result.valid = true;
+            }
         }
 
         void RunNuwlsPostSolve(const vector<int>& assumpsForPost)
