@@ -9,6 +9,7 @@
 #include "algorithms/Alg_nuwls.h"
 #include "algorithms/LSU.hpp"
 #include "algorithms/MrsBeaver.hpp"
+
 using namespace std;
 
 namespace Topor
@@ -79,24 +80,15 @@ namespace Topor
                 CaptureToporAssignment();
                 ComputeObjFromAssignment();
 
-                const int postSolveRounds = 5;
 
-                for (int i = 0; i < postSolveRounds && m_Result.valid && m_Result.cost > 0; ++i)
-                {
-                    const uint64_t beforeCost = m_Result.cost;
+                RunNuwlsPostSolve(assumpsForPost);
+                RunMrsBeaverPostSolve(assumpsForPost);
 
-                    RunNuwlsPostSolve(assumpsForPost);
-                    RunMrsBeaverPostSolve(assumpsForPost);
-
-                    if (m_Result.cost >= beforeCost)
-                    {
-                        break;
-                    }
-                }
+                  
 
                 if (!m_SoftLit2Weight.empty() && m_Result.cost > 0)
                 {
-                    lsu::TLinearSUResult lsuResult = RunLsuOptimization();
+                    lsu::TLinearSUResult lsuResult = RunLsuOptimization(assumpsForPost, m_Result.cost);
 
                     if (lsuResult.LastSolveRet == Topor::TToporReturnVal::RET_SAT)
                     {
@@ -109,7 +101,16 @@ namespace Topor
                     }
                     else if (lsuResult.LastSolveRet == Topor::TToporReturnVal::RET_UNSAT)
                     {
-                        retVal = 20;
+                       
+                        if (lsuResult.BestCost < m_Result.cost)
+                        {
+                            m_Result.assignment = lsuResult.BestModel01;
+                            m_Result.cost = lsuResult.BestCost;
+                            m_Result.valid = true;
+                        }
+
+                        m_Result.is_optimal = true;
+                        retVal = 30;
                     }
                 }
 
