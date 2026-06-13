@@ -64,37 +64,54 @@ namespace wmb
             std::vector<int32_t> currentAssumps = base;
             uint64_t currentPassCost = 0;
 
+            std::vector<int> candidateModel01 = res.bestModel01;
+
+
+
+            auto snapshotCandidate = [&]() {
+
+                for (int32_t v = 1; v < static_cast<int32_t>(candidateModel01.size()); ++v) {
+
+                    candidateModel01[v] = (getLitValue(v) == Topor::TToporLitVal::VAL_UNSATISFIED) ? 0 : 1;
+
+                }
+
+                };
+
+
+
             for (size_t i = 0; i < relaxLits.size(); ++i) {
+
+                auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - start).count();
                 if (elapsed >= options.timeLimitSeconds) break;
+
 
                 int32_t targetLit = relaxLits[i].Lit;
                 uint64_t weight = relaxLits[i].Weight;
 
-                // Test forcing the soft clause to be satisfied (-targetLit is usually the relaxation)
-                currentAssumps.push_back(-targetLit); 
-                
+
+                currentAssumps.push_back(-targetLit);
                 Topor::TToporReturnVal ret = solve(currentAssumps);
-                
+
+
                 if (ret == Topor::TToporReturnVal::RET_SAT) {
-                    // Lock it in, we can satisfy it
-                    continue; 
-                } else {
-                    // Conflict or timeout. Revert and take the penalty.
+                    snapshotCandidate();
+                    continue;
+                }
+                else {
                     currentAssumps.pop_back();
                     currentAssumps.push_back(targetLit);
                     currentPassCost += weight;
+
                 }
-                
-                // Early exit if this pass is already worse than our best
-                if (currentPassCost >= res.bestCost) break; 
+                if (currentPassCost >= res.bestCost) break;
             }
 
             // Update global best if we improved
             if (currentPassCost < res.bestCost) {
                 res.bestCost = currentPassCost;
-                for (int32_t v = 1; v < res.bestModel01.size(); ++v) {
-                    res.bestModel01[v] = (getLitValue(v) == Topor::TToporLitVal::VAL_UNSATISFIED) ? 0 : 1;
-                }
+                res.bestModel01 = std::move(candidateModel01); 
+
                 std::cout << "o " << res.bestCost << std::endl;
                 std::cout << "c timeo " << (unsigned)std::ceil(MainWallTimePassed()) << " " << res.bestCost << std::endl;
                 if (res.bestCost == 0) break;
