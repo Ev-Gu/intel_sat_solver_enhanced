@@ -1,0 +1,48 @@
+IntelSatSolver -- MaxSAT Evaluation Incremental-Track (IPAMIR) submission
+=========================================================================
+
+This directory is a self-contained incremental-track solver package. Its
+signature, as returned by ipamir_signature(), is "IntelSatSolver".
+
+Layout
+------
+  makefile        Default goal builds  libipamirIntelSatSolver.a  (the IPAMIR
+                  static library required by the evaluation).
+  glue.cc         Provides MainWallTimePassed(), normally supplied by the
+                  command-line front-end (Main.cc). Main.cc's object is dropped
+                  from the archive because it carries main(), which would clash
+                  with the benchmark application's main().
+  LIBS            Extra linker flags needed by the solver (-lpthread).
+  solver_src/     Full IntelSAT (Topor) source tree, including the IPAMIR
+                  interface ToporIpamir.cc and the MaxSAT algorithms
+                  (algorithms/: NuWLS, Mrs. Beaver, LSU).
+
+How it builds
+-------------
+  make
+    1. builds the solver's release static library from solver_src (make libr),
+    2. copies it to libipamirIntelSatSolver.a,
+    3. removes Main.or (drops the main() symbol),
+    4. adds glue.o (MainWallTimePassed),
+    5. ranlib.
+
+Usage in the IPAMIR harness
+---------------------------
+  Place this directory as  <ipamir>/maxsat/IntelSatSolver/  and build any
+  benchmark application with:
+      make IPAMIRSOLVER=IntelSatSolver
+  The IPAMIR header is assumed available as ../../ipamir.h, per the maxsat/
+  directory convention.
+
+Requirements
+------------
+  - g++ with C++20 support (the solver uses std::span etc.).
+  - POSIX threads (-lpthread).
+
+Return codes (ipamir_solve), per the IPAMIR contract
+----------------------------------------------------
+  0  interrupted, no feasible solution (only via ipamir_set_terminate)
+  10 interrupted, feasible solution found (only via ipamir_set_terminate)
+  20 unsatisfiable hard clauses
+  30 optimal solution found and proven (via the LSU complete phase)
+  40 ERROR state (unsupported call sequence / internal solver error)
