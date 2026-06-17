@@ -5,8 +5,14 @@
 *.oh
 *.oq
 *.so
+*.a
 intel_sat_solver_*
 depend.mk
 /.vs
 /topor
 /x64
+
+# IPAMIR test harness: 700+ MB of upstream code + sample inputs (re-clonable).
+# Keep only the setup guide; everything else is ignored.
+/ipamir_test/*
+!/ipamir_test/README.md
