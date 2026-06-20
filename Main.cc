@@ -136,17 +136,12 @@ vector<vector<TLit>> rawHardClauses;
 vector<pair<uint64_t, vector<TLit>>> rawSoftClauses;
 long long lastWeight = -1;
 
-static std::chrono::steady_clock::time_point gSolverStartTime = std::chrono::steady_clock::now();
-
 // LSU variables
 bool enableLSU = true;
 int lsuTimeLimit = 120;
 int lsuVerbosity = 1;
 
-double MainWallTimePassed()
-{
-	return std::chrono::duration<double>(std::chrono::steady_clock::now() - gSolverStartTime).count();
-}
+#include "TimeMeasure.h"
 
 struct TRelaxVars
 {
@@ -185,7 +180,7 @@ int OnFinishingSolving(TTopor& topor, TToporReturnVal ret, bool printModel, bool
 				}
 			}
 			bestCost = cost;
-			std::cout << "c timeo " << (unsigned)std::ceil(MainWallTimePassed()) << " " << cost << std::endl;
+			std::cout << "c timeo " << (unsigned)std::ceil(g_GlobalTimer.WallTimePassedSinceStartOrReset()) << " " << cost << std::endl;
 			return 10;
 		}
 
@@ -290,7 +285,6 @@ int OnFinishingSolving(TTopor& topor, TToporReturnVal ret, bool printModel, bool
 
 int main(int argc, char** argv)
 {
-	gSolverStartTime = std::chrono::steady_clock::now();
 	if (argc == 1 || strcmp(argv[1], "-help") == 0 || strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)
 	{
 		cout << print_as_color <ansi_color_code::red>("c Usage:") << endl;

@@ -19,8 +19,9 @@
 #else
 #define DPRINTF(fmt, ...) // Compiles to literally nothing when DPRINT is off
 #endif
+#include "../TimeMeasure.h"
+inline CTimeMeasure g_GlobalTimer(false, 1);
 
-double MainWallTimePassed();
 namespace nuwls{
 
 using namespace std;
@@ -1755,8 +1756,7 @@ inline void NUWLS::RunLocalSearch(vector<int>& solver_model, unsigned long long&
                     opt_unsat_weight = soft_unsat_weight;
                     current_cost = soft_unsat_weight;
 
-                    if (verbosity > 0) printf("c timeo %u %llu \n", (unsigned)ceil(::MainWallTimePassed()), current_cost);
-
+                    if (verbosity > 0) printf("c timeo %u %llu \n", (unsigned)ceil(g_GlobalTimer.WallTimePassedSinceStartOrReset()), current_cost);
 
                     // Save the better model back to the provided reference vector
                     for (int v = 1; v <= num_vars; ++v)
@@ -1796,7 +1796,7 @@ inline void NUWLS::RunLocalSearch(vector<int>& solver_model, unsigned long long&
                     opt_unsat_weight = soft_unsat_weight;
                     current_cost = soft_unsat_weight;
 
-                    if (verbosity > 0) printf("c timeo %u %llu \n", (unsigned)ceil(::MainWallTimePassed()), current_cost);
+                    if (verbosity > 0) printf("c timeo %u %llu \n", (unsigned)ceil(g_GlobalTimer.WallTimePassedSinceStartOrReset()), current_cost);
 
                     // Save the better model back to the provided reference vector
                     for (int v = 1; v <= num_vars; ++v)

@@ -5,7 +5,8 @@
 #include <cmath>
 #include <random>
 
-extern double MainWallTimePassed();
+#include "../TimeMeasure.h"
+inline CTimeMeasure g_GlobalTimer(false, 1);
 
 namespace wmb
 {
@@ -122,8 +123,8 @@ namespace wmb
                 res.bestCost = currentPassCost;
                 res.bestModel01 = std::move(candidateModel01); 
 
-                std::cout << "o " << res.bestCost << std::endl;
-                std::cout << "c timeo " << (unsigned)std::ceil(MainWallTimePassed()) << " " << res.bestCost << std::endl;
+                // std::cout << "o " << res.bestCost << std::endl;
+                std::cout << "c timeo " << (unsigned)std::ceil(g_GlobalTimer.WallTimePassedSinceStartOrReset()) << " " << res.bestCost << std::endl;
                 if (res.bestCost == 0) break;
             }
 

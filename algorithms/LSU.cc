@@ -11,7 +11,9 @@
 #define DLOG(x) // Compiles to literally nothing when DPRINT is off
 #endif
 
-extern double MainWallTimePassed();
+#include "../TimeMeasure.h"
+inline CTimeMeasure g_GlobalTimer(false, 1);
+
 
 namespace lsu
 {
@@ -222,7 +224,7 @@ namespace lsu
             if (maxUserVarToStore > 0) res.BestModel01 = SnapshotModel01(maxUserVarToStore, getLitValue);
 
             //std::cout << "o " << best << std::endl;
-            std::cout << "c timeo " << (unsigned)std::ceil(MainWallTimePassed()) << " " << best << std::endl;
+            std::cout << "c timeo " << (unsigned)std::ceil(g_GlobalTimer.WallTimePassedSinceStartOrReset()) << " " << best << std::endl;
         }
 
         DLOG("=== EXITING LSU ===");
@@ -302,7 +304,7 @@ namespace lsu
             if (maxUserVarToStore > 0) res.BestModel01 = SnapshotModel01(maxUserVarToStore, getLitValue);
 
             //std::cout << "o " << best << std::endl;
-            std::cout << "c timeo " << (unsigned)std::ceil(MainWallTimePassed()) << " " << best << std::endl;
+            std::cout << "c timeo " << (unsigned)std::ceil(g_GlobalTimer.WallTimePassedSinceStartOrReset()) << " " << best << std::endl;
         }
 
         DLOG("=== EXITING LSU ===");
