@@ -9,7 +9,7 @@ PWD        = $(shell pwd)
 EXEC      ?= $(notdir $(PWD))
 LIB       ?= $(notdir $(PWD))
 
-CSRCS      = $(filter-out test_ipamir.cc, $(wildcard *.cc)) $(wildcard algorithms/*.cc)
+CSRCS      = $($(wildcard *.cc)) $(wildcard algorithms/*.cc)
 DSRCS      = $(foreach dir, $(DEPDIR), $(filter-out $(MROOT)/$(dir)/Main.cc, $(wildcard $(MROOT)/$(dir)/%.cc)))
 CHDRS      = $(wildcard *.h)
 COBJS      = $(CSRCS:.cc=.o) $(DSRCS:.cc=.o)
