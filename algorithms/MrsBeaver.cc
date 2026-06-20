@@ -27,40 +27,51 @@ namespace wmb
 
         if (relaxLits.empty() || initialCost == 0) return res;
 
-        // Sort descending by weight (Greedy approximation)
-        std::sort(relaxLits.begin(), relaxLits.end(), 
-            [](const lsu::TWeightedRelaxLit& a, const lsu::TWeightedRelaxLit& b) {
-                return a.Weight > b.Weight;
-            });
+        // Skip sorting entirely for unweighted problems
+        if (isWeighted) {
+            std::sort(relaxLits.begin(), relaxLits.end(),
+                [](const lsu::TWeightedRelaxLit& a, const lsu::TWeightedRelaxLit& b) {
+                    return a.Weight > b.Weight;
+                });
+        }
 
         auto start = std::chrono::steady_clock::now();
         int iteration = 0;
+
         std::mt19937 rng(1337);
+        std::uniform_real_distribution<double> unif(0.0, 1.0);
 
         std::vector<int32_t> base;
         for (auto a : baseAssumps) {
             if (a != 0) base.push_back(a);
         }
+
+        struct WeightedKey {
+            lsu::TWeightedRelaxLit lit;
+            double key;
+        };
+        std::vector<WeightedKey> weightedItems;
+        if (isWeighted) {
+            weightedItems.reserve(relaxLits.size());
+        }
+
         while (true)
         {
             iteration++;
-            
-            // Check time limit
+
             auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - start).count();
             if (elapsed >= options.timeLimitSeconds) break;
 
-            // SSCP Check
             if (iteration > options.gtl && !res.skipCompletePhase) {
-                // Heuristic: target count * max weight limits
                 uint64_t expectedNodes = relaxLits.size() * res.bestCost;
                 if (expectedNodes < options.gtThr) {
-                    break; // Size is safe, hand off to LSU for the complete phase
-                } else {
-                    res.skipCompletePhase = true; // Size too big, keep looping WMB
+                    break;
+                }
+                else {
+                    res.skipCompletePhase = true;
                 }
             }
 
-            // OBV-BS Pass
             std::vector<int32_t> currentAssumps = base;
             uint64_t currentPassCost = 0;
 
@@ -70,43 +81,101 @@ namespace wmb
                 int32_t targetLit = relaxLits[i].Lit;
                 uint64_t weight = relaxLits[i].Weight;
 
-                // Test forcing the soft clause to be satisfied (-targetLit is usually the relaxation)
-                currentAssumps.push_back(-targetLit); 
-                
+                currentAssumps.push_back(-targetLit);
+
                 Topor::TToporReturnVal ret = solve(currentAssumps);
-                
+
                 if (ret == Topor::TToporReturnVal::RET_SAT) {
-                    // Lock it in, we can satisfy it
-                    continue; 
-                } else {
-                    // Conflict or timeout. Revert and take the penalty.
+                    continue;
+                }
+                else {
                     currentAssumps.pop_back();
                     currentAssumps.push_back(targetLit);
                     currentPassCost += weight;
                 }
-                
-                // Early exit if this pass is already worse than our best
-                if (currentPassCost >= res.bestCost) break; 
+
+                if (currentPassCost >= res.bestCost) break;
             }
 
-            // Update global best if we improved
             if (currentPassCost < res.bestCost) {
                 res.bestCost = currentPassCost;
                 for (int32_t v = 1; v < res.bestModel01.size(); ++v) {
                     res.bestModel01[v] = (getLitValue(v) == Topor::TToporLitVal::VAL_UNSATISFIED) ? 0 : 1;
                 }
-                std::cout << "o " << res.bestCost << std::endl;
                 std::cout << "c timeo " << (unsigned)std::ceil(MainWallTimePassed()) << " " << res.bestCost << std::endl;
                 if (res.bestCost == 0) break;
             }
 
-            // Perturb for next iteration: Weighted shuffle
-            std::shuffle(relaxLits.begin(), relaxLits.end(), rng);
-            // Re-sort segments to roughly keep heavier weights near the top
-            for(size_t i = 0; i < relaxLits.size(); i += 5) {
-                size_t end = std::min(i + 5, relaxLits.size());
-                std::sort(relaxLits.begin() + i, relaxLits.begin() + end, 
-                    [](const auto& a, const auto& b) { return a.Weight > b.Weight; });
+            // --- Perturbation / Shuffle Phase ---
+            bool doShuffle = (iteration % 2 != 0);
+
+            if (isWeighted) {
+                if (!doShuffle) {
+                    size_t n = relaxLits.size();
+
+                    size_t i = 0;
+                    while (i < n) {
+                        size_t j = i + 1;
+                        while (j < n && relaxLits[j].Weight == relaxLits[i].Weight) {
+                            j++;
+                        }
+                        if (j - i > 1) {
+                            std::reverse(relaxLits.begin() + i, relaxLits.begin() + j);
+                        }
+                        i = j;
+                    }
+
+                    for (size_t k = 0; k + 1 < n; ) {
+                        bool k_isolated = (k == 0 || relaxLits[k].Weight != relaxLits[k - 1].Weight) &&
+                            (relaxLits[k].Weight != relaxLits[k + 1].Weight);
+                        bool k1_isolated = (relaxLits[k + 1].Weight != relaxLits[k].Weight) &&
+                            (k + 2 >= n || relaxLits[k + 1].Weight != relaxLits[k + 2].Weight);
+
+                        if (k_isolated && k1_isolated) {
+                            std::swap(relaxLits[k], relaxLits[k + 1]);
+                            k += 2;
+                        }
+                        else {
+                            k++;
+                        }
+                    }
+                }
+                else {
+                    weightedItems.clear();
+                    for (const auto& lit : relaxLits) {
+                        double u = unif(rng);
+                        if (u == 0.0) u = 0.000000001;
+                        double key = std::pow(u, 1.0 / static_cast<double>(lit.Weight));
+                        weightedItems.push_back({ lit, key });
+                    }
+
+                    std::sort(weightedItems.begin(), weightedItems.end(),
+                        [](const WeightedKey& a, const WeightedKey& b) {
+                            return a.key > b.key;
+                        });
+
+                    for (size_t k = 0; k < weightedItems.size(); ++k) {
+                        relaxLits[k] = weightedItems[k].lit;
+                    }
+                }
+            }
+            else {
+                // --- Unweighted Branch ---
+                if (!doShuffle) {
+                    // UBS Heuristic: Push satisfied bits toward the MSB (front)
+                    std::stable_partition(relaxLits.begin(), relaxLits.end(),
+                        [&](const lsu::TWeightedRelaxLit& rlit) {
+                            // The soft clause is satisfied if -targetLit is true in the model
+                            int32_t satisfyingLit = -rlit.Lit;
+                            int var = std::abs(satisfyingLit);
+                            bool expectedValue = (satisfyingLit > 0);
+                            return res.bestModel01[var] == (expectedValue ? 1 : 0);
+                        });
+                }
+                else {
+                    // Uniform fast shuffle
+                    std::shuffle(relaxLits.begin(), relaxLits.end(), rng);
+                }
             }
         }
 
