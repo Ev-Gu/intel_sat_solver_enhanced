@@ -47,19 +47,23 @@ namespace lsu
 
                 std::vector<std::vector<int32_t>> leaves;
                 leaves.reserve(relaxLits.size());
-                for (int32_t lit : relaxLits) {
+                for (int32_t lit : relaxLits)
                     if (lit > 0) leaves.push_back({ lit });
-                }
+
+                std::vector<std::vector<int32_t>> clauseBuffer;
 
                 while (leaves.size() > 1) {
                     std::vector<std::vector<int32_t>> next;
                     next.reserve((leaves.size() + 1) / 2);
                     for (size_t i = 0; i < leaves.size(); i += 2) {
                         if (i + 1 == leaves.size()) next.push_back(std::move(leaves[i]));
-                        else next.push_back(Merge(leaves[i], leaves[i + 1]));
+                        else next.push_back(Merge(leaves[i], leaves[i + 1], clauseBuffer));
                     }
                     leaves = std::move(next);
                 }
+
+                for (auto& clause : clauseBuffer) m_addClause(clause);
+
                 return leaves.empty() ? std::vector<int32_t>{} : leaves.front();
             }
 
@@ -68,25 +72,24 @@ namespace lsu
             uint64_t m_cap;
             TAddClauseFn m_addClause;
 
-            std::vector<int32_t> Merge(const std::vector<int32_t>& L, const std::vector<int32_t>& R)
+            std::vector<int32_t> Merge(const std::vector<int32_t>& L, const std::vector<int32_t>& R,
+                std::vector<std::vector<int32_t>>& clauseBuffer)
             {
                 uint64_t outSize = std::min(m_cap + 1, (uint64_t)(L.size() + R.size()));
                 std::vector<int32_t> out(outSize);
                 for (size_t i = 0; i < outSize; ++i) out[i] = ++m_nextVar;
 
                 for (size_t i = 0; i < L.size() && i < outSize; ++i)
-                    m_addClause({ -L[i], out[i] });
+                    clauseBuffer.push_back({ -L[i], out[i] });
 
                 for (size_t j = 0; j < R.size() && j < outSize; ++j)
-                    m_addClause({ -R[j], out[j] });
+                    clauseBuffer.push_back({ -R[j], out[j] });
 
-                for (size_t i = 0; i < L.size(); ++i) {
-                    for (size_t j = 0; j < R.size(); ++j) {
-                        if (i + j + 1 < outSize) {
-                            m_addClause({ -L[i], -R[j], out[i + j + 1] });
-                        }
-                    }
-                }
+                for (size_t i = 0; i < L.size(); ++i)
+                    for (size_t j = 0; j < R.size(); ++j)
+                        if (i + j + 1 < outSize)
+                            clauseBuffer.push_back({ -L[i], -R[j], out[i + j + 1] });
+
                 return out;
             }
         };
@@ -112,20 +115,23 @@ namespace lsu
                 std::vector<std::vector<NodeOut>> leaves;
                 leaves.reserve(relaxLits.size());
                 for (const auto& r : relaxLits) {
-                    if (r.Lit > 0 && r.Weight > 0) {
-                        leaves.push_back({ NodeOut{ r.Weight, r.Lit } });
-                    }
+                    if (r.Lit > 0 && r.Weight > 0)
+                        leaves.push_back({ NodeOut{ Clip(r.Weight), r.Lit } });
                 }
+
+                std::vector<std::vector<int32_t>> clauseBuffer;
 
                 while (leaves.size() > 1) {
                     std::vector<std::vector<NodeOut>> next;
                     next.reserve((leaves.size() + 1) / 2);
                     for (size_t i = 0; i < leaves.size(); i += 2) {
                         if (i + 1 == leaves.size()) next.push_back(std::move(leaves[i]));
-                        else next.push_back(Merge(leaves[i], leaves[i + 1]));
+                        else next.push_back(Merge(leaves[i], leaves[i + 1], clauseBuffer));
                     }
                     leaves = std::move(next);
                 }
+
+                for (auto& clause : clauseBuffer) m_addClause(clause);
 
                 auto out = leaves.front();
                 std::sort(out.begin(), out.end(), [](const NodeOut& a, const NodeOut& b) { return a.Sum < b.Sum; });
@@ -140,7 +146,8 @@ namespace lsu
             uint64_t Clip(uint64_t s) const { return (s > m_cap) ? (m_cap + 1) : s; }
             int32_t NewVar() { return ++m_nextVar; }
 
-            std::vector<NodeOut> Merge(const std::vector<NodeOut>& L, const std::vector<NodeOut>& R)
+            std::vector<NodeOut> Merge(const std::vector<NodeOut>& L, const std::vector<NodeOut>& R,
+                std::vector<std::vector<int32_t>>& clauseBuffer)
             {
                 std::unordered_map<uint64_t, int32_t> outMap;
 
@@ -152,14 +159,12 @@ namespace lsu
                     return v;
                     };
 
-                for (const auto& lo : L) m_addClause({ -lo.Lit, EnsureOut(Clip(lo.Sum)) });
-                for (const auto& ro : R) m_addClause({ -ro.Lit, EnsureOut(Clip(ro.Sum)) });
+                for (const auto& lo : L) clauseBuffer.push_back({ -lo.Lit, EnsureOut(Clip(lo.Sum)) });
+                for (const auto& ro : R) clauseBuffer.push_back({ -ro.Lit, EnsureOut(Clip(ro.Sum)) });
 
-                for (const auto& lo : L) {
-                    for (const auto& ro : R) {
-                        m_addClause({ -lo.Lit, -ro.Lit, EnsureOut(Clip(lo.Sum + ro.Sum)) });
-                    }
-                }
+                for (const auto& lo : L)
+                    for (const auto& ro : R)
+                        clauseBuffer.push_back({ -lo.Lit, -ro.Lit, EnsureOut(Clip(lo.Sum + ro.Sum)) });
 
                 std::vector<NodeOut> res;
                 res.reserve(outMap.size());
