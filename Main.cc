@@ -129,7 +129,7 @@ bool optimal = false;
 // NuWLS variables
 bool enableNuwls = true;
 bool isWeighted = false;
-unsigned long nuwlsMaxFlips = 2000000000;
+unsigned long nuwlsMaxFlips = 20000000;
 unsigned long nuwlsMaxNonImprove = 10000000;
 unsigned long nuwlsTimeLimit = 15;
 vector<vector<TLit>> rawHardClauses;
@@ -1211,82 +1211,84 @@ int main(int argc, char** argv)
 								skipLSU = true;
 							}
 						}
-					} while (skipLSU);
 
-					// --- LSU COMPLETE PHASE ---
-					if (isMaxsat && enableLSU && !skipLSU && retValBasedOnLatestSolve == 10 && !optimal)
-					{
-						DLOG(">> Handing off to LSU. Bound: " << bestCost);
-						lsu::TLinearSUOptions opt;
-						opt.Verbose = (lsuVerbosity != 0);
-						opt.TimeLimitSeconds = lsuTimeLimit;
+						// --- LSU COMPLETE PHASE ---
+						if (isMaxsat && enableLSU && !skipLSU && retValBasedOnLatestSolve == 10 && !optimal)
+						{
+							DLOG(">> Handing off to LSU. Bound: " << bestCost);
+							lsu::TLinearSUOptions opt;
+							opt.Verbose = (lsuVerbosity != 0);
+							opt.TimeLimitSeconds = lsuTimeLimit;
 
-						// Act_lit for dead weight management
-						TLit act_lit = currRelaxLit++;
+							// Act_lit for dead weight management
+							TLit act_lit = currRelaxLit++;
 
-						auto addClauseCb = [&](const std::vector<int32_t>& c) {
-							std::vector<int32_t> clauseWithAct = c;
-							clauseWithAct.push_back(-act_lit);
-							ToporAddClause(std::span<TLit>(clauseWithAct.data(), clauseWithAct.size()));
-							};
-						auto solveCb = [&](const std::vector<int32_t>& a) {
-							std::vector<int32_t> fullAssumps = a;
-							fullAssumps.push_back(act_lit);
-							return ToporSolve(std::span<TLit>(fullAssumps.data(), fullAssumps.size()));
-							};
-						auto getValCb = [&](int32_t l) { return ToporGetLitValue(l); };
+							auto addClauseCb = [&](const std::vector<int32_t>& c) {
+								std::vector<int32_t> clauseWithAct = c;
+								clauseWithAct.push_back(-act_lit);
+								ToporAddClause(std::span<TLit>(clauseWithAct.data(), clauseWithAct.size()));
+								};
+							auto solveCb = [&](const std::vector<int32_t>& a) {
+								std::vector<int32_t> fullAssumps = a;
+								fullAssumps.push_back(act_lit);
+								return ToporSolve(std::span<TLit>(fullAssumps.data(), fullAssumps.size()));
+								};
+							auto getValCb = [&](int32_t l) { return ToporGetLitValue(l); };
 
-						lsu::TLinearSUResult lsuRes;
+							lsu::TLinearSUResult lsuRes;
 
-						try {
-							if (!isWeighted) {
-								std::vector<int32_t> ur;
-								for (const auto& rv : relaxVars) {
-									if (rv.Weight > 0 && rv.RelaxVar != 0) ur.push_back((int32_t)rv.RelaxVar);
+							try {
+								if (!isWeighted) {
+									std::vector<int32_t> ur;
+									for (const auto& rv : relaxVars) {
+										if (rv.Weight > 0 && rv.RelaxVar != 0) ur.push_back((int32_t)rv.RelaxVar);
+									}
+									uint64_t commonWeight = (lastWeight > 0) ? (uint64_t)lastWeight : 1;
+									lsuRes = lsu::RunUnweightedLinearSatUnsat(
+										ur, assumpsPtr ? *assumpsPtr : std::vector<TLit>{}, (int32_t)currRelaxLit, (int32_t)maxLit,
+										bestCost, commonWeight, addClauseCb, solveCb, getValCb, opt);
 								}
-								uint64_t commonWeight = (lastWeight > 0) ? (uint64_t)lastWeight : 1;
-								lsuRes = lsu::RunUnweightedLinearSatUnsat(
-									ur, assumpsPtr ? *assumpsPtr : std::vector<TLit>{}, (int32_t)currRelaxLit, (int32_t)maxLit,
-									bestCost, commonWeight, addClauseCb, solveCb, getValCb, opt);
-							}
-							else {
-								std::vector<lsu::TWeightedRelaxLit> wr;
-								for (const auto& rv : relaxVars) {
-									if (rv.Weight > 0 && rv.RelaxVar != 0)
-										wr.push_back(lsu::TWeightedRelaxLit{ (int32_t)rv.RelaxVar, (uint64_t)rv.Weight });
+								else {
+									std::vector<lsu::TWeightedRelaxLit> wr;
+									for (const auto& rv : relaxVars) {
+										if (rv.Weight > 0 && rv.RelaxVar != 0)
+											wr.push_back(lsu::TWeightedRelaxLit{ (int32_t)rv.RelaxVar, (uint64_t)rv.Weight });
+									}
+									lsuRes = lsu::RunWeightedLinearSatUnsat(
+										wr, assumpsPtr ? *assumpsPtr : std::vector<TLit>{}, (int32_t)currRelaxLit, (int32_t)maxLit,
+										bestCost, addClauseCb, solveCb, getValCb, opt);
 								}
-								lsuRes = lsu::RunWeightedLinearSatUnsat(
-									wr, assumpsPtr ? *assumpsPtr : std::vector<TLit>{}, (int32_t)currRelaxLit, (int32_t)maxLit,
-									bestCost, addClauseCb, solveCb, getValCb, opt);
-							}
 
-							if (lsuRes.NextFreeVar > currRelaxLit) currRelaxLit = lsuRes.NextFreeVar;
-							if (lsuRes.Improved) {
-								bestCost = lsuRes.BestCost;
-								globalBestModel = std::move(lsuRes.BestModel01);
-							}
+								if (lsuRes.NextFreeVar > currRelaxLit) currRelaxLit = lsuRes.NextFreeVar;
+								if (lsuRes.Improved) {
+									bestCost = lsuRes.BestCost;
+									globalBestModel = std::move(lsuRes.BestModel01);
+								}
 
-							if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_MEM_OUT) {
+								if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_MEM_OUT) {
+									mem_out_occurred = true;
+								}
+								else if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_UNSAT || bestCost == 0) {
+									optimal = true;
+									retValBasedOnLatestSolve = 30;
+								}
+								else if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_TIMEOUT_LOCAL || lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_TIMEOUT_GLOBAL) {
+									cout << "c TIME LIMIT REACHED DURING LSU" << endl;
+								}
+
+							}
+							catch (const std::bad_alloc& e) {
 								mem_out_occurred = true;
 							}
-							else if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_UNSAT || bestCost == 0) {
-								optimal = true;
-								retValBasedOnLatestSolve = 30;
-							}
-							else if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_TIMEOUT_LOCAL || lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_TIMEOUT_GLOBAL) {
-								cout << "c TIME LIMIT REACHED DURING LSU" << endl;
-							}
 
+							if (!mem_out_occurred) {
+								std::vector<TLit> disableClause = { -act_lit };
+								ToporAddClause(std::span<TLit>(disableClause.data(), disableClause.size()));
+							}
 						}
-						catch (const std::bad_alloc& e) {
-							mem_out_occurred = true;
-						}
+					} while (skipLSU);
 
-						if (!mem_out_occurred) {
-							std::vector<TLit> disableClause = { -act_lit };
-							ToporAddClause(std::span<TLit>(disableClause.data(), disableClause.size()));
-						}
-					}
+					
 				}
 
 				// Wipe logic executes here if flagged during solve or LSU

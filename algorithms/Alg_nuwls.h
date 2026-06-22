@@ -235,7 +235,7 @@ public:
     int max_non_improve_flip;
     int step;
 
-    int param_max_flips = 2000000000;
+    int param_max_flips = 20000000;
     int param_max_non_improve_flip = 10000000;
     int param_time_limit = 15;
 
@@ -416,7 +416,7 @@ inline void NUWLS::settings()
     local_soln_feasible = 1;
     NUWLS_TIME_LIMIT = param_time_limit;
     
-    max_flips = param_max_flips;
+    max_flips = param_max_non_improve_flip;
     max_non_improve_flip = param_max_non_improve_flip;
     //cout << "c max_flips = " << max_flips << "; max_non_improve_flip = " << max_non_improve_flip << endl;	
     
@@ -1749,7 +1749,7 @@ inline void NUWLS::RunLocalSearch(vector<int>& solver_model, unsigned long long&
                 local_soln_feasible = 1;
                 if (soft_unsat_weight < opt_unsat_weight)
                 {
-                    max_flips = step + max_non_improve_flip;
+                    max_flips = step + param_max_flips;
                     time_limit_for_ls = get_runtime() + param_time_limit;
 
                     best_soln_feasible = 1;
@@ -1789,7 +1789,7 @@ inline void NUWLS::RunLocalSearch(vector<int>& solver_model, unsigned long long&
                 local_soln_feasible = 1;
                 if (soft_unsat_weight < opt_unsat_weight)
                 {
-                    max_flips = step + max_non_improve_flip;
+                    max_flips = step + param_max_flips;
                     time_limit_for_ls = get_runtime() + param_time_limit;
 
                     best_soln_feasible = 1;
