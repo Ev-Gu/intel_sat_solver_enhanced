@@ -1821,7 +1821,7 @@ inline void NUWLS::RunLocalSearch(vector<int>& solver_model, unsigned long long&
             }
         }
     }
-    DPRINTF("NuWLS Exiting. Finished with best cost %d after %d flips.", opt_unsat_weight, step);
+    DPRINTF("NuWLS Exiting. Finished with best cost %d after %I64d flips.", opt_unsat_weight, max_flips);
 }
 
 }
