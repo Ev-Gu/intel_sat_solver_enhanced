@@ -259,7 +259,7 @@ namespace Topor
 
                     wmb::WMBResult wmbRes = wmb::RunMrsBeaver(
                         m_isWeighted, wr, internalAssumps,
-                        m_bestCost, m_globalBestModel, wmbSolveCb, getValCb, wmbOptions, false
+                        m_bestCost, m_globalBestModel, wmbSolveCb, getValCb, localWmbOptions, false
                     );
 
                     // Sync final WMB status just in case

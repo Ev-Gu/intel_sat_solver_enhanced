@@ -93,7 +93,16 @@ The intended local timeout is ignored.
 Fix:
 Pass localWmbOptions to RunMrsBeaver.
 
-Status: Planned
+Status: DONE
+
+Implementation:
+Changed the MrsBeaver call in RunMbvAndLsuPostSolve to pass localWmbOptions instead of wmbOptions.
+
+Why the fix is correct:
+localWmbOptions is the options object adjusted according to the remaining local time budget. Passing the original wmbOptions ignored that adjustment, so MrsBeaver could run with the wrong timeout.
+
+Validation:
+The project rebuilds after the change. A later timeout-focused run should verify that MrsBeaver respects the reduced local time limit.
 
 ---
 
