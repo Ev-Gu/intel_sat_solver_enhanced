@@ -43,7 +43,10 @@ Changed ValLit so it computes varTrue from m_globalBestModel, then computes litS
 Validation:
 The project must build after the change. A later tiny-model test should verify that ValLit(x) and ValLit(-x) report opposite literal satisfaction for the same assignment.
 
-Status: Done
+Status: Reverted pending usage verification
+
+Decision update:
+After partner review, this change was not kept for now. ValLit was restored to the previous implementation until we verify where ipamir_val_lit is used and what exact return convention is expected by ipamir.h and by the project tests.
 
 ---
 

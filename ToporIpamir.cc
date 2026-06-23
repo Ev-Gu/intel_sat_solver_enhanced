@@ -34,10 +34,7 @@ namespace Topor
 
             if ((size_t)internalVar >= m_globalBestModel.size()) return 0;
 
-            bool varTrue = (m_globalBestModel[internalVar] != 0);
-            bool litSatisfied = (lit > 0) ? varTrue : !varTrue;
-
-            return litSatisfied ? lit : -lit;
+            return m_globalBestModel[internalVar];
         }
 
         void AddHard(int lit_or_zero)
