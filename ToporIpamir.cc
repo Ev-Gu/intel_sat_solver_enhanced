@@ -1,4 +1,3 @@
-#include <utility>
 #include "ToporIpamir.h"
 #include "Topor.hpp"
 #include <vector>
@@ -6,211 +5,130 @@
 #include <unordered_map>
 #include <cstdint>
 #include <cmath>
+#include <iostream> // Added for debug couts
 #include "algorithms/Alg_nuwls.h"
 #include "algorithms/LSU.hpp"
 #include "algorithms/MrsBeaver.hpp"
 
 using namespace std;
+using namespace nuwls;
+using namespace wmb;
+using TLit = int32_t;
 
 namespace Topor
 {
     class CToporIpamirWrapper : public CTopor<>
     {
     public:
+
+        int ValLit(int lit)
+        {
+            if (m_globalBestModel.empty()) return 0;
+
+            int32_t absExt = std::abs(lit);
+            auto it = m_ext2int.find(absExt);
+
+            if (it == m_ext2int.end()) return 0;
+
+            int32_t internalVar = it->second;
+
+            if ((size_t)internalVar >= m_globalBestModel.size()) return 0;
+
+            return m_globalBestModel[internalVar];
+        }
+
         void AddHard(int lit_or_zero)
         {
             m_Result.valid = false;
+            m_optimal = false;
 
             if (lit_or_zero == 0)
             {
                 if (!m_CurrHardCls.empty())
                 {
                     AddClause(m_CurrHardCls);
-                    m_AllHardClauses.push_back(m_CurrHardCls); // keep for post-solvers
+                    m_AllHardClauses.push_back(m_CurrHardCls);
                     m_CurrHardCls.clear();
                 }
             }
             else
             {
-                m_CurrHardCls.emplace_back(lit_or_zero);
-                const int v = lit_or_zero > 0 ? lit_or_zero : -lit_or_zero;
-                if (v > m_MaxVarSeen) m_MaxVarSeen = v;
+                m_CurrHardCls.emplace_back(GetOrCreateInternalVar(lit_or_zero));
             }
         }
 
         void AddSoftLit(int lit, uint64_t weight)
         {
             m_Result.valid = false;
+            m_optimal = false;
 
-            m_SoftLit2Weight[lit] = weight;
+            int32_t internalLit = GetOrCreateInternalVar(lit);
+            m_SoftLit2Weight[internalLit] = weight;
 
-            const int v = lit > 0 ? lit : -lit;
-            if (v > m_MaxVarSeen) m_MaxVarSeen = v;
+            if (m_lastWeight == 0) m_lastWeight = weight;
+            if (weight != m_lastWeight) m_isWeighted = true;
 
-            CreateInternalLit(v);
-            FixPolarity(-lit, false);
+            CreateInternalLit(std::abs(internalLit));
+            FixPolarity(internalLit, false);
         }
 
         void Assume(int lit)
         {
             m_Result.valid = false;
+            m_optimal = false;
+            int32_t internalLit = GetOrCreateInternalVar(lit);
 
-            const int v = lit > 0 ? lit : -lit;
-            if (v > m_MaxVarSeen) m_MaxVarSeen = v;
-
-            if (m_Assump2Ind.find(lit) == m_Assump2Ind.end())
+            if (m_Assump2Ind.find(internalLit) == m_Assump2Ind.end())
             {
-                m_Assump2Ind.insert(make_pair(lit, m_CurrAssumps.size()));
-                m_CurrAssumps.push_back(lit);
+                m_Assump2Ind.insert(make_pair(internalLit, m_CurrAssumps.size()));
+                m_CurrAssumps.push_back(internalLit);
             }
         }
-
         int Solve()
         {
-            // IPAMIR: once in ERROR state, the only valid call is ipamir_release;
-            // any further solve must keep reporting 40.
-            if (m_InError) return 40;
-
             const vector<int> assumpsForPost = m_CurrAssumps;
+            solveStartTime = g_GlobalTimer.WallTimePassedSinceStartOrReset();
 
             TToporReturnVal trv = CTopor::Solve(m_CurrAssumps);
 
-            m_Result = TSolverResult();
+            m_PrevAssump2Ind = move(m_Assump2Ind);
+            m_Assump2Ind.clear();
+            m_CurrAssumps.clear();
 
-            int retVal = 0;
+            m_Result = TSolverResult();
 
             if (trv == Topor::TToporReturnVal::RET_SAT)
             {
                 CaptureToporAssignment();
                 ComputeObjFromAssignment();
 
+                m_bestCost = m_Result.cost;
+                m_globalBestModel = m_Result.assignment;
+                if (m_bestCost == 0) m_optimal = true;
 
-                RunNuwlsPostSolve(assumpsForPost);
-                RunMrsBeaverPostSolve(assumpsForPost);
+                std::cout << "c [DEBUG-Solve] Initial Topor Model Captured. Cost: " << m_bestCost << "\n";
 
-                  
+                if (!m_optimal) RunNuwlsPostSolve(assumpsForPost);
+                if (!m_optimal) RunMbvAndLsuPostSolve(assumpsForPost);
 
-                bool lsuInterrupted = false;
+                std::cout << "c [DEBUG-Solve] Exiting Solve. Final Cost: " << m_bestCost << "\n";
 
-                if (!m_SoftLit2Weight.empty() && m_Result.cost > 0)
-                {
-                    lsu::TLinearSUResult lsuResult = RunLsuOptimization();
-
-                    // Adopt any improved model, regardless of how LSU stopped.
-                    if (lsuResult.BestCost < m_Result.cost)
-                    {
-                        m_Result.assignment = lsuResult.BestModel01;
-                        m_Result.cost = lsuResult.BestCost;
-                        m_Result.valid = true;
-                    }
-
-                    switch (lsuResult.LastSolveRet)
-                    {
-                    case Topor::TToporReturnVal::RET_UNSAT:
-                        // LSU proved no cheaper solution exists -> optimum proven.
-                        m_Result.is_optimal = true;
-                        retVal = 30;
-                        break;
-                    case Topor::TToporReturnVal::RET_USER_INTERRUPT:
-                    case Topor::TToporReturnVal::RET_TIMEOUT_LOCAL:
-                    case Topor::TToporReturnVal::RET_TIMEOUT_GLOBAL:
-                    case Topor::TToporReturnVal::RET_CONFLICT_OUT:
-                    case Topor::TToporReturnVal::RET_MEM_OUT:
-                        // The search was genuinely interrupted (e.g. the app's
-                        // terminate callback fired). A feasible solution is in hand.
-                        lsuInterrupted = true;
-                        break;
-                    default:
-                        // RET_SAT here means the loop exited while still feasible without
-                        // an interrupt. With the internal timer disabled this only happens
-                        // if cost reached 0 (handled below) or the totalizer encoding could
-                        // not tighten further (the Path 2 guard).
-                        break;
-                    }
-                }
-
-                if (retVal == 0)
-                {
-                    if (m_Result.cost == 0)
-                    {
-                        // Cost 0 is optimal by definition.
-                        m_Result.is_optimal = true;
-                        retVal = 30;
-                    }
-                    else if (lsuInterrupted)
-                    {
-                        // IPAMIR: 10 == interrupted with a feasible solution. Legal here
-                        // only because an interrupt actually occurred.
-                        retVal = 10;
-                    }
-                    else
-                    {
-                        // Feasible, not proven optimal, and NOT interrupted. This should
-                        // not occur once LSU runs to completion; if it does it points to
-                        // the encoding being unable to tighten the bound (Path 2 guard).
-                        // We have no proof, so we must not claim 30; report 10 (feasible)
-                        // as the least-incorrect option. KNOWN LIMITATION: not observed in
-                        // testing; tracked in findings/benchmark-testing-findings.md.
-                        retVal = 10;
-                    }
-                }
+                m_Result.is_optimal = m_optimal;
+                return m_Result.is_optimal ? 30 : 10;
             }
             else if (trv == Topor::TToporReturnVal::RET_UNSAT)
             {
-                retVal = 20;
+                return 20;
             }
             else
             {
-                // Neither SAT nor UNSAT. Distinguish a genuine interrupt / resource-out
-                // (legal IPAMIR "interrupted, no feasible solution" == 0) from an internal
-                // solver error, which maps to the IPAMIR ERROR state (== 40, sticky).
-                switch (trv)
-                {
-                case Topor::TToporReturnVal::RET_USER_INTERRUPT:
-                case Topor::TToporReturnVal::RET_TIMEOUT_LOCAL:
-                case Topor::TToporReturnVal::RET_TIMEOUT_GLOBAL:
-                case Topor::TToporReturnVal::RET_CONFLICT_OUT:
-                case Topor::TToporReturnVal::RET_MEM_OUT:
-                    retVal = 0;
-                    break;
-                default:
-                    // RET_INDEX_TOO_NARROW, RET_PARAM_ERROR, RET_ASSUMPTION_REQUIRED_ERROR,
-                    // RET_DRAT_FILE_PROBLEM, RET_EXOTIC_ERROR: an unsupported / failed call
-                    // sequence. Enter ERROR state and report 40.
-                    m_InError = true;
-                    retVal = 40;
-                    break;
-                }
+                return 0;
             }
-
-            m_PrevAssump2Ind = move(m_Assump2Ind);
-            m_Assump2Ind.clear();
-            m_CurrAssumps.clear();
-
-            return retVal;
         }
 
         uint64_t ValObj() const
         {
-            return m_Result.cost;
-        }
-
-        int ValLit(int lit)
-        {
-            if (!m_Result.valid)
-            {
-                return 0;
-            }
-
-            const int v = lit > 0 ? lit : -lit;
-            if (v <= 0 || v >= (int)m_Result.assignment.size())
-            {
-                return 0;
-            }
-
-            const int val = m_Result.assignment[v]; // 0/1
-            const bool litSatisfied = (lit > 0) ? (val == 1) : (val == 0);
-            return litSatisfied ? lit : -lit;
+            return m_bestCost;
         }
 
         void SetTerminate(void* state, int (*terminate)(void* state))
@@ -240,20 +158,12 @@ namespace Topor
             SetCbStopNow(StopTopor);
         }
 
-#ifdef IPAMIR_TEST_HOOKS
-        // Test-only hook: force the IPAMIR ERROR state so the code-40 path can be
-        // exercised by unit tests. No available benchmark drives the underlying
-        // solver into an internal error code, so this is the only way to verify
-        // the 40 / sticky-ERROR behavior. Compiled out of production builds.
-        void TestForceError() { m_InError = true; }
-#endif
-
     protected:
         struct TSolverResult
         {
-            vector<int> assignment;   // index by var id, [1..maxVar], value in {0,1}
-            uint64_t cost = 0;
+            vector<int> assignment;
             bool is_optimal = false;
+            uint64_t cost = 0;
             bool valid = false;
         };
 
@@ -266,13 +176,13 @@ namespace Topor
 
         void CaptureToporAssignment()
         {
-            m_Result.assignment.assign(m_MaxVarSeen + 1, 0);
+            m_Result.assignment.assign(m_internalMaxVar + 1, 0);
 
-            for (int v = 1; v <= m_MaxVarSeen; ++v)
+            for (int v = 1; v <= m_internalMaxVar; ++v)
             {
                 const TToporLitVal lv = GetLitValue(v);
                 if (lv == TToporLitVal::VAL_SATISFIED) m_Result.assignment[v] = 1;
-                else m_Result.assignment[v] = 0; // UNSAT/DONT_CARE/UNASSIGNED -> 0
+                else m_Result.assignment[v] = 0;
             }
 
             m_Result.valid = true;
@@ -283,7 +193,7 @@ namespace Topor
             uint64_t c = 0;
             for (const auto& p : m_SoftLit2Weight)
             {
-                if (IsLitSatisfiedByAssignment(p.first, m_Result.assignment))
+                if (!IsLitSatisfiedByAssignment(p.first, m_Result.assignment))
                 {
                     c += p.second;
                 }
@@ -291,184 +201,159 @@ namespace Topor
             m_Result.cost = c;
         }
 
-        uint64_t InitialSoftCost() const
-        {
-            uint64_t cost = 0;
+        void RunMbvAndLsuPostSolve(const vector<int>& assumpsForPost) {
+            bool skipLSU = false;
+            double elapsedGlobal;
+            double elapsedLocal;
+            double remainingLocal;
 
-            for (const auto& p : m_SoftLit2Weight)
-            {
-                cost += p.second;
+            std::vector<lsu::TWeightedRelaxLit> wr;
+            for (const auto& kv : m_SoftLit2Weight) {
+                wr.push_back({ -kv.first, kv.second });
             }
 
-            return cost;
-        }
-
-        lsu::TLinearSUResult RunLsuOptimization()
-        {
-            CTopor<> lsuTopor(m_MaxVarSeen);
-
-            // LSU runs on its own solver instance, so it must be given the same
-            // terminate callback as the main solver; otherwise the app can never
-            // stop it and the internal time limit would be its only brake.
-            if (m_CurrTerminateFunc)
-            {
-                lsuTopor.SetCbStopNow([this]()
-                    {
-                        return (m_CurrTerminateFunc && m_CurrTerminateFunc(m_CurrTerminateState))
-                            ? TStopTopor::VAL_STOP
-                            : TStopTopor::VAL_CONTINUE;
-                    });
+            std::vector<int32_t> internalAssumps;
+            for (int a : assumpsForPost) {
+                internalAssumps.push_back(GetOrCreateInternalVar(a));
             }
 
-            vector<lsu::TWeightedRelaxLit> relaxLits;
-            relaxLits.reserve(m_SoftLit2Weight.size());
+            do {
+                skipLSU = false;
 
-            int32_t nextFreeVar = m_MaxVarSeen + 1;
+                elapsedGlobal = g_GlobalTimer.WallTimePassedSinceStartOrReset();
+                elapsedLocal = elapsedGlobal - solveStartTime;
 
-            for (const vector<int>& hardClause : m_AllHardClauses)
-            {
-                lsuTopor.AddClause(std::span<int>(const_cast<int*>(hardClause.data()), hardClause.size()));
-            }
+                remainingLocal = max(0.0, (double)m_lsuTimeLimit - elapsedLocal);
 
-            for (const auto& p : m_SoftLit2Weight)
-            {
-                const int softLit = p.first;
-                const uint64_t weight = p.second;
-
-                const int32_t relaxLit = nextFreeVar++;
-
-                // IPAMIR soft literal 'lit' means cost is paid when lit is true.
-                // This is equivalent to the soft clause (-lit).
-                vector<int> relaxedSoftClause;
-                relaxedSoftClause.push_back(-softLit);
-                relaxedSoftClause.push_back(relaxLit);
-
-                lsuTopor.AddClause(relaxedSoftClause);
-
-                relaxLits.push_back(lsu::TWeightedRelaxLit{ relaxLit, weight });
-            }
-
-            const lsu::TAddClauseFn addClause =
-                [&lsuTopor](const vector<int32_t>& clause)
-                {
-                    lsuTopor.AddClause(std::span<int>(const_cast<int*>(clause.data()), clause.size()));
-                };
-
-            const lsu::TSolveFn solve =
-                [&lsuTopor](const vector<int32_t>& assumptions)
-                {
-                    return lsuTopor.Solve(std::span<int>(const_cast<int*>(assumptions.data()), assumptions.size()));
-                };
-
-            const lsu::TGetLitValueFn getLitValue =
-                [&lsuTopor](int32_t lit)
-                {
-                    return lsuTopor.GetLitValue(lit);
-                };
-
-            lsu::TLinearSUOptions options;
-            options.Verbose = false;
-            // Disable LSU's built-in 15s cap: under IPAMIR, timing is controlled
-            // externally (global wall-clock + the terminate callback wired above).
-            // Running to completion lets LSU reach UNSAT and prove optimality (30)
-            // instead of stopping early and forcing an (illegal) feasible verdict.
-            options.TimeLimitSeconds = 0;
-
-            return lsu::RunWeightedLinearSatUnsat(
-                relaxLits,
-                m_CurrAssumps,
-                nextFreeVar,
-                m_MaxVarSeen,
-                InitialSoftCost(),
-                addClause,
-                solve,
-                getLitValue,
-                options
-            );
-        }
-
-        void RunMrsBeaverPostSolve(const vector<int>& assumpsForPost)
-        {
-            if (m_MaxVarSeen <= 0) return;
-            if (m_SoftLit2Weight.empty()) return;
-            if (!m_Result.valid) return;
-
-            CTopor<> wmbTopor(m_MaxVarSeen);
-
-            vector<lsu::TWeightedRelaxLit> relaxLits;
-            relaxLits.reserve(m_SoftLit2Weight.size());
-
-            bool isWeighted = false;
-            int32_t nextFreeVar = m_MaxVarSeen + 1;
-
-            for (const vector<int>& hardClause : m_AllHardClauses)
-            {
-                wmbTopor.AddClause(std::span<int>(const_cast<int*>(hardClause.data()), hardClause.size()));
-            }
-
-            for (const auto& p : m_SoftLit2Weight)
-            {
-                const int softLit = p.first;
-                const uint64_t weight = p.second;
-
-                if (weight != 1)
-                {
-                    isWeighted = true;
+                if (m_lsuTimeLimit > 0 && remainingLocal <= 0) {
+                    skipLSU = true;
+                    break;
                 }
 
-                const int32_t relaxLit = nextFreeVar++;
-
-                vector<int> relaxedSoftClause;
-                relaxedSoftClause.push_back(-softLit);
-                relaxedSoftClause.push_back(relaxLit);
-
-                wmbTopor.AddClause(relaxedSoftClause);
-                relaxLits.push_back(lsu::TWeightedRelaxLit{ relaxLit, weight });
-            }
-
-            const lsu::TSolveFn solve =
-                [&wmbTopor](const vector<int32_t>& assumptions)
+                if (wmbOptions.enable && !m_optimal)
                 {
-                    return wmbTopor.Solve(std::span<int>(const_cast<int*>(assumptions.data()), assumptions.size()));
-                };
+                    wmb::WMBOptions localWmbOptions = wmbOptions;
+                    if (m_lsuTimeLimit > 0) {
+                        localWmbOptions.timeLimitSeconds = min(60, (int)remainingLocal);
+                    }
 
-            const lsu::TGetLitValueFn getLitValue =
-                [&wmbTopor](int32_t lit)
+                    auto wmbSolveCb = [&](const std::vector<int32_t>& a) {
+                        auto ret = CTopor::Solve(std::span<int32_t>(const_cast<int32_t*>(a.data()), a.size()),
+                            std::make_pair(numeric_limits<double>::max(), false),
+                            wmbOptions.conflictThreshold);
+
+                        // IMMEDIATE GLOBAL UPDATE: Intercept SAT models during WMB
+                        if (ret == Topor::TToporReturnVal::RET_SAT) {
+                            CaptureToporAssignment();
+                            ComputeObjFromAssignment();
+                            if (m_Result.cost < m_bestCost) {
+                                m_bestCost = m_Result.cost;
+                                m_globalBestModel = m_Result.assignment;
+                                if (m_bestCost == 0) m_optimal = true;
+                                std::cout << "c [DEBUG-WMB] Immediate callback improvement. New Cost: " << m_bestCost << "\n";
+                            }
+                        }
+                        return ret;
+                        };
+
+                    auto getValCb = [&](int32_t l) { return CTopor::GetLitValue(l); };
+
+                    wmb::WMBResult wmbRes = wmb::RunMrsBeaver(
+                        m_isWeighted, wr, internalAssumps,
+                        m_bestCost, m_globalBestModel, wmbSolveCb, getValCb, wmbOptions, false
+                    );
+
+                    // Sync final WMB status just in case
+                    if (wmbRes.bestCost < m_bestCost) {
+                        m_bestCost = wmbRes.bestCost;
+                        m_globalBestModel = std::move(wmbRes.bestModel01);
+                        if (m_bestCost == 0) m_optimal = true;
+                    }
+
+                    if (wmbRes.skipCompletePhase || wmbRes.timedOut) {
+                        skipLSU = true;
+                    }
+                }
+
+                // --- LSU COMPLETE PHASE ---
+                if (m_enableLSU && !skipLSU && !m_optimal)
                 {
-                    return wmbTopor.GetLitValue(lit);
-                };
+                    lsu::TLinearSUOptions opt;
+                    opt.Verbose = (m_lsuVerbosity != 0);
+                    opt.TimeLimitSeconds = m_lsuTimeLimit > 0 ? (int)remainingLocal : 0;
 
-            wmb::WMBOptions options;
-            options.enable = true;
-            options.gtl = 10;
+                    auto addClauseCb = [&](const std::vector<int32_t>& c) {
+                        std::vector<int32_t> clauseWithAct = c;
+                        CTopor::AddClause(std::span<int32_t>(clauseWithAct.data(), clauseWithAct.size()));
+                        };
 
-            wmb::WMBResult wmbResult = wmb::RunMrsBeaver(
-                isWeighted,
-                relaxLits,
-                assumpsForPost,
-                m_Result.cost,
-                m_Result.assignment,
-                solve,
-                getLitValue,
-                options,
-                false
-            );
+                    auto solveCb = [&](const std::vector<int32_t>& a) {
+                        std::vector<int32_t> fullAssumps = a;
+                        auto ret = CTopor::Solve(std::span<int32_t>(fullAssumps.data(), fullAssumps.size()));
 
-            if (wmbResult.bestCost < m_Result.cost)
-            {
-                m_Result.cost = wmbResult.bestCost;
-                m_Result.assignment = std::move(wmbResult.bestModel01);
-                m_Result.valid = true;
-            }
+                        // IMMEDIATE GLOBAL UPDATE: Intercept SAT models during LSU
+                        if (ret == Topor::TToporReturnVal::RET_SAT) {
+                            CaptureToporAssignment();
+                            ComputeObjFromAssignment();
+                            if (m_Result.cost < m_bestCost) {
+                                m_bestCost = m_Result.cost;
+                                m_globalBestModel = m_Result.assignment;
+                                if (m_bestCost == 0) m_optimal = true;
+                                std::cout << "c [DEBUG-LSU] Immediate callback improvement. New Cost: " << m_bestCost << "\n";
+                            }
+                        }
+                        return ret;
+                        };
+
+                    auto getValCb = [&](int32_t l) { return CTopor::GetLitValue(l); };
+
+                    lsu::TLinearSUResult lsuRes;
+
+                    try {
+                        if (!m_isWeighted) {
+                            std::vector<int32_t> ur;
+                            for (const auto& w_lit : wr) ur.push_back(w_lit.Lit);
+                            uint64_t commonWeight = (m_lastWeight > 0) ? (uint64_t)m_lastWeight : 1;
+
+                            lsuRes = lsu::RunUnweightedLinearSatUnsat(
+                                ur, internalAssumps, m_internalMaxVar + 1, m_internalMaxVar,
+                                m_bestCost, commonWeight, addClauseCb, solveCb, getValCb, opt);
+                        }
+                        else {
+                            lsuRes = lsu::RunWeightedLinearSatUnsat(
+                                wr, internalAssumps, m_internalMaxVar + 1, m_internalMaxVar,
+                                m_bestCost, addClauseCb, solveCb, getValCb, opt);
+                        }
+
+                        if (lsuRes.NextFreeVar > m_internalMaxVar) {
+                            m_internalMaxVar = lsuRes.NextFreeVar;
+                            if ((size_t)m_internalMaxVar >= m_int2ext.size()) m_int2ext.resize(m_internalMaxVar + 1, 0);
+                        }
+
+                        // Sync final LSU status just in case
+                        if (lsuRes.Improved && lsuRes.BestCost < m_bestCost) {
+                            m_bestCost = lsuRes.BestCost;
+                            m_globalBestModel = std::move(lsuRes.BestModel01);
+                        }
+
+                        if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_MEM_OUT) {
+                            break;
+                        }
+                        else if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_UNSAT || m_bestCost == 0) {
+                            m_optimal = true;
+                        }
+                    }
+                    catch (const std::bad_alloc& e) {
+                        break;
+                    }
+                }
+            } while (skipLSU && !m_optimal);
         }
 
         void RunNuwlsPostSolve(const vector<int>& assumpsForPost)
         {
-            if (m_MaxVarSeen <= 0) return;
+            if (m_internalMaxVar <= 0) return;
             if (m_AllHardClauses.empty() && m_SoftLit2Weight.empty()) return;
-            // Cost 0 is already optimal: nothing to improve, and NuWLS's pick_var
-            // divides by the unsat-stack size, which is 0 when everything is satisfied
-            if (m_Result.cost == 0) return;
 
             vector<pair<uint64_t, vector<int>>> softClauses;
             softClauses.reserve(m_SoftLit2Weight.size());
@@ -477,8 +362,7 @@ namespace Topor
             bool isWeighted = false;
             for (const auto& p : m_SoftLit2Weight)
             {
-                // soft lit 'l' => penalty if l=true => soft clause (~l)
-                softClauses.push_back({ p.second, vector<int>{ -p.first } });
+                softClauses.push_back({ p.second, vector<int>{ p.first } });
                 sumW += (unsigned long long)p.second;
                 if (p.second != 1) isWeighted = true;
             }
@@ -486,7 +370,7 @@ namespace Topor
             const unsigned long long topClauseWeight = sumW + 1ULL;
 
             auto built = nuwls::SanitizeAndBuildNuwlsInstance(
-                m_MaxVarSeen,
+                m_internalMaxVar,
                 topClauseWeight,
                 m_AllHardClauses,
                 softClauses,
@@ -494,7 +378,7 @@ namespace Topor
 
             if (built.numClauses > 0)
             {
-                nuwls::NUWLS nuwls_solver;
+                NUWLS nuwls_solver;
                 nuwls_solver.problem_weighted = isWeighted ? 1 : 0;
                 nuwls_solver.build_instance(
                     built.numVars,
@@ -505,45 +389,69 @@ namespace Topor
                     built.clauseWeight);
                 nuwls_solver.settings();
 
-                nuwls_solver.init(m_Result.assignment);
+                // IMMEDIATE GLOBAL UPDATE: Initialize directly from the global state
+                nuwls_solver.init(m_globalBestModel);
 
-                unsigned long long improvedCost = m_Result.cost;
-                nuwls_solver.RunLocalSearch(m_Result.assignment, improvedCost, 0);
+                // Safely cast m_bestCost to unsigned long long& so NuWLS modifies it continuously in-place
+                unsigned long long& refCost = reinterpret_cast<unsigned long long&>(m_bestCost);
 
-                if (improvedCost < m_Result.cost)
-                {
-                    m_Result.cost = improvedCost;
-                }
+                // Pass m_globalBestModel directly so modifications happen globally in real-time
+                nuwls_solver.RunLocalSearch(m_globalBestModel, refCost, 0);
 
-                // free_memory() also releases the arrays of 'built', whose ownership
-                // was transferred by build_instance(); reset to avoid a double free
+                if (m_bestCost == 0) m_optimal = true;
+
                 nuwls_solver.free_memory();
-                built = {};
             }
-
-            nuwls::FreeNuwlsBuiltInstance(built);
         }
 
         vector<int> m_CurrHardCls;
         vector<int> m_CurrAssumps;
         unordered_map<int, size_t> m_Assump2Ind;
         unordered_map<int, size_t> m_PrevAssump2Ind;
+        double solveStartTime;
+        wmb::WMBOptions wmbOptions;
 
         unordered_map<int, uint64_t> m_SoftLit2Weight;
 
         TSolverResult m_Result;
-        int m_MaxVarSeen = 0;
-
-        // IPAMIR ERROR state. Entered when the underlying solver reports an
-        // internal/unsupported error from a solve; sticky until ipamir_release,
-        // because add/solve are not allowed from ERROR (only release is).
-        bool m_InError = false;
 
         void* m_CurrTerminateState = nullptr;
         int (*m_CurrTerminateFunc)(void* state) = nullptr;
 
-        // post-solver inputs
+        uint64_t m_bestCost = std::numeric_limits<uint64_t>::max();
+        bool m_optimal = false;
+        bool m_isWeighted = false;
+        uint64_t m_lastWeight = 0;
+        std::vector<int> m_globalBestModel;
+
+        bool m_enableLSU = true;
+        int m_lsuVerbosity = 1;
+        int m_lsuTimeLimit = 120;
+
         vector<vector<int>> m_AllHardClauses;
+
+        std::unordered_map<int32_t, int32_t> m_ext2int;
+        std::vector<int32_t> m_int2ext;
+        int32_t m_internalMaxVar = 0;
+
+        int32_t GetOrCreateInternalVar(int32_t extVar)
+        {
+            int32_t absExt = std::abs(extVar);
+            auto it = m_ext2int.find(absExt);
+            if (it != m_ext2int.end()) {
+                return extVar > 0 ? it->second : -it->second;
+            }
+
+            m_internalMaxVar++;
+            m_ext2int[absExt] = m_internalMaxVar;
+
+            if ((size_t)m_internalMaxVar >= m_int2ext.size()) {
+                m_int2ext.resize(m_internalMaxVar + 1, 0);
+            }
+            m_int2ext[m_internalMaxVar] = absExt;
+
+            return extVar > 0 ? m_internalMaxVar : -m_internalMaxVar;
+        }
     };
 }
 
@@ -609,12 +517,4 @@ extern "C" {
         CToporIpamirWrapper* tw = reinterpret_cast<CToporIpamirWrapper*>(solver);
         tw->SetTerminate(state, terminate);
     }
-
-#ifdef IPAMIR_TEST_HOOKS
-    // Test-only entry point (see CToporIpamirWrapper::TestForceError).
-    void ipamir__test_force_error(void* solver)
-    {
-        reinterpret_cast<CToporIpamirWrapper*>(solver)->TestForceError();
-    }
-#endif
 }

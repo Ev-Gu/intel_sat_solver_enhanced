@@ -1220,17 +1220,13 @@ int main(int argc, char** argv)
 							opt.Verbose = (lsuVerbosity != 0);
 							opt.TimeLimitSeconds = lsuTimeLimit;
 
-							// Act_lit for dead weight management
-							TLit act_lit = currRelaxLit++;
 
 							auto addClauseCb = [&](const std::vector<int32_t>& c) {
 								std::vector<int32_t> clauseWithAct = c;
-								clauseWithAct.push_back(-act_lit);
 								ToporAddClause(std::span<TLit>(clauseWithAct.data(), clauseWithAct.size()));
 								};
 							auto solveCb = [&](const std::vector<int32_t>& a) {
 								std::vector<int32_t> fullAssumps = a;
-								fullAssumps.push_back(act_lit);
 								return ToporSolve(std::span<TLit>(fullAssumps.data(), fullAssumps.size()));
 								};
 							auto getValCb = [&](int32_t l) { return ToporGetLitValue(l); };
@@ -1267,6 +1263,7 @@ int main(int argc, char** argv)
 
 								if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_MEM_OUT) {
 									mem_out_occurred = true;
+									break;
 								}
 								else if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_UNSAT || bestCost == 0) {
 									optimal = true;
@@ -1280,13 +1277,8 @@ int main(int argc, char** argv)
 							catch (const std::bad_alloc& e) {
 								mem_out_occurred = true;
 							}
-
-							if (!mem_out_occurred) {
-								std::vector<TLit> disableClause = { -act_lit };
-								ToporAddClause(std::span<TLit>(disableClause.data(), disableClause.size()));
-							}
 						}
-					} while (skipLSU);
+					} while (skipLSU && !optimal);
 
 					
 				}
