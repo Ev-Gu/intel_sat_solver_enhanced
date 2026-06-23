@@ -210,10 +210,13 @@ namespace Topor
             }
 
             std::vector<int32_t> internalAssumps;
-            for (int a : assumpsForPost) {
-                internalAssumps.push_back(GetOrCreateInternalVar(a));
-            }
+            internalAssumps.reserve(assumpsForPost.size());
 
+            for (int a : assumpsForPost) {
+                if (a != 0) {
+                    internalAssumps.push_back(a);
+                }
+            }
             do {
                 skipLSU = false;
 

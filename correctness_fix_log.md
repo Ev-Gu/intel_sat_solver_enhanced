@@ -64,7 +64,16 @@ Post-solvers may solve under different assumptions than the main Topor solve. Th
 Fix:
 Treat assumpsForPost as already internal and copy or filter it without remapping.
 
-Status: Planned
+Status: DONE
+
+Implementation:
+Changed RunMbvAndLsuPostSolve so assumpsForPost is treated as an already-internal assumption vector. The code now copies non-zero assumptions directly instead of passing them through GetOrCreateInternalVar again.
+
+Why the fix is correct:
+Assume already converts external literals into internal literals before storing them in m_CurrAssumps. Since Solve copies m_CurrAssumps into assumpsForPost, post-solvers must receive those same internal literals. Remapping them again can silently change the constrained problem solved by MrsBeaver and LSU.
+
+Validation:
+The project builds after the change. A later assumption-specific tiny test should verify that different assumptions on the same wrapper instance affect the post-solver phase consistently.
 
 ---
 
