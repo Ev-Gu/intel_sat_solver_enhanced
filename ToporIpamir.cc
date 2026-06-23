@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <cstdint>
 #include <cmath>
-#include <iostream> // Added for debug couts
+#include <iostream>
 #include "algorithms/Alg_nuwls.h"
 #include "algorithms/LSU.hpp"
 #include "algorithms/MrsBeaver.hpp"
@@ -105,14 +105,8 @@ namespace Topor
                 m_bestCost = m_Result.cost;
                 m_globalBestModel = m_Result.assignment;
                 if (m_bestCost == 0) m_optimal = true;
-
-                std::cout << "c [DEBUG-Solve] Initial Topor Model Captured. Cost: " << m_bestCost << "\n";
-
                 if (!m_optimal) RunNuwlsPostSolve(assumpsForPost);
                 if (!m_optimal) RunMbvAndLsuPostSolve(assumpsForPost);
-
-                std::cout << "c [DEBUG-Solve] Exiting Solve. Final Cost: " << m_bestCost << "\n";
-
                 m_Result.is_optimal = m_optimal;
                 return m_Result.is_optimal ? 30 : 10;
             }
@@ -250,7 +244,6 @@ namespace Topor
                                 m_bestCost = m_Result.cost;
                                 m_globalBestModel = m_Result.assignment;
                                 if (m_bestCost == 0) m_optimal = true;
-                                std::cout << "c [DEBUG-WMB] Immediate callback improvement. New Cost: " << m_bestCost << "\n";
                             }
                         }
                         return ret;
@@ -299,7 +292,6 @@ namespace Topor
                                 m_bestCost = m_Result.cost;
                                 m_globalBestModel = m_Result.assignment;
                                 if (m_bestCost == 0) m_optimal = true;
-                                std::cout << "c [DEBUG-LSU] Immediate callback improvement. New Cost: " << m_bestCost << "\n";
                             }
                         }
                         return ret;
