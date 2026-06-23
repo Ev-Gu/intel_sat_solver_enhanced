@@ -125,7 +125,16 @@ This relies on unsafe type aliasing and is not robust.
 Fix:
 Copy m_bestCost to a local unsigned long long, pass it to NUWLS, then copy it back only if improved.
 
-Status: Planned
+Status: DONE
+
+Implementation:
+Replaced reinterpret_cast<unsigned long long&>(m_bestCost) with a local unsigned long long nuwlsCost. NUWLS now receives the type it expects, and m_bestCost is updated only if NUWLS reports a strictly better cost.
+
+Why the fix is correct:
+This preserves the intended optimization behavior without aliasing m_bestCost through an unrelated reference type. The algorithmic flow is unchanged: NUWLS still starts from the current best model and cost, and the wrapper keeps the improved cost only when it is actually better.
+
+Validation:
+The project rebuilds after the change. A later small optimization test should verify that NUWLS can still reduce m_bestCost when it finds an improved assignment.
 
 ---
 

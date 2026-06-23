@@ -386,13 +386,13 @@ namespace Topor
 
                 // IMMEDIATE GLOBAL UPDATE: Initialize directly from the global state
                 nuwls_solver.init(m_globalBestModel);
+                unsigned long long nuwlsCost = static_cast<unsigned long long>(m_bestCost);
 
-                // Safely cast m_bestCost to unsigned long long& so NuWLS modifies it continuously in-place
-                unsigned long long& refCost = reinterpret_cast<unsigned long long&>(m_bestCost);
+                nuwls_solver.RunLocalSearch(m_globalBestModel, nuwlsCost, 0);
 
-                // Pass m_globalBestModel directly so modifications happen globally in real-time
-                nuwls_solver.RunLocalSearch(m_globalBestModel, refCost, 0);
-
+                if (nuwlsCost < m_bestCost) {
+                    m_bestCost = static_cast<uint64_t>(nuwlsCost);
+                }
                 if (m_bestCost == 0) m_optimal = true;
 
                 nuwls_solver.free_memory();
