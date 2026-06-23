@@ -1178,7 +1178,10 @@ int main(int argc, char** argv)
 						if (isMaxsat && wmbOptions.enable && retValBasedOnLatestSolve == 10 && !optimal)
 						{
 							wmb::WMBOptions localWmbOptions = wmbOptions;
-							localWmbOptions.timeLimitSeconds = min(60, (int)remainingLocal);
+
+							if (remainingLocal > 0 && remainingLocal < localWmbOptions.timeLimitSeconds) {
+								localWmbOptions.timeLimitSeconds = (remainingLocal < 1.0) ? 1 : (int)remainingLocal;
+							}
 
 							DLOG(">> Handing off to Mrs Beaver. Current bound: " << bestCost);
 
@@ -1197,7 +1200,7 @@ int main(int argc, char** argv)
 
 							wmb::WMBResult wmbRes = wmb::RunMrsBeaver(
 								isWeighted, wr, assumpsPtr ? *assumpsPtr : std::vector<TLit>{},
-								bestCost, globalBestModel, wmbSolveCb, getValCb, wmbOptions, false
+								bestCost, globalBestModel, wmbSolveCb, getValCb, localWmbOptions, false
 							);
 
 							if (wmbRes.bestCost < bestCost) {
