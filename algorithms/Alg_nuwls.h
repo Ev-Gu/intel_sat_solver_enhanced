@@ -19,8 +19,9 @@
 #else
 #define DPRINTF(fmt, ...) // Compiles to literally nothing when DPRINT is off
 #endif
+#include "../TimeMeasure.h"
+inline CTimeMeasure g_GlobalTimer(false, 1);
 
-double MainWallTimePassed();
 namespace nuwls{
 
 using namespace std;
@@ -234,7 +235,7 @@ public:
     int max_non_improve_flip;
     int step;
 
-    int param_max_flips = 2000000000;
+    int param_max_flips = 20000000;
     int param_max_non_improve_flip = 10000000;
     int param_time_limit = 15;
 
@@ -415,7 +416,7 @@ inline void NUWLS::settings()
     local_soln_feasible = 1;
     NUWLS_TIME_LIMIT = param_time_limit;
     
-    max_flips = param_max_flips;
+    max_flips = param_max_non_improve_flip;
     max_non_improve_flip = param_max_non_improve_flip;
     //cout << "c max_flips = " << max_flips << "; max_non_improve_flip = " << max_non_improve_flip << endl;	
     
@@ -1748,15 +1749,14 @@ inline void NUWLS::RunLocalSearch(vector<int>& solver_model, unsigned long long&
                 local_soln_feasible = 1;
                 if (soft_unsat_weight < opt_unsat_weight)
                 {
-                    max_flips = step + max_non_improve_flip;
+                    max_flips = step + param_max_flips;
                     time_limit_for_ls = get_runtime() + param_time_limit;
 
                     best_soln_feasible = 1;
                     opt_unsat_weight = soft_unsat_weight;
                     current_cost = soft_unsat_weight;
 
-                    if (verbosity > 0) printf("c timeo %u %llu \n", (unsigned)ceil(::MainWallTimePassed()), current_cost);
-
+                    if (verbosity > 0) printf("c timeo %u %llu \n", (unsigned)ceil(g_GlobalTimer.WallTimePassedSinceStartOrReset()), current_cost);
 
                     // Save the better model back to the provided reference vector
                     for (int v = 1; v <= num_vars; ++v)
@@ -1795,14 +1795,14 @@ inline void NUWLS::RunLocalSearch(vector<int>& solver_model, unsigned long long&
                 local_soln_feasible = 1;
                 if (soft_unsat_weight < opt_unsat_weight)
                 {
-                    max_flips = step + max_non_improve_flip;
+                    max_flips = step + param_max_flips;
                     time_limit_for_ls = get_runtime() + param_time_limit;
 
                     best_soln_feasible = 1;
                     opt_unsat_weight = soft_unsat_weight;
                     current_cost = soft_unsat_weight;
 
-                    if (verbosity > 0) printf("c timeo %u %llu \n", (unsigned)ceil(::MainWallTimePassed()), current_cost);
+                    if (verbosity > 0) printf("c timeo %u %llu \n", (unsigned)ceil(g_GlobalTimer.WallTimePassedSinceStartOrReset()), current_cost);
 
                     // Save the better model back to the provided reference vector
                     for (int v = 1; v <= num_vars; ++v)
@@ -1833,7 +1833,7 @@ inline void NUWLS::RunLocalSearch(vector<int>& solver_model, unsigned long long&
             }
         }
     }
-    DPRINTF("NuWLS Exiting. Finished with best cost %d after %d flips.", opt_unsat_weight, step);
+    DPRINTF("NuWLS Exiting. Finished with best cost %d after %I64d flips.", opt_unsat_weight, max_flips);
 }
 
 }

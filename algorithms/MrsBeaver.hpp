@@ -21,6 +21,7 @@ namespace wmb
         uint64_t bestCost = 0;
         std::vector<int> bestModel01;
         bool skipCompletePhase = false; // True if gtThr exceeded
+        bool timedOut = false;          // NEW: True if the time limit was reached
     };
 
     WMBResult RunMrsBeaver(

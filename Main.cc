@@ -129,24 +129,19 @@ bool optimal = false;
 // NuWLS variables
 bool enableNuwls = true;
 bool isWeighted = false;
-unsigned long nuwlsMaxFlips = 2000000000;
+unsigned long nuwlsMaxFlips = 20000000;
 unsigned long nuwlsMaxNonImprove = 10000000;
 unsigned long nuwlsTimeLimit = 15;
 vector<vector<TLit>> rawHardClauses;
 vector<pair<uint64_t, vector<TLit>>> rawSoftClauses;
 long long lastWeight = -1;
 
-static std::chrono::steady_clock::time_point gSolverStartTime = std::chrono::steady_clock::now();
-
 // LSU variables
 bool enableLSU = true;
 int lsuTimeLimit = 120;
 int lsuVerbosity = 1;
 
-double MainWallTimePassed()
-{
-	return std::chrono::duration<double>(std::chrono::steady_clock::now() - gSolverStartTime).count();
-}
+#include "TimeMeasure.h"
 
 struct TRelaxVars
 {
@@ -185,7 +180,7 @@ int OnFinishingSolving(TTopor& topor, TToporReturnVal ret, bool printModel, bool
 				}
 			}
 			bestCost = cost;
-			std::cout << "c timeo " << (unsigned)std::ceil(MainWallTimePassed()) << " " << cost << std::endl;
+			std::cout << "c timeo " << (unsigned)std::ceil(g_GlobalTimer.WallTimePassedSinceStartOrReset()) << " " << cost << std::endl;
 			return 10;
 		}
 
@@ -290,7 +285,6 @@ int OnFinishingSolving(TTopor& topor, TToporReturnVal ret, bool printModel, bool
 
 int main(int argc, char** argv)
 {
-	gSolverStartTime = std::chrono::steady_clock::now();
 	if (argc == 1 || strcmp(argv[1], "-help") == 0 || strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)
 	{
 		cout << print_as_color <ansi_color_code::red>("c Usage:") << endl;
@@ -1062,218 +1056,280 @@ int main(int argc, char** argv)
 	TLit varsInPCnf = 0;
 	
 	auto Solve = [&](vector<TLit>* assumpsPtr)
-	{
-		vector<TLit> assumpsEmpty;
-		optimal = false;
-		bestCost = numeric_limits<unsigned long long>::max();
-		if (isMaxsat) printModel = false;
-		ret = ToporSolve(assumpsPtr ? *assumpsPtr : assumpsEmpty, nextSolveToInSecIsCpuTime, nextSolveConfThr);
-		nextSolveToInSecIsCpuTime = make_pair(numeric_limits<double>::max(), false);
-		nextSolveConfThr = numeric_limits<uint64_t>::max();
-
-		retValBasedOnLatestSolve = AllToporsNull() ? BadRetVal :
-			topor32 ? OnFinishingSolving(*topor32, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty) :
-			topor64 ? OnFinishingSolving(*topor64, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty) :
-			OnFinishingSolving(*toporc, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty);
-
-		if (verifyModel && retValBasedOnLatestSolve == 10)
 		{
-			if (VerifyModel(assumpsPtr) == BadRetVal) return BadRetVal;
-		}
+			int retValBasedOnLatestSolve = BadRetVal;
+			bool mem_out_occurred = false;
+			double solveStartTime = g_GlobalTimer.WallTimePassedSinceStartOrReset();
 
-		if (verifyUcore && retValBasedOnLatestSolve == 20)
-		{
-			vector<TLit> ucAssumps;
-			for (unsigned i = 0; i < assumpsPtr->size() && (*assumpsPtr)[i] != 0; ++i)
-			{
-				cout << "Assumption #" << to_string(i) << " -- " << (*assumpsPtr)[i] << " : " << ToporIsAssumptionRequired(i) << endl;
-				if (ToporIsAssumptionRequired(i))
-				{
-					ucAssumps.emplace_back((*assumpsPtr)[i]);
-				}
-			}
-			ret = ToporSolve(ucAssumps, nextSolveToInSecIsCpuTime, nextSolveConfThr);
-			retValBasedOnLatestSolve = AllToporsNull() ? BadRetVal :
-				topor32 ? OnFinishingSolving(*topor32, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty) :
-				topor64 ? OnFinishingSolving(*topor64, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty) :
-				OnFinishingSolving(*toporc, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty);
-			if (retValBasedOnLatestSolve != 20)
-			{
-				cout << "ret == " << to_string(retValBasedOnLatestSolve) << ": UNSAT CORE BUG!!!!!\n";
-				return BadRetVal;
-			}
-		}
-		if (isMaxsat && retValBasedOnLatestSolve == 10) {
-			globalBestModel.resize(currRelaxLit+1, 0);
-			if(bestCost==0){optimal=true;}
-			for (int i = 1; i <= currRelaxLit; ++i) {
-				globalBestModel[i] = (ToporGetLitValue(i) == TToporLitVal::VAL_SATISFIED) ? 1 : 0;
-			}
-		}
-		if (isMaxsat && enableNuwls && retValBasedOnLatestSolve == 10 && !optimal)
-		{
-			DLOG(">> Handing off to NuWLS. Topor's initial upper bound: " << bestCost);
-			NUWLS nuwls_solver;
-			nuwls_solver.problem_weighted = (int)isWeighted;
-			nuwls_solver.param_max_flips = nuwlsMaxFlips;
-			nuwls_solver.param_max_non_improve_flip = nuwlsMaxNonImprove;
-			nuwls_solver.param_time_limit = nuwlsTimeLimit;
+			do {
+				mem_out_occurred = false;
+				vector<TLit> assumpsEmpty;
+				optimal = false;
+				bestCost = numeric_limits<unsigned long long>::max();
+				if (isMaxsat) printModel = false;
 
-			int numVars = currRelaxLit - 1;
-			unsigned long long topClauseWeight = cumulativeWeight + 1;
+				ret = ToporSolve(assumpsPtr ? *assumpsPtr : assumpsEmpty, nextSolveToInSecIsCpuTime, nextSolveConfThr);
 
-			auto built = nuwls::SanitizeAndBuildNuwlsInstance(
-				numVars,
-				topClauseWeight,
-				rawHardClauses,
-				rawSoftClauses,
-				assumpsPtr);
-
-			nuwls_solver.build_instance(
-				built.numVars,
-				built.numClauses,
-				built.topClauseWeight,
-				built.clauseLit,
-				built.clauseLitCount,
-				built.clauseWeight);
-
-			nuwls_solver.settings();
-
-			nuwls_solver.init(globalBestModel);
-			unsigned long long current_cost = bestCost;
-
-			nuwls_solver.RunLocalSearch(globalBestModel, current_cost, 1);
-			if (current_cost < bestCost) {
-				bestCost = current_cost;
-				if (bestCost == 0) { optimal = true; }
-			}
-			nuwls_solver.free_memory();
-		}
-		bool skipLSU = false;
-
-		// --- MRS BEAVER INCOMPLETE PHASE ---
-		if (isMaxsat && wmbOptions.enable && retValBasedOnLatestSolve == 10 && !optimal)
-		{
-			DLOG(">> Handing off to Mrs Beaver. Current bound: " << bestCost);
-
-			// Re-wrap solve callback to inject WMB's conflict threshold
-			auto wmbSolveCb = [&](const std::vector<int32_t>& a) {
-				return ToporSolve(std::span<TLit>(const_cast<TLit*>(a.data()), a.size()),
-					std::make_pair(numeric_limits<double>::max(), false),
-					wmbOptions.conflictThreshold);
-				};
-			auto getValCb = [&](int32_t l) { return ToporGetLitValue(l); };
-
-			std::vector<lsu::TWeightedRelaxLit> wr;
-			for (const auto& rv : relaxVars) {
-				if (rv.Weight > 0 && rv.RelaxVar != 0)
-					wr.push_back(lsu::TWeightedRelaxLit{ (int32_t)rv.RelaxVar, (uint64_t)rv.Weight });
-			}
-
-			wmb::WMBResult wmbRes = wmb::RunMrsBeaver(
-				isWeighted, wr, assumpsPtr ? *assumpsPtr : std::vector<TLit>{},
-				bestCost, globalBestModel, wmbSolveCb, getValCb, wmbOptions, false
-			);
-
-			if (wmbRes.bestCost < bestCost) {
-				bestCost = wmbRes.bestCost;
-				globalBestModel = std::move(wmbRes.bestModel01);
-				if (bestCost == 0) optimal = true;
-			}
-
-			skipLSU = wmbRes.skipCompletePhase; // True if gtThr check failed
-		}
-
-		// --- LSU COMPLETE PHASE (with bad_alloc fallback) ---
-		if (isMaxsat && enableLSU && !skipLSU && retValBasedOnLatestSolve == 10 && !optimal)
-		{
-			DLOG(">> Handing off to LSU. Bound: " << bestCost);
-			lsu::TLinearSUOptions opt;
-			opt.Verbose = (lsuVerbosity != 0);
-			opt.TimeLimitSeconds = lsuTimeLimit;
-
-			auto addClauseCb = [&](const std::vector<int32_t>& c) {
-				ToporAddClause(std::span<TLit>(const_cast<TLit*>(c.data()), c.size()));
-				};
-			auto solveCb = [&](const std::vector<int32_t>& a) {
-				return ToporSolve(std::span<TLit>(const_cast<TLit*>(a.data()), a.size()));
-				};
-			auto getValCb = [&](int32_t l) { return ToporGetLitValue(l); };
-
-			lsu::TLinearSUResult lsuRes;
-
-			try {
-				if (!isWeighted) {
-					std::vector<int32_t> ur;
-					for (const auto& rv : relaxVars) {
-						if (rv.Weight > 0 && rv.RelaxVar != 0) ur.push_back((int32_t)rv.RelaxVar);
-					}
-					uint64_t commonWeight = (lastWeight > 0) ? (uint64_t)lastWeight : 1;
-					lsuRes = lsu::RunUnweightedLinearSatUnsat(
-						ur, assumpsPtr ? *assumpsPtr : std::vector<TLit>{}, (int32_t)currRelaxLit, (int32_t)maxLit,
-						bestCost, commonWeight, addClauseCb, solveCb, getValCb, opt);
+				if (ret == Topor::TToporReturnVal::RET_MEM_OUT && isMaxsat) {
+					mem_out_occurred = true;
 				}
 				else {
-					std::vector<lsu::TWeightedRelaxLit> wr;
-					for (const auto& rv : relaxVars) {
-						if (rv.Weight > 0 && rv.RelaxVar != 0)
-							wr.push_back(lsu::TWeightedRelaxLit{ (int32_t)rv.RelaxVar, (uint64_t)rv.Weight });
+					retValBasedOnLatestSolve = AllToporsNull() ? BadRetVal :
+						topor32 ? OnFinishingSolving(*topor32, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty) :
+						topor64 ? OnFinishingSolving(*topor64, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty) :
+						OnFinishingSolving(*toporc, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty);
+
+					if (verifyModel && retValBasedOnLatestSolve == 10)
+					{
+						if (VerifyModel(assumpsPtr) == BadRetVal) return BadRetVal;
 					}
-					lsuRes = lsu::RunWeightedLinearSatUnsat(
-						wr, assumpsPtr ? *assumpsPtr : std::vector<TLit>{}, (int32_t)currRelaxLit, (int32_t)maxLit,
-						bestCost, addClauseCb, solveCb, getValCb, opt);
+
+					if (verifyUcore && retValBasedOnLatestSolve == 20)
+					{
+						vector<TLit> ucAssumps;
+						for (unsigned i = 0; i < assumpsPtr->size() && (*assumpsPtr)[i] != 0; ++i)
+						{
+							cout << "Assumption #" << to_string(i) << " -- " << (*assumpsPtr)[i] << " : " << ToporIsAssumptionRequired(i) << endl;
+							if (ToporIsAssumptionRequired(i))
+							{
+								ucAssumps.emplace_back((*assumpsPtr)[i]);
+							}
+						}
+						ret = ToporSolve(ucAssumps, nextSolveToInSecIsCpuTime, nextSolveConfThr);
+						retValBasedOnLatestSolve = AllToporsNull() ? BadRetVal :
+							topor32 ? OnFinishingSolving(*topor32, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty) :
+							topor64 ? OnFinishingSolving(*topor64, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty) :
+							OnFinishingSolving(*toporc, ret, printModel, printUcore, isMaxsat, (TLit)maxLit, relaxVars, assumpsPtr ? *assumpsPtr : assumpsEmpty);
+						if (retValBasedOnLatestSolve != 20)
+						{
+							cout << "ret == " << to_string(retValBasedOnLatestSolve) << ": UNSAT CORE BUG!!!!!\n";
+							return BadRetVal;
+						}
+					}
+
+					if (isMaxsat && retValBasedOnLatestSolve == 10) {
+						globalBestModel.resize(currRelaxLit + 1, 0);
+						if (bestCost == 0) { optimal = true; }
+						for (int i = 1; i <= currRelaxLit; ++i) {
+							globalBestModel[i] = (ToporGetLitValue(i) == TToporLitVal::VAL_SATISFIED) ? 1 : 0;
+						}
+					}
+
+					if (isMaxsat && enableNuwls && retValBasedOnLatestSolve == 10 && !optimal)
+					{
+						DLOG(">> Handing off to NuWLS. Topor's initial upper bound: " << bestCost);
+						NUWLS nuwls_solver;
+						nuwls_solver.problem_weighted = (int)isWeighted;
+						nuwls_solver.param_max_flips = nuwlsMaxFlips;
+						nuwls_solver.param_max_non_improve_flip = nuwlsMaxNonImprove;
+						nuwls_solver.param_time_limit = nuwlsTimeLimit;
+
+						int numVars = currRelaxLit - 1;
+						unsigned long long topClauseWeight = cumulativeWeight + 1;
+
+						auto built = nuwls::SanitizeAndBuildNuwlsInstance(
+							numVars,
+							topClauseWeight,
+							rawHardClauses,
+							rawSoftClauses,
+							assumpsPtr);
+
+						nuwls_solver.build_instance(
+							built.numVars,
+							built.numClauses,
+							built.topClauseWeight,
+							built.clauseLit,
+							built.clauseLitCount,
+							built.clauseWeight);
+
+						nuwls_solver.settings();
+
+						nuwls_solver.init(globalBestModel);
+						unsigned long long current_cost = bestCost;
+
+						nuwls_solver.RunLocalSearch(globalBestModel, current_cost, 1);
+						if (current_cost < bestCost) {
+							bestCost = current_cost;
+							if (bestCost == 0) { optimal = true; }
+						}
+						nuwls_solver.free_memory();
+					}
+
+					bool skipLSU = false;
+					double elapsedGlobal;
+					double elapsedLocal;
+					double remainingLocal;
+
+					// --- MRS BEAVER INCOMPLETE PHASE ---
+					do {
+						skipLSU = false;
+
+						elapsedGlobal = g_GlobalTimer.WallTimePassedSinceStartOrReset();
+						elapsedLocal = elapsedGlobal - solveStartTime;
+
+						remainingLocal = max(0.0, nextSolveToInSecIsCpuTime.first - elapsedLocal);
+
+						if (remainingLocal <= 0) {
+							DLOG(">> Skipping Mrs Beaver and LSU. Reason: Absolute timeout reached.");
+							skipLSU = true;
+							break;
+						}
+
+						if (isMaxsat && wmbOptions.enable && retValBasedOnLatestSolve == 10 && !optimal)
+						{
+							wmb::WMBOptions localWmbOptions = wmbOptions;
+
+							if (remainingLocal > 0 && remainingLocal < localWmbOptions.timeLimitSeconds) {
+								localWmbOptions.timeLimitSeconds = (remainingLocal < 1.0) ? 1 : (int)remainingLocal;
+							}
+
+							DLOG(">> Handing off to Mrs Beaver. Current bound: " << bestCost);
+
+							auto wmbSolveCb = [&](const std::vector<int32_t>& a) {
+								return ToporSolve(std::span<TLit>(const_cast<TLit*>(a.data()), a.size()),
+									std::make_pair(numeric_limits<double>::max(), false),
+									wmbOptions.conflictThreshold);
+								};
+							auto getValCb = [&](int32_t l) { return ToporGetLitValue(l); };
+
+							std::vector<lsu::TWeightedRelaxLit> wr;
+							for (const auto& rv : relaxVars) {
+								if (rv.Weight > 0 && rv.RelaxVar != 0)
+									wr.push_back(lsu::TWeightedRelaxLit{ (int32_t)rv.RelaxVar, (uint64_t)rv.Weight });
+							}
+
+							wmb::WMBResult wmbRes = wmb::RunMrsBeaver(
+								isWeighted, wr, assumpsPtr ? *assumpsPtr : std::vector<TLit>{},
+								bestCost, globalBestModel, wmbSolveCb, getValCb, localWmbOptions, false
+							);
+
+							if (wmbRes.bestCost < bestCost) {
+								bestCost = wmbRes.bestCost;
+								globalBestModel = std::move(wmbRes.bestModel01);
+								if (bestCost == 0) optimal = true;
+							}
+
+							if (wmbRes.skipCompletePhase || wmbRes.timedOut) {
+								DLOG(">> Skipping LSU. Reason: " << (wmbRes.timedOut ? "WMB Timed Out" : "Threshold Exceeded"));
+								skipLSU = true;
+							}
+						}
+
+						// --- LSU COMPLETE PHASE ---
+						if (isMaxsat && enableLSU && !skipLSU && retValBasedOnLatestSolve == 10 && !optimal)
+						{
+							DLOG(">> Handing off to LSU. Bound: " << bestCost);
+							lsu::TLinearSUOptions opt;
+							opt.Verbose = (lsuVerbosity != 0);
+							opt.TimeLimitSeconds = lsuTimeLimit;
+
+
+							auto addClauseCb = [&](const std::vector<int32_t>& c) {
+								std::vector<int32_t> clauseWithAct = c;
+								ToporAddClause(std::span<TLit>(clauseWithAct.data(), clauseWithAct.size()));
+								};
+							auto solveCb = [&](const std::vector<int32_t>& a) {
+								std::vector<int32_t> fullAssumps = a;
+								return ToporSolve(std::span<TLit>(fullAssumps.data(), fullAssumps.size()));
+								};
+							auto getValCb = [&](int32_t l) { return ToporGetLitValue(l); };
+
+							lsu::TLinearSUResult lsuRes;
+
+							try {
+								if (!isWeighted) {
+									std::vector<int32_t> ur;
+									for (const auto& rv : relaxVars) {
+										if (rv.Weight > 0 && rv.RelaxVar != 0) ur.push_back((int32_t)rv.RelaxVar);
+									}
+									uint64_t commonWeight = (lastWeight > 0) ? (uint64_t)lastWeight : 1;
+									lsuRes = lsu::RunUnweightedLinearSatUnsat(
+										ur, assumpsPtr ? *assumpsPtr : std::vector<TLit>{}, (int32_t)currRelaxLit, (int32_t)maxLit,
+										bestCost, commonWeight, addClauseCb, solveCb, getValCb, opt);
+								}
+								else {
+									std::vector<lsu::TWeightedRelaxLit> wr;
+									for (const auto& rv : relaxVars) {
+										if (rv.Weight > 0 && rv.RelaxVar != 0)
+											wr.push_back(lsu::TWeightedRelaxLit{ (int32_t)rv.RelaxVar, (uint64_t)rv.Weight });
+									}
+									lsuRes = lsu::RunWeightedLinearSatUnsat(
+										wr, assumpsPtr ? *assumpsPtr : std::vector<TLit>{}, (int32_t)currRelaxLit, (int32_t)maxLit,
+										bestCost, addClauseCb, solveCb, getValCb, opt);
+								}
+
+								if (lsuRes.NextFreeVar > currRelaxLit) currRelaxLit = lsuRes.NextFreeVar;
+								if (lsuRes.Improved) {
+									bestCost = lsuRes.BestCost;
+									globalBestModel = std::move(lsuRes.BestModel01);
+								}
+
+								if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_MEM_OUT) {
+									mem_out_occurred = true;
+									break;
+								}
+								else if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_UNSAT || bestCost == 0) {
+									optimal = true;
+									retValBasedOnLatestSolve = 30;
+								}
+								else if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_TIMEOUT_LOCAL || lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_TIMEOUT_GLOBAL) {
+									cout << "c TIME LIMIT REACHED DURING LSU" << endl;
+								}
+
+							}
+							catch (const std::bad_alloc& e) {
+								mem_out_occurred = true;
+							}
+						}
+					} while (skipLSU && !optimal);
+
+					
 				}
 
-				if (lsuRes.NextFreeVar > currRelaxLit) currRelaxLit = lsuRes.NextFreeVar;
-				if (lsuRes.Improved) {
-					bestCost = lsuRes.BestCost;
-					globalBestModel = std::move(lsuRes.BestModel01);
+				// Wipe logic executes here if flagged during solve or LSU
+				if (mem_out_occurred) {
+					cout << "c [WARNING] Memory Out / Bad Alloc detected. Wiping Topor instance and rebuilding..." << endl;
+					delete topor32; topor32 = nullptr;
+					delete topor64; topor64 = nullptr;
+					delete toporc; toporc = nullptr;
+
+					if (type_indexing_and_compression == 2) toporc = new CTopor<int32_t, uint64_t, true>(varsInPCnf);
+					else if (type_indexing_and_compression == 1) topor64 = new CTopor<int32_t, uint64_t, false>(varsInPCnf);
+					else topor32 = new CTopor<int32_t, uint32_t, false>(varsInPCnf);
+
+					for (const auto& hc : rawHardClauses) {
+						ToporAddClause(std::span<TLit>(const_cast<TLit*>(hc.data()), hc.size()));
+					}
+
+					for (size_t i = 0; i < rawSoftClauses.size(); ++i) {
+						vector<TLit> c = rawSoftClauses[i].second;
+						c.pop_back();
+						TLit rLit = relaxVars[i].RelaxVar;
+						c.push_back(rLit);
+						c.push_back(0);
+						ToporCreateInternalLit(abs(rLit));
+						ToporFixPolarity(-abs(rLit), false);
+						ToporAddClause(std::span<TLit>(c.data(), c.size()));
+					}
 				}
 
-				if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_UNSAT || bestCost == 0) {
-					optimal = true;
-					retValBasedOnLatestSolve = 30;
+			} while (mem_out_occurred);
+
+			nextSolveToInSecIsCpuTime = make_pair(numeric_limits<double>::max(), false);
+			nextSolveConfThr = numeric_limits<uint64_t>::max();
+
+			if (isMaxsat && (retValBasedOnLatestSolve == 30 || retValBasedOnLatestSolve == 10)) {
+				cout << "o " << bestCost << endl;
+				cout << "v";
+				for (int i = 1; i <= (int)maxLit; ++i) {
+					cout << " " << globalBestModel[i];
 				}
-				else if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_TIMEOUT_LOCAL || lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_TIMEOUT_GLOBAL) {
-					cout << "c TIME LIMIT REACHED DURING LSU" << endl;
-				}
-
-			}
-			catch (const std::bad_alloc& e) {
-				// Fallback: Totalizer blew up memory. Resume Mrs. Beaver until timeout.
-				cout << "c [WARNING] memory allocation failed in LSU (totalizer too large). Falling back to Mrs. Beaver incomplete loop." << endl;
-
-				std::vector<lsu::TWeightedRelaxLit> wr;
-				for (const auto& rv : relaxVars) if (rv.Weight > 0 && rv.RelaxVar != 0) wr.push_back(lsu::TWeightedRelaxLit{ (int32_t)rv.RelaxVar, (uint64_t)rv.Weight });
-
-				auto wmbSolveCb = [&](const std::vector<int32_t>& a) {
-					return ToporSolve(std::span<TLit>(const_cast<TLit*>(a.data()), a.size()), std::make_pair(numeric_limits<double>::max(), false), wmbOptions.conflictThreshold);
-					};
-
-				wmb::WMBResult wmbRes = wmb::RunMrsBeaver(
-					isWeighted, wr, assumpsPtr ? *assumpsPtr : std::vector<TLit>{},
-					bestCost, globalBestModel, wmbSolveCb, getValCb, wmbOptions, true // force loop
-				);
-
-				if (wmbRes.bestCost < bestCost) {
-					bestCost = wmbRes.bestCost;
-					globalBestModel = std::move(wmbRes.bestModel01);
-					if (bestCost == 0) optimal = true;
-				}
-			}
-		}
-		if (isMaxsat && (retValBasedOnLatestSolve == 30 || retValBasedOnLatestSolve == 10) ){
-			cout << "o " << bestCost << endl;
-			cout << "v";
-			for (int i = 1; i <= (int)maxLit; ++i) {
-				cout << " " << globalBestModel[i];
+				cout << endl;
+				cout << "s" << (optimal ? " OPTIMUM FOUND" : " SATISFIABLE") << endl;
 			}
 			cout << endl;
-			cout << "s" << (optimal ? " OPTIMUM FOUND" : " SATISFIABLE") << endl;
-		}
-		cout << endl;
-		return retValBasedOnLatestSolve;
-	};
+			return retValBasedOnLatestSolve;
+		};
 
 	// First pass: determine maxLit for MaxSAT mode
 	if (isMaxsat)

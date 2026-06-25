@@ -5,10 +5,36 @@
 #include <cmath>
 #include <random>
 
-extern double MainWallTimePassed();
+#if defined(_WIN32)
+#include <windows.h>
+#elif defined(__linux__) || defined(__CYGWIN__)
+#include <unistd.h>
+#endif
+
+#include "../TimeMeasure.h"
+inline CTimeMeasure g_GlobalTimer(false, 1);
 
 namespace wmb
 {
+    namespace
+    {
+        uint64_t GetAvailableSystemMemoryBytes() {
+#if defined(_WIN32)
+            MEMORYSTATUSEX statex;
+            statex.dwLength = sizeof(statex);
+            if (GlobalMemoryStatusEx(&statex)) {
+                return statex.ullAvailPhys;
+            }
+#elif defined(__linux__) || defined(__CYGWIN__)
+            long pages = sysconf(_SC_AVPHYS_PAGES);
+            long page_size = sysconf(_SC_PAGE_SIZE);
+            if (pages > 0 && page_size > 0) {
+                return (uint64_t)pages * page_size;
+            }
+#endif
+            return 4ULL * 1024 * 1024 * 1024; // Fallback: Assume 4GB
+        }
+    }
     WMBResult RunMrsBeaver(
         bool isWeighted,
         std::vector<lsu::TWeightedRelaxLit> relaxLits,
@@ -60,11 +86,18 @@ namespace wmb
             iteration++;
 
             auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - start).count();
-            if (elapsed >= options.timeLimitSeconds) break;
+            if (elapsed >= options.timeLimitSeconds) {
+                res.timedOut = true;
+                break;
+            }
 
-            if (iteration > options.gtl && !res.skipCompletePhase) {
+            if (iteration > options.gtl) {
                 uint64_t expectedNodes = relaxLits.size() * res.bestCost;
-                if (expectedNodes < options.gtThr) {
+                uint64_t availMem = GetAvailableSystemMemoryBytes();
+                uint64_t estimatedMem = expectedNodes * 40ULL;
+                // If the tree is small enough AND fits in 80% of RAM, we are clear for Complete Phase.
+                if (expectedNodes < options.gtThr && estimatedMem <= availMem * 0.8) {
+                    res.skipCompletePhase = false;
                     break;
                 }
                 else {
@@ -75,34 +108,58 @@ namespace wmb
             std::vector<int32_t> currentAssumps = base;
             uint64_t currentPassCost = 0;
 
+            std::vector<int> candidateModel01 = res.bestModel01;
+
+
+
+            auto snapshotCandidate = [&]() {
+
+                for (int32_t v = 1; v < static_cast<int32_t>(candidateModel01.size()); ++v) {
+
+                    candidateModel01[v] = (getLitValue(v) == Topor::TToporLitVal::VAL_UNSATISFIED) ? 0 : 1;
+
+                }
+
+                };
+
+
+
             for (size_t i = 0; i < relaxLits.size(); ++i) {
-                if (elapsed >= options.timeLimitSeconds) break;
+
+                auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - start).count();
+                if (elapsed >= options.timeLimitSeconds) {
+                    res.timedOut = true;
+                    break;
+                }
+
 
                 int32_t targetLit = relaxLits[i].Lit;
                 uint64_t weight = relaxLits[i].Weight;
 
-                currentAssumps.push_back(-targetLit);
 
+                currentAssumps.push_back(-targetLit);
                 Topor::TToporReturnVal ret = solve(currentAssumps);
 
+
                 if (ret == Topor::TToporReturnVal::RET_SAT) {
+                    snapshotCandidate();
                     continue;
                 }
                 else {
                     currentAssumps.pop_back();
                     currentAssumps.push_back(targetLit);
                     currentPassCost += weight;
-                }
 
+                }
                 if (currentPassCost >= res.bestCost) break;
             }
 
             if (currentPassCost < res.bestCost) {
                 res.bestCost = currentPassCost;
-                for (int32_t v = 1; v < res.bestModel01.size(); ++v) {
-                    res.bestModel01[v] = (getLitValue(v) == Topor::TToporLitVal::VAL_UNSATISFIED) ? 0 : 1;
-                }
-                std::cout << "c timeo " << (unsigned)std::ceil(MainWallTimePassed()) << " " << res.bestCost << std::endl;
+                res.bestModel01 = std::move(candidateModel01); 
+
+                // std::cout << "o " << res.bestCost << std::endl;
+                std::cout << "c timeo " << (unsigned)std::ceil(g_GlobalTimer.WallTimePassedSinceStartOrReset()) << " " << res.bestCost << std::endl;
                 if (res.bestCost == 0) break;
             }
 
