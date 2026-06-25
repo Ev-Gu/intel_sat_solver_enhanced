@@ -28,9 +28,16 @@ mem_limit_for_one_solver_call = 32000
 
 # Attention MIP solver have all their own output format. You have to transform that to the new MSE format first
 solvers = {
+    "IntelTopor": {
+        # "./" is expanded by compare.py to the MaxSAT-Fuzzer directory, so this is portable.
+        "solver_call": "bash ./Scripts/intel_topor_maxsat.sh",
+        "input_format": "wcnf",
+        "type": "complete",
+        "short": "ITP",
+    },
     ## MSE 22 solver
     "MSE22-EvalMaxSAT": {
-        "solver_call": "/usr/local/scratch/paxiant/MaxSATFuzzer/MaxSATSolver/MSE22/EvalMaxSAT/bin/EvalMaxSAT_bin",
+        "solver_call": "./MaxSATSolver/MSE22/EvalMaxSAT/build/EvalMaxSAT_bin",
         "input_format": "wcnf",
         "type": "complete",
         "short": "EMS",
@@ -48,12 +55,12 @@ solvers = {
     #     "short": "MHC",
     # },
 
-    "MaxHSSCIP": {
-        "solver_call": "/usr/local/scratch/paxiant/MaxSATFuzzer/MaxSATSolver/MaxHSBinaries/maxhsScip -printSoln",
-        "input_format": "wcnf",
-        "type": "complete",
-        "short": "MHSS",
-    },
+    # "MaxHSSCIP": {
+    #     "solver_call": "/usr/local/scratch/paxiant/MaxSATFuzzer/MaxSATSolver/MaxHSBinaries/maxhsScip -printSoln",
+    #     "input_format": "wcnf",
+    #     "type": "complete",
+    #     "short": "MHSS",
+    # },
     # "MaxHSSCIPExact": {
     #     "solver_call": "/usr/local/scratch/paxiant/MaxSATFuzzer/MaxSATSolver/MaxHSBinaries/maxhsScipExact -printSoln",
     #     "input_format": "wcnf",
@@ -159,13 +166,14 @@ fuzzers = {
         "min_seed": 10**19,
     },
     # # The following two fuzzers have to be downloaded and are not part of the project!
-    # # But I've included the necessary scripts to reproduce the results anyhow!
-    "Manthey": {
-        "command": "Fuzzer/generateNorbertMantheyWCNF.sh",
-        "compare_extra": "--reWriteAllWCNFs",
-    },
-    "Soos": {
-        "command": "Fuzzer/generateMateSoosWCNF.sh"
-    },
+    # # They point at hardcoded /usr/local/data/... paths that do not exist here, so they
+    # # are disabled. Re-enable only after installing the external tools and fixing paths.
+    # "Manthey": {
+    #     "command": "Fuzzer/generateNorbertMantheyWCNF.sh",
+    #     "compare_extra": "--reWriteAllWCNFs",
+    # },
+    # "Soos": {
+    #     "command": "Fuzzer/generateMateSoosWCNF.sh"
+    # },
 }
 

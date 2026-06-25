@@ -23,4 +23,4 @@ fi
 seed="${seed:0:20}"
 #echo "../FlorianPollitt/fuzzer.py --path stdout --seed $seed #> $wcnfLocation/bugPollitt-$seed.new.wcnf"
 echo "c seed $seed"
-python $directory/FlorianPollitt/fuzzer.py --path stdout --seed "$seed" # > "$wcnfLocation/bugPollitt-$seed.new.wcnf"
+python3 $directory/FlorianPollitt/fuzzer.py --path stdout --seed "$seed" # > "$wcnfLocation/bugPollitt-$seed.new.wcnf"

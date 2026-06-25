@@ -21,6 +21,18 @@ cd kissat
 ./configure && make test
 ```
 
+### Build IntelTopor (our solver, static release)
+
+From the **repository root** (not this directory):
+
+```sh
+make rs EXEC=intel_sat_solver_enhanced
+```
+
+This produces `intel_sat_solver_enhanced_static`. The wrapper
+`Scripts/intel_topor_maxsat.sh` uses that binary (team standard: static release
+via `make rs`, not dynamically linked `make r` / `_release`).
+
 ### Configure `config.py` File with Your Solvers / Fuzzers
 In `config.py`, configure your solvers and fuzzers:
 - **Solvers**: Add at least one solvers to the `solvers` dictionary, but better two or more for being able to compare the best found objection value. Until now we found two solvers without any bugs for all sum of weights up to 2^64-1 EvalMaxSAT from the MSE22 (23 had bugs) and sat4j.

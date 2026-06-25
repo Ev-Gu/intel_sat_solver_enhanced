@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <cstdint>
+#include <cstdlib>
 #include <cmath>
 #include "algorithms/Alg_nuwls.h"
 
@@ -192,6 +193,19 @@ namespace Topor
             if (m_MaxVarSeen <= 0) return;
             if (m_AllHardClauses.empty() && m_SoftLit2Weight.empty()) return;
 
+            // Optional override of the NUWLS local-search time budget (seconds),
+            // useful for incremental usage where many solves happen in sequence.
+            //   TOPOR_NUWLS_TIME_LIMIT unset -> use the solver default
+            //   TOPOR_NUWLS_TIME_LIMIT=0     -> skip the local-search post-solve
+            //   TOPOR_NUWLS_TIME_LIMIT=N>0   -> cap each local search to N seconds
+            static int s_nuwlsTimeLimit = -2; // -2 = not yet read
+            if (s_nuwlsTimeLimit == -2)
+            {
+                const char* e = getenv("TOPOR_NUWLS_TIME_LIMIT");
+                s_nuwlsTimeLimit = e ? atoi(e) : -1; // -1 = solver default
+            }
+            if (s_nuwlsTimeLimit == 0) return;
+
             vector<pair<uint64_t, vector<int>>> softClauses;
             softClauses.reserve(m_SoftLit2Weight.size());
 
@@ -216,7 +230,7 @@ namespace Topor
 
             if (built.numClauses > 0)
             {
-                NUWLS nuwls_solver;
+                nuwls::NUWLS nuwls_solver;
                 nuwls_solver.problem_weighted = isWeighted ? 1 : 0;
                 nuwls_solver.build_instance(
                     built.numVars,
@@ -226,6 +240,7 @@ namespace Topor
                     built.clauseLitCount,
                     built.clauseWeight);
                 nuwls_solver.settings();
+                if (s_nuwlsTimeLimit > 0) nuwls_solver.param_time_limit = s_nuwlsTimeLimit;
 
                 nuwls_solver.init(m_Result.assignment);
 
@@ -238,6 +253,16 @@ namespace Topor
                 }
 
                 nuwls_solver.free_memory();
+
+                // NUWLS::build_instance() takes ownership of these arrays
+                // (clause_lit / clause_lit_count / org_clause_weight alias the
+                // ones built below) and frees them in free_memory(). Null them
+                // out here so the FreeNuwlsBuiltInstance() call does not free
+                // the same memory a second time (double free).
+                built.clauseLit = nullptr;
+                built.clauseLitCount = nullptr;
+                built.clauseWeight = nullptr;
+                built.numClauses = 0;
             }
 
             nuwls::FreeNuwlsBuiltInstance(built);
