@@ -36,7 +36,7 @@ void print_solution(int status, void* solver, int32_t print_max_var) {
 
         std::cout << "v";
         for (int32_t i = 1; i <= print_max_var; ++i) {
-            int32_t val = ipamir_val_lit(solver, i);
+            int32_t val = ipamir_val_lit(solver, i)>0 ? 1 : 0;
             std::cout << " " << val;
         }
         std::cout << "\n";
