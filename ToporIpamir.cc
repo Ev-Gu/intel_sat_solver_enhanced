@@ -140,6 +140,7 @@ namespace Topor
 
             m_CurrTerminateFunc = terminate;
             m_CurrTerminateState = state;
+            terminate_now = m_CurrTerminateFunc(m_CurrTerminateState)
 
             auto StopTopor = [&]()
                 {
@@ -219,8 +220,6 @@ namespace Topor
                 }
             }
             do {
-                skipLSU = false;
-
                 elapsedGlobal = g_GlobalTimer.WallTimePassedSinceStartOrReset();
                 elapsedLocal = elapsedGlobal - solveStartTime;
 
@@ -231,7 +230,7 @@ namespace Topor
                     break;
                 }
 
-                if (wmbOptions.enable && !m_optimal)
+                if (wmbOptions.enable && !m_optimal && !terminate_now)
                 {
                     wmb::WMBOptions localWmbOptions = wmbOptions;
                     if (m_lsuTimeLimit > 0) {
@@ -276,7 +275,7 @@ namespace Topor
                 }
 
                 // --- LSU COMPLETE PHASE ---
-                if (m_enableLSU && !skipLSU && !m_optimal)
+                if (m_enableLSU && !skipLSU && !m_optimal && !terminate_now)
                 {
                     lsu::TLinearSUOptions opt;
                     opt.Verbose = (m_lsuVerbosity != 0);
@@ -343,10 +342,12 @@ namespace Topor
                         }
                     }
                     catch (const std::bad_alloc& e) {
-                        break;
+                        skipLSU = true;
+                        continue;
                     }
                 }
-            } while (skipLSU && !m_optimal);
+                skipLSU = false;
+            } while (skipLSU && !m_optimal && !terminate_now);
         }
 
         void RunNuwlsPostSolve(const vector<int>& assumpsForPost)
@@ -365,7 +366,7 @@ namespace Topor
                 const char* e = getenv("TOPOR_NUWLS_TIME_LIMIT");
                 s_nuwlsTimeLimit = e ? atoi(e) : -1; // -1 = solver default
             }
-            if (s_nuwlsTimeLimit == 0) return;
+            if (s_nuwlsTimeLimit == 0 || terminate_now) return;
 
             vector<pair<uint64_t, vector<int>>> softClauses;
             softClauses.reserve(m_SoftLit2Weight.size());
@@ -440,6 +441,7 @@ namespace Topor
 
         void* m_CurrTerminateState = nullptr;
         int (*m_CurrTerminateFunc)(void* state) = nullptr;
+        bool terminate_now = false;
 
         uint64_t m_bestCost = std::numeric_limits<uint64_t>::max();
         bool m_optimal = false;

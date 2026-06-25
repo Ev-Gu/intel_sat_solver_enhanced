@@ -1057,7 +1057,7 @@ int main(int argc, char** argv)
 	
 	auto Solve = [&](vector<TLit>* assumpsPtr)
 		{
-			int retValBasedOnLatestSolve = BadRetVal;
+			retValBasedOnLatestSolve = BadRetVal;
 			bool mem_out_occurred = false;
 			double solveStartTime = g_GlobalTimer.WallTimePassedSinceStartOrReset();
 
@@ -2034,6 +2034,6 @@ int main(int argc, char** argv)
 		}
 
 	}
-
+	cout << retValBasedOnLatestSolve << endl;
 	return retValBasedOnLatestSolve;
 }
