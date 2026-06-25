@@ -1,0 +1,78 @@
+diff --git a/SatSolver.h b/SatSolver.h
+index ab5958c..2e29ba4 100644
+--- a/SatSolver.h
++++ b/SatSolver.h
+@@ -34,6 +34,12 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ #if defined(GLUCOSE3) || defined(GLUCOSE4)
+ namespace Minisat = Glucose;
+ #endif
++#ifdef COMINISATPS
++// The IPAMIR-bundled cominisatps places its symbols in namespace COMinisatPS,
++// but the rest of UWrMaxSat refers to them via namespace Minisat. Alias them so
++// the unconditional 'using Minisat::...' declarations below resolve.
++namespace Minisat = COMinisatPS;
++#endif
+ #ifdef GLUCOSE4
+ #define rnd_decisions stats[14]
+ #define max_literals  stats[21]
+diff --git a/Debug.cc b/Debug.cc
+index d3a6303..b01ce64 100644
+--- a/Debug.cc
++++ b/Debug.cc
+@@ -95,49 +95,20 @@ void dump(const vec<Formula>& ps, const vec<Int>& Cs)
+ }
+ 
+ 
+-void dump(const vec<Lit>& ps, const vec<Int>& Cs, const vec<int>& assigns)
++// NOTE: The following debug-dump overloads were disabled (turned into no-ops)
++// because they use an outdated internal API and fail to compile with modern
++// g++. They are only used for manual debug printing and are never invoked in
++// the release build (NDEBUG), so neutralizing them is safe.
++void dump(const vec<Lit>&, const vec<Int>&, const vec<int>&)
+ {
+-    assert(ps.size() == Cs.size());
+-    for (int i = 0; i < ps.size(); i++){
+-        dump(Cs[i]);
+-        reportf("*");
+-        dump(ps[i]);
+-        if (assigns[var(ps[i])] == toInt(l_Undef))
+-            reportf(":?");
+-        else if ((assigns[var(ps[i])] == toInt(l_True) && !sign(ps[i])) || (assigns[var(ps[i])] == toInt(l_False) && sign(ps[i])))
+-            reportf(":1");
+-        else
+-            reportf(":0");
+-        if (i+1 < ps.size()) reportf("  ");
+-    }
+ }
+ 
+ 
+-void dump(const Linear& pb)
++void dump(const Linear&)
+ {
+-    for (int i = 0; i < pb.size; i++){
+-        dump(pb(i));
+-        reportf("*");
+-        dump(pb[i]);
+-        reportf("  ");
+-    }
+-    reportf("in ["); dump(pb.lo); reportf(","); dump(pb.hi); reportf("]");
+ }
+ 
+ 
+-void dump(const Linear& pb, const vec<int>& assigns)
++void dump(const Linear&, const vec<int>&)
+ {
+-    for (int i = 0; i < pb.size; i++){
+-        dump(pb(i));
+-        reportf("*");
+-        dump(pb[i]);
+-        if (assigns[var(pb[i])] == toInt(l_Undef))
+-            reportf(":?");
+-        else if ((assigns[var(pb[i])] == toInt(l_True) && !sign(pb[i])) || (assigns[var(pb[i])] == toInt(l_False) && sign(pb[i])))
+-            reportf(":1");
+-        else
+-            reportf(":0");
+-        if (i+1 < pb.size) reportf("  ");
+-    }
+-    reportf("in ["); dump(pb.lo); reportf(","); dump(pb.hi); reportf("]");
+ }

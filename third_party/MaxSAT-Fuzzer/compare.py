@@ -270,13 +270,15 @@ def SolverCall(solver):
     #               solver["solver_call"] + " " + solver["input_file"]
 
     command_str = solver["solver_call"] + " " + solver["input_file"]
-    command = ["/usr/bin/time", "-q", "-f", "c mempeak %M"] + command_str.split()
+    # macOS /usr/bin/time does not support -q/-f; GNU time is installed as "gtime" (brew install gnu-time).
+    time_cmd = "gtime" if sys.platform == "darwin" else "/usr/bin/time"
+    command = [time_cmd, "-q", "-f", "c mempeak %M"] + command_str.split()
     killed = False
     solver_start_time = time.time()
     # print(command)
 
     with subprocess.Popen(
-        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, preexec_fn=set_memory_limit
+        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, errors="replace", preexec_fn=set_memory_limit
     ) as process:
         active_processes.append(process)
         try:

@@ -1769,6 +1769,12 @@ inline void NUWLS::RunLocalSearch(vector<int>& solver_model, unsigned long long&
                 }
             }
 
+            // All clauses satisfied (cost 0): nothing left to improve. Break
+            // here, otherwise pick_var() would compute rand() % 0 on the empty
+            // unsat stacks and raise SIGFPE.
+            if (hardunsat_stack_fill_pointer == 0 && softunsat_stack_fill_pointer == 0)
+                break;
+
             int flipvar = pick_var();
             // Consolidated the flip logic branches
             flip2(flipvar);
@@ -1808,6 +1814,12 @@ inline void NUWLS::RunLocalSearch(vector<int>& solver_model, unsigned long long&
                     if (opt_unsat_weight == 0) break;
                 }
             }
+
+            // All clauses satisfied (cost 0): nothing left to improve. Break
+            // here, otherwise pick_var() would compute rand() % 0 on the empty
+            // unsat stacks and raise SIGFPE.
+            if (hardunsat_stack_fill_pointer == 0 && softunsat_stack_fill_pointer == 0)
+                break;
 
             int flipvar = pick_var();
             // Consolidated the flip logic branches

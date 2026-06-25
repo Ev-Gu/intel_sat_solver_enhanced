@@ -51,8 +51,12 @@ uint64_t pick_uint64(uint64_t l, uint64_t r) {
   assert(l <= r);
   const uint64_t delta = 1 + r - l;
   uint64_t rnd = RAND(), scaled;
+#ifdef __SIZEOF_FLOAT128__
   const __float128 fraction = rnd / (__float128)18446744073709551615ul;
-  // const long double fraction = rnd / (long double)18446744073709551615ul;
+#else
+  // __float128 is unavailable (e.g. clang on Apple Silicon); long double is sufficient here.
+  const long double fraction = rnd / (long double)18446744073709551615ul;
+#endif
   scaled = delta * fraction;
   const uint64_t res = scaled + l;
   assert(l <= res);
@@ -430,12 +434,15 @@ int main(int argc, char **argv) {
           o = nunused[layer] - 1;
           p = pick(0, o);
           lit = unused[layer][p];
-          if (mark[abs(lit)])
-            k--;
-            continue;
+          // Consume this pool entry first (matches Armin Biere's original cnfuzz),
+          // so a duplicate variable can't be picked again and loop forever.
           nunused[layer] = o;
           if (p != o)
             unused[layer][p] = unused[layer][o];
+          if (mark[abs(lit)]) {
+            k--;
+            continue;
+          }
         } else {
           lit = pick(low[layer], high[layer]);
           if (mark[lit])
