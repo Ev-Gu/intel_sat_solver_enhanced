@@ -25,3 +25,15 @@ Run any script without parameters to see its usage instructions.
 
 - **`fuzz_and_verify_parallel.csh`**  
   Fuzzes incremental instances and verifies IntelSAT in parallel.  
+
+---
+
+## MaxSAT Testing (separate from SAT)
+
+- **`build_maxsat_tools.sh`** — build solver, IPAMIR loaders, wcnfuzz, EvalMaxSAT  
+- **`fuzz_maxsat.sh`** — fuzzer 1: batch WCNF vs EvalMaxSAT  
+- **`fuzz_maxsat_ipamir.sh`** — fuzzer 2: WCNF via IPAMIR, ours vs UWrMaxSat  
+- **`run_maxsat_regression.sh`** — MSE regression suite  
+- **`compare_wcnf_batch_vs_ipamir.sh`** — batch vs IPAMIR on our solver  
+
+See `FUZZING.md`.

@@ -16,3 +16,14 @@ depend.mk
 # Keep only the setup guide; everything else is ignored.
 /ipamir_test/*
 !/ipamir_test/README.md
+
+tools/bin/
+tools/Logs/
+third_party/MaxSAT-Fuzzer/MaxSATSolver/
+third_party/MaxSAT-Fuzzer/kissat/
+third_party/MaxSAT-Fuzzer/*__FaultLogs*
+third_party/MaxSAT-Fuzzer/__pycache__/
+third_party/MaxSAT-Fuzzer/Logs/
+third_party/ipamir/
+third_party/IncrementalFuzzer/Logs/
+third_party/IncrementalFuzzer/bin/

@@ -1,76 +1,55 @@
-# Differential Fuzzing Setup
+# Differential MaxSAT Testing
 
-Two fuzzers validate IntelTopor / IntelSatSolver on this branch.
+MaxSAT testing is **separate** from SAT (see `scripts/README.md`).
 
-## Build the solver (once)
+## Two fuzzers
 
-From the **repository root**:
+| | Fuzzer 1 | Fuzzer 2 |
+|---|----------|----------|
+| **Script** | `./scripts/fuzz_maxsat.sh` | `./scripts/fuzz_maxsat_ipamir.sh` |
+| **Input** | random `.wcnf` | random `.wcnf` (same generator) |
+| **Path** | batch (`-M 1`) | IPAMIR (Yevgeny WCNF loader) |
+| **Compare** | Ours vs **EvalMaxSAT** | Ours vs **UWrMaxSat** |
 
-```bash
-# Static release executable — used by the non-incremental WCNF fuzzer
-make rs EXEC=intel_sat_solver_enhanced
+Extra check (not a fuzzer): `./scripts/compare_wcnf_batch_vs_ipamir.sh` — batch vs IPAMIR on **our** solver only.
 
-# Static release library — used by the incremental IPAMIR fuzzer (via build.sh)
-make libr LIB=IntelSatSolver
-```
-
-Team standard: **`make rs`** (static release), not `make r` (dynamic `_release`).
-
----
-
-## Fuzzer 1 — Non-incremental (`.wcnf`)
-
-**Directory:** `third_party/MaxSAT-Fuzzer/`
-
-| File | Role |
-|------|------|
-| `runwcnfuzz.py` | Main fuzzer loop |
-| `compare.py` | Runs two solvers, compares output |
-| `config.py` | Solver paths (IntelTopor + EvalMaxSAT) |
-| `Scripts/intel_topor_maxsat.sh` | Runs `intel_sat_solver_enhanced_static` on WCNF |
-| `Scripts/install_evalmaxsat.sh` | Clone + build EvalMaxSAT 2022 reference |
-| `Fuzzer/wcnfuzz/wcnfuzz.c` | Random WCNF generator |
-
-**Setup:**
+## Build (once)
 
 ```bash
-bash third_party/MaxSAT-Fuzzer/Scripts/install_evalmaxsat.sh
-cd third_party/MaxSAT-Fuzzer/Fuzzer/wcnfuzz && make
+./scripts/build_maxsat_tools.sh
 ```
 
-**Run:**
+## Run
 
 ```bash
-cd third_party/MaxSAT-Fuzzer
-./runwcnfuzz.py -t 4 --timeout 30 --upperBound 4611686018427387904
+# Fuzzer 1 — batch WCNF
+./scripts/fuzz_maxsat.sh
+
+# Fuzzer 2 — IPAMIR WCNF (ours vs UWrMaxSat)
+PYTHONUNBUFFERED=1 ./scripts/fuzz_maxsat_ipamir.sh -n 10 --nuwls-time 1
+
+# Batch vs IPAMIR consistency (our solver)
+./scripts/compare_wcnf_batch_vs_ipamir.sh maxsat_regression_instances/*.wcnf
+
+# MSE regression (after ./install in MaxSATRegressionSuite)
+./scripts/run_maxsat_regression.sh
 ```
 
----
+## Layout (mirrors SAT)
 
-## Fuzzer 2 — Incremental (IPAMIR)
+| SAT | MaxSAT |
+|-----|--------|
+| `scripts/fuzz_and_verify.csh` | `scripts/fuzz_maxsat.sh` + `scripts/fuzz_maxsat_ipamir.sh` |
+| `scripts/run_and_verify_intel_sat_on_regression.csh` | `scripts/run_maxsat_regression.sh` |
+| `regression_instances/*.cnf` | `maxsat_regression_instances/` + `MaxSATRegressionSuite/` |
+| `third_party/cnfuzzdd2013/` | `third_party/MaxSAT-Fuzzer/` |
+| — | `tools/ipamir_wcnf_*.cpp` (Yevgeny WCNF→IPAMIR loader) |
 
-**Directory:** `third_party/IncrementalFuzzer/`
+## Components
 
-| File | Role |
-|------|------|
-| `incr_fuzz.py` | Generates scenarios, compares our solver vs UWrMaxSat |
-| `incr_driver.cc` | Replays a scenario through any linked IPAMIR library |
-| `build.sh` | Builds static IPAMIR libs + `bin/driver_ours` / `driver_uwrmaxsat` |
-| `Scripts/install_ipamir.sh` | Clone IPAMIR repo + apply UWrMaxSat compile patches |
-| `patches/uwrmaxsat-build.patch` | Fixes for UWrMaxSat + cominisatps on modern g++ |
+- **`third_party/MaxSAT-Fuzzer/`** — WCNF generator + fuzzer 1
+- **`tools/wcnf_ipamir_fuzz.py`** — fuzzer 2 loop
+- **`tools/bin/ipamir_wcnf_ours`** / **`ipamir_wcnf_uwrmaxsat`** — Yevgeny loader × two libraries
+- **`third_party/MaxSATRegressionSuite/`** — MSE regression
 
-**Setup:**
-
-```bash
-bash third_party/IncrementalFuzzer/Scripts/install_ipamir.sh
-cd third_party/IncrementalFuzzer && ./build.sh
-```
-
-**Run:**
-
-```bash
-cd third_party/IncrementalFuzzer
-./incr_fuzz.py
-```
-
-Bug scenarios are saved under `Logs/<run>/FaultyScenarios/`.
+Bug WCNFs from fuzzer 2: `tools/Logs/<run>/FaultyWCNFs/`
