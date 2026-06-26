@@ -34,6 +34,7 @@ Run any script without parameters to see its usage instructions.
 - **`fuzz_maxsat.sh`** — fuzzer 1: batch WCNF vs EvalMaxSAT  
 - **`fuzz_maxsat_ipamir.sh`** — fuzzer 2: WCNF via IPAMIR, ours vs UWrMaxSat  
 - **`run_maxsat_regression.sh`** — MSE regression suite  
+- **`run_maxsat_performance.sh`** — IntelTopor vs EvalMaxSAT / IPAMIR on MSE regression subset  
 - **`compare_wcnf_batch_vs_ipamir.sh`** — batch vs IPAMIR on our solver  
 
 See `FUZZING.md`.
