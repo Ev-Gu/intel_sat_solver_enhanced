@@ -235,7 +235,7 @@ public:
     int max_non_improve_flip;
     int step;
 
-    int param_max_flips = 20000000;
+    int param_max_flips = 200000000;
     int param_max_non_improve_flip = 10000000;
     int param_time_limit = 15;
 
@@ -413,32 +413,30 @@ inline long long NUWLS::floorToPowerOfTen(double x)
 
 inline void NUWLS::settings()
 {
+    // Parameter presets aligned with NuWLS-c (MSE2022 TT-Open-WBO-Inc hybrid); see NuWLS-c/code/algorithms/Alg_nuwls.h
     local_soln_feasible = 1;
     NUWLS_TIME_LIMIT = param_time_limit;
-    
-    max_flips = param_max_non_improve_flip;
+
+    max_flips = param_max_flips;
     max_non_improve_flip = param_max_non_improve_flip;
-    //cout << "c max_flips = " << max_flips << "; max_non_improve_flip = " << max_non_improve_flip << endl;	
-    
+
     if (1 == problem_weighted)
     {
-        //cout << "c problem weighted = 1" << endl;
         large_clause_count_threshold = 0;
         soft_large_clause_count_threshold = 0;
 
-        if (num_hclauses > 0) // weighted partial
+        if (num_hclauses > 0) // weighted partial (WPMS)
         {
-            NUWLS_TIME_LIMIT = 20;
-            h_inc = 5;
-            s_inc = 6;
-            // coe_soft_clause_weight = 1000;
+            coe_soft_clause_weight = 1000;
             hd_count_threshold = 50;
-            rdprob = 0.036;
-            rwprob = 0.48;
-            soft_smooth_probability = 2E-6;
-            smooth_probability = 2E-5;
+            rdprob = 0.036f;
+            rwprob = 0.48f;
+            soft_smooth_probability = 2E-6f;
+            smooth_probability = 2E-5f;
+            h_inc = 10;
+            s_inc = 3;
             softclause_weight_threshold = 50;
-            coe_tuned_weight = 1.0 / (double(top_clause_weight - 1) / (double)(num_sclauses));
+            coe_tuned_weight = (double)coe_soft_clause_weight / (double)(top_clause_weight - 1) * (double)num_sclauses;
             for (int c = 0; c < num_clauses; c++)
             {
                 if (org_clause_weight[c] != top_clause_weight)
@@ -446,55 +444,51 @@ inline void NUWLS::settings()
                     tuned_org_clause_weight[c] = (double)org_clause_weight[c] * coe_tuned_weight;
                 }
             }
+            if (num_sclauses > 0 && total_soft_length / num_sclauses > 100)
+            {
+                h_inc = 300;
+                s_inc = 100;
+            }
         }
         else // weighted not partial
         {
-            softclause_weight_threshold = 10;
-            s_inc = 3.0;
-            NUWLS_TIME_LIMIT = 25;
-            soft_smooth_probability = 1E-3;
+            softclause_weight_threshold = 0;
+            s_inc = 1.0;
+            soft_smooth_probability = 1E-3f;
             hd_count_threshold = 22;
-            rdprob = 0.036;
-            rwprob = 0.48;
-
-            coe_soft_clause_weight = 1000;
-            coe_tuned_weight = ((double)coe_soft_clause_weight) / ((double(top_clause_weight - 1) / (double)(num_sclauses)));
-            // cout << "c coe_tuned_weight: " << coe_tuned_weight << endl;
+            rdprob = 0.036f;
+            rwprob = 0.48f;
             for (int c = 0; c < num_clauses; c++)
             {
-                tuned_org_clause_weight[c] = org_clause_weight[c] * coe_tuned_weight;
+                tuned_org_clause_weight[c] = org_clause_weight[c];
             }
         }
     }
     else
     {
-        //cout << "c problem weighted = 0" << endl;
-
         large_clause_count_threshold = 0;
         soft_large_clause_count_threshold = 0;
 
         h_inc = 1;
         s_inc = 1;
 
-        if (num_hclauses > 0) // unweighted partial
+        if (num_hclauses > 0) // unweighted partial (PMS)
         {
             hd_count_threshold = 50;
-            coe_soft_clause_weight = 1;
-            rdprob = 0.079;
-            rwprob = 0.087;
-            soft_smooth_probability = 1E-5;
+            coe_soft_clause_weight = 10;
+            rdprob = 0.079f;
+            rwprob = 0.087f;
+            soft_smooth_probability = 1E-5f;
             softclause_weight_threshold = 500;
-            smooth_probability = 1E-4;
+            smooth_probability = 1E-4f;
         }
         else // unweighted not partial
         {
-            s_inc = 1;
-            NUWLS_TIME_LIMIT = 15;
             hd_count_threshold = 94;
             coe_soft_clause_weight = 397;
-            rdprob = 0.007;
-            rwprob = 0.047;
-            soft_smooth_probability = 0.002;
+            rdprob = 0.007f;
+            rwprob = 0.047f;
+            soft_smooth_probability = 0.002f;
             softclause_weight_threshold = 550;
         }
     }
@@ -704,7 +698,7 @@ inline void NUWLS::build_instance(int numVars, int numClauses, unsigned long lon
         if (org_clause_weight[i] != top_clause_weight)
         {
             total_soft_weight += org_clause_weight[i];
-            // total_soft_length += clause_lit_count[i];
+            total_soft_length += clause_lit_count[i];
             soft_clause_num_index[num_sclauses++] = i;
         }
         else

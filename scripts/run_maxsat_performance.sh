@@ -5,6 +5,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SUITE="$ROOT/third_party/MaxSATRegressionSuite"
+mkdir -p "$ROOT/results"
 
 usage() {
   echo "Usage: $0 [--max-instances N] [--timeout SEC] [--csv FILE]"

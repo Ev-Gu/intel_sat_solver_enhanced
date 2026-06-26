@@ -24,7 +24,7 @@ Organized tracker from Yevgeny + Yam conversation.
 | Task | Owner | Notes |
 |------|-------|-------|
 | MSE2022 incremental *apps* (IPAMIR repo) | You + Yevgeny | Build `app/*` with `IPAMIRSOLVER=IntelSatSolver` |
-| NUWLS params like tt-open-wbo-inc | Yevgeny | Reduce suboptimality under time budget |
+| NUWLS params like tt-open-wbo-inc | ✅ | Aligned with NuWLS-c (MSE2022 hybrid) in `Alg_nuwls.h` |
 | Longer fuzzer runs (overnight) | You | Fuzzer 1 + 2 |
 | Full regression suite (148+ instances) | You | `./scripts/run_maxsat_regression.sh` |
 

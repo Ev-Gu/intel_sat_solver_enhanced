@@ -129,7 +129,7 @@ bool optimal = false;
 // NuWLS variables
 bool enableNuwls = true;
 bool isWeighted = false;
-unsigned long nuwlsMaxFlips = 20000000;
+unsigned long nuwlsMaxFlips = 200000000;
 unsigned long nuwlsMaxNonImprove = 10000000;
 unsigned long nuwlsTimeLimit = 15;
 vector<vector<TLit>> rawHardClauses;

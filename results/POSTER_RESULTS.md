@@ -21,27 +21,24 @@ Differential fuzzer compares **IntelTopor IPAMIR** vs **UWrMaxSat 1.4 IPAMIR** o
 
 ---
 
-## 2. Performance (MSE regression subset)
+## 2. Performance — ref-first benchmark (Yam method, **final run**)
 
-**Benchmark:** 40 instances from `MSE22Unique.csv` (MSE22 regression suite, certified optimums where noted)  
-**Timeout:** 30 s per solver invocation  
-**Script:** `./scripts/run_maxsat_performance.sh -n 40 -t 30`
+**Benchmark:** `MSE22Unique.csv` — only instances **EvalMaxSAT solved within 60s** (141 of 148)  
+**Timeout:** 60 s per solver invocation  
+**Script:** `./scripts/run_mse2022_bench.sh ref-first-wcnf --timeout 60`  
+**Full report:** `results/MSE2022_REF_FIRST_WCNF.md`
 
-### Batch (non-incremental, `-M 1`)
+| Path | Solved | Matches certified optimum | Avg time (solved) |
+|------|--------|---------------------------|-------------------|
+| **IntelTopor batch (-M 1)** | **78 / 141** | **78 / 141** | 1.27 s |
+| **IntelTopor IPAMIR** | **140 / 141** | **99 / 141** | 26.54 s |
+| EvalMaxSAT 2022 (filter) | 141 / 141 | — | ~0 s |
 
-| Solver | Solved (SAT/optimum) | Matches certified optimum | Avg time when solved |
-|--------|----------------------|---------------------------|----------------------|
-| **IntelTopor** | 26 / 40 | 26 / 40 | 2.04 s |
-| EvalMaxSAT 2022 | 38 / 40 | — | 0.01 s |
+**Takeaway:** On the fair subset (what the reference solved), **IPAMIR solves far more instances than batch** (140 vs 78) within 60s; batch is faster when it succeeds. Official MSE uses 7200s per instance — this run uses 60s for poster/dev (per Yam).
 
-### IPAMIR (WCNF loader, single load + solve)
+### Earlier smoke (40 instances, 30s — superseded for poster)
 
-| Solver | Solved | Matches certified optimum | Avg time when solved |
-|--------|--------|---------------------------|----------------------|
-| **IntelTopor IPAMIR** | 38 / 40 | **31 / 40** | 10.35 s |
-| UWrMaxSat 1.4 IPAMIR | 38 / 40 | *(loader reports `o 0` on many instances — not used for cost parity on this benchmark)* | — |
-
-**Takeaway:** On this certified subset, IPAMIR path reaches optimum on **more instances (31) than batch (26)** within 30 s, but is slower per instance than EvalMaxSAT on batch mode.
+See `results/PERFORMANCE_SUMMARY.md` if needed; use ref-first numbers above for Lisa.
 
 ---
 
@@ -69,4 +66,4 @@ Differential fuzzer compares **IntelTopor IPAMIR** vs **UWrMaxSat 1.4 IPAMIR** o
 
 1. **Incremental MaxSAT (IPAMIR)** integrated into IntelTopor with differential fuzzing vs UWrMaxSat — **0 correctness bugs** in 20-instance extended fuzz run.
 2. **Internal timeout + `c timeo`** align IPAMIR behavior with competition-style anytime output.
-3. On **MSE22 regression subset** (40 instances, 30 s): IPAMIR solves **31/40 to certified optimum** vs **26/40** batch mode; performance tuning vs MSE2022 incremental solvers is ongoing.
+3. **Ref-first benchmark (141 instances, 60s):** IPAMIR **140/141 solved**, **99/141 certified optimum** vs batch **78/141** — IPAMIR path much stronger on EvalMaxSAT-feasible subset.
