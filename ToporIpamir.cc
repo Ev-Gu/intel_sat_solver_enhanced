@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cmath>
+#include <limits>
 #include <iostream>
 #include "algorithms/Alg_nuwls.h"
 #include "algorithms/LSU.hpp"
@@ -92,6 +93,8 @@ namespace Topor
         {
             const vector<int> assumpsForPost = m_CurrAssumps;
             solveStartTime = g_GlobalTimer.WallTimePassedSinceStartOrReset();
+            ReadConfigFromEnv();
+            InstallStopCallback();
 
             TToporReturnVal trv = CTopor::Solve(m_CurrAssumps);
 
@@ -106,17 +109,22 @@ namespace Topor
                 CaptureToporAssignment();
                 ComputeObjFromAssignment();
 
-                m_bestCost = m_Result.cost;
-                m_globalBestModel = m_Result.assignment;
+                UpdateBestCost(m_Result.cost, m_Result.assignment);
                 if (m_bestCost == 0) m_optimal = true;
-                if (!m_optimal) RunNuwlsPostSolve(assumpsForPost);
-                if (!m_optimal) RunMbvAndLsuPostSolve(assumpsForPost);
+                if (!m_optimal && !ShouldTerminate()) RunNuwlsPostSolve(assumpsForPost);
+                if (!m_optimal && !ShouldTerminate()) RunMbvAndLsuPostSolve(assumpsForPost);
                 m_Result.is_optimal = m_optimal;
+                if (ShouldTerminate() && m_bestCost != numeric_limits<uint64_t>::max())
+                    return 10;
                 return m_Result.is_optimal ? 30 : 10;
             }
             else if (trv == Topor::TToporReturnVal::RET_UNSAT)
             {
                 return 20;
+            }
+            else if (IsTimeoutRet(trv) && m_bestCost != numeric_limits<uint64_t>::max())
+            {
+                return 10;
             }
             else
             {
@@ -135,26 +143,13 @@ namespace Topor
             {
                 m_CurrTerminateFunc = nullptr;
                 m_CurrTerminateState = nullptr;
-                return;
             }
-
-            m_CurrTerminateFunc = terminate;
-            m_CurrTerminateState = state;
-            terminate_now = m_CurrTerminateFunc(m_CurrTerminateState)
-
-            auto StopTopor = [&]()
-                {
-                    if (m_CurrTerminateFunc && m_CurrTerminateFunc(m_CurrTerminateState))
-                    {
-                        return TStopTopor::VAL_STOP;
-                    }
-                    else
-                    {
-                        return TStopTopor::VAL_CONTINUE;
-                    }
-                };
-
-            SetCbStopNow(StopTopor);
+            else
+            {
+                m_CurrTerminateFunc = terminate;
+                m_CurrTerminateState = state;
+            }
+            InstallStopCallback();
         }
 
     protected:
@@ -200,6 +195,87 @@ namespace Topor
             m_Result.cost = c;
         }
 
+        static bool IsTimeoutRet(TToporReturnVal trv)
+        {
+            return trv == TToporReturnVal::RET_TIMEOUT_LOCAL
+                || trv == TToporReturnVal::RET_TIMEOUT_GLOBAL
+                || trv == TToporReturnVal::RET_USER_INTERRUPT;
+        }
+
+        void ReadConfigFromEnv()
+        {
+            static bool read = false;
+            if (read) return;
+            read = true;
+            if (const char* e = getenv("TOPOR_IPAMIR_TIME_LIMIT"))
+            {
+                m_solveTimeLimitSec = atoi(e);
+            }
+            if (const char* e = getenv("TOPOR_IPAMIR_VERBOSE"))
+            {
+                m_printTimeo = (atoi(e) != 0);
+            }
+            else
+            {
+                m_printTimeo = (m_lsuVerbosity != 0);
+            }
+        }
+
+        double RemainingSolveSeconds() const
+        {
+            const double elapsed = g_GlobalTimer.WallTimePassedSinceStartOrReset() - solveStartTime;
+            double limit = 0.0;
+            if (m_solveTimeLimitSec > 0) limit = (double)m_solveTimeLimitSec;
+            else if (m_lsuTimeLimit > 0) limit = (double)m_lsuTimeLimit;
+            else return numeric_limits<double>::max();
+            return max(0.0, limit - elapsed);
+        }
+
+        bool ShouldTerminate() const
+        {
+            if (m_CurrTerminateFunc && m_CurrTerminateFunc(m_CurrTerminateState))
+                return true;
+            if (m_solveTimeLimitSec > 0)
+            {
+                return RemainingSolveSeconds() <= 0.0;
+            }
+            return false;
+        }
+
+        void MaybePrintTimeo(uint64_t cost)
+        {
+            if (!m_printTimeo || cost >= m_lastPrintedCost) return;
+            m_lastPrintedCost = cost;
+            std::cout << "c timeo "
+                      << (unsigned)std::ceil(g_GlobalTimer.WallTimePassedSinceStartOrReset())
+                      << " " << cost << std::endl;
+        }
+
+        void UpdateBestCost(uint64_t cost, const vector<int>& model)
+        {
+            if (cost >= m_bestCost) return;
+            m_bestCost = cost;
+            m_globalBestModel = model;
+            MaybePrintTimeo(cost);
+        }
+
+        void UpdateBestCost(uint64_t cost, vector<int>&& model)
+        {
+            if (cost >= m_bestCost) return;
+            m_bestCost = cost;
+            m_globalBestModel = std::move(model);
+            MaybePrintTimeo(cost);
+        }
+
+        void InstallStopCallback()
+        {
+            auto StopTopor = [this]()
+                {
+                    return ShouldTerminate() ? TStopTopor::VAL_STOP : TStopTopor::VAL_CONTINUE;
+                };
+            SetCbStopNow(StopTopor);
+        }
+
         void RunMbvAndLsuPostSolve(const vector<int>& assumpsForPost) {
             bool skipLSU = false;
             double elapsedGlobal;
@@ -223,18 +299,18 @@ namespace Topor
                 elapsedGlobal = g_GlobalTimer.WallTimePassedSinceStartOrReset();
                 elapsedLocal = elapsedGlobal - solveStartTime;
 
-                remainingLocal = max(0.0, (double)m_lsuTimeLimit - elapsedLocal);
+                remainingLocal = RemainingSolveSeconds();
 
-                if (m_lsuTimeLimit > 0 && remainingLocal <= 0) {
+                if (remainingLocal <= 0.0 && (m_solveTimeLimitSec > 0 || m_lsuTimeLimit > 0)) {
                     skipLSU = true;
                     break;
                 }
 
-                if (wmbOptions.enable && !m_optimal && !terminate_now)
+                if (wmbOptions.enable && !m_optimal && !ShouldTerminate())
                 {
                     wmb::WMBOptions localWmbOptions = wmbOptions;
-                    if (m_lsuTimeLimit > 0) {
-                        localWmbOptions.timeLimitSeconds = min(60, (int)remainingLocal);
+                    if (m_lsuTimeLimit > 0 || m_solveTimeLimitSec > 0) {
+                        localWmbOptions.timeLimitSeconds = min(60, max(1, (int)remainingLocal));
                     }
 
                     auto wmbSolveCb = [&](const std::vector<int32_t>& a) {
@@ -246,11 +322,8 @@ namespace Topor
                         if (ret == Topor::TToporReturnVal::RET_SAT) {
                             CaptureToporAssignment();
                             ComputeObjFromAssignment();
-                            if (m_Result.cost < m_bestCost) {
-                                m_bestCost = m_Result.cost;
-                                m_globalBestModel = m_Result.assignment;
-                                if (m_bestCost == 0) m_optimal = true;
-                            }
+                            UpdateBestCost(m_Result.cost, m_Result.assignment);
+                            if (m_bestCost == 0) m_optimal = true;
                         }
                         return ret;
                         };
@@ -264,8 +337,7 @@ namespace Topor
 
                     // Sync final WMB status just in case
                     if (wmbRes.bestCost < m_bestCost) {
-                        m_bestCost = wmbRes.bestCost;
-                        m_globalBestModel = std::move(wmbRes.bestModel01);
+                        UpdateBestCost(wmbRes.bestCost, wmbRes.bestModel01);
                         if (m_bestCost == 0) m_optimal = true;
                     }
 
@@ -275,11 +347,12 @@ namespace Topor
                 }
 
                 // --- LSU COMPLETE PHASE ---
-                if (m_enableLSU && !skipLSU && !m_optimal && !terminate_now)
+                if (m_enableLSU && !skipLSU && !m_optimal && !ShouldTerminate())
                 {
                     lsu::TLinearSUOptions opt;
                     opt.Verbose = (m_lsuVerbosity != 0);
-                    opt.TimeLimitSeconds = m_lsuTimeLimit > 0 ? (int)remainingLocal : 0;
+                    opt.TimeLimitSeconds = (m_lsuTimeLimit > 0 || m_solveTimeLimitSec > 0)
+                        ? max(1, (int)remainingLocal) : 0;
 
                     auto addClauseCb = [&](const std::vector<int32_t>& c) {
                         std::vector<int32_t> clauseWithAct = c;
@@ -294,11 +367,8 @@ namespace Topor
                         if (ret == Topor::TToporReturnVal::RET_SAT) {
                             CaptureToporAssignment();
                             ComputeObjFromAssignment();
-                            if (m_Result.cost < m_bestCost) {
-                                m_bestCost = m_Result.cost;
-                                m_globalBestModel = m_Result.assignment;
-                                if (m_bestCost == 0) m_optimal = true;
-                            }
+                            UpdateBestCost(m_Result.cost, m_Result.assignment);
+                            if (m_bestCost == 0) m_optimal = true;
                         }
                         return ret;
                         };
@@ -330,8 +400,7 @@ namespace Topor
 
                         // Sync final LSU status just in case
                         if (lsuRes.Improved && lsuRes.BestCost < m_bestCost) {
-                            m_bestCost = lsuRes.BestCost;
-                            m_globalBestModel = std::move(lsuRes.BestModel01);
+                            UpdateBestCost(lsuRes.BestCost, lsuRes.BestModel01);
                         }
 
                         if (lsuRes.LastSolveRet == Topor::TToporReturnVal::RET_MEM_OUT) {
@@ -347,7 +416,7 @@ namespace Topor
                     }
                 }
                 skipLSU = false;
-            } while (skipLSU && !m_optimal && !terminate_now);
+            } while (skipLSU && !m_optimal && !ShouldTerminate());
         }
 
         void RunNuwlsPostSolve(const vector<int>& assumpsForPost)
@@ -366,7 +435,7 @@ namespace Topor
                 const char* e = getenv("TOPOR_NUWLS_TIME_LIMIT");
                 s_nuwlsTimeLimit = e ? atoi(e) : -1; // -1 = solver default
             }
-            if (s_nuwlsTimeLimit == 0 || terminate_now) return;
+            if (s_nuwlsTimeLimit == 0 || ShouldTerminate()) return;
 
             vector<pair<uint64_t, vector<int>>> softClauses;
             softClauses.reserve(m_SoftLit2Weight.size());
@@ -402,6 +471,12 @@ namespace Topor
                     built.clauseWeight);
                 nuwls_solver.settings();
                 if (s_nuwlsTimeLimit > 0) nuwls_solver.param_time_limit = s_nuwlsTimeLimit;
+                const double rem = RemainingSolveSeconds();
+                if (m_solveTimeLimitSec > 0 && rem < (double)nuwls_solver.param_time_limit)
+                {
+                    nuwls_solver.param_time_limit = max(1, (int)rem);
+                }
+                if (nuwls_solver.param_time_limit == 0) return;
 
                 // IMMEDIATE GLOBAL UPDATE: Initialize directly from the global state
                 nuwls_solver.init(m_globalBestModel);
@@ -410,7 +485,7 @@ namespace Topor
                 nuwls_solver.RunLocalSearch(m_globalBestModel, nuwlsCost, 0);
 
                 if (nuwlsCost < m_bestCost) {
-                    m_bestCost = static_cast<uint64_t>(nuwlsCost);
+                    UpdateBestCost(static_cast<uint64_t>(nuwlsCost), m_globalBestModel);
                 }
                 if (m_bestCost == 0) m_optimal = true;
 
@@ -441,7 +516,10 @@ namespace Topor
 
         void* m_CurrTerminateState = nullptr;
         int (*m_CurrTerminateFunc)(void* state) = nullptr;
-        bool terminate_now = false;
+
+        int m_solveTimeLimitSec = 0;
+        bool m_printTimeo = true;
+        uint64_t m_lastPrintedCost = numeric_limits<uint64_t>::max();
 
         uint64_t m_bestCost = std::numeric_limits<uint64_t>::max();
         bool m_optimal = false;

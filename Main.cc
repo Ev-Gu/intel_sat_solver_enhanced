@@ -1221,7 +1221,9 @@ int main(int argc, char** argv)
 							DLOG(">> Handing off to LSU. Bound: " << bestCost);
 							lsu::TLinearSUOptions opt;
 							opt.Verbose = (lsuVerbosity != 0);
-							opt.TimeLimitSeconds = lsuTimeLimit;
+							opt.TimeLimitSeconds = (lsuTimeLimit > 0 && remainingLocal < (double)lsuTimeLimit)
+								? max(1, (int)remainingLocal)
+								: lsuTimeLimit;
 
 
 							auto addClauseCb = [&](const std::vector<int32_t>& c) {

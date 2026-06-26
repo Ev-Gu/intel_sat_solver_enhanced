@@ -170,7 +170,12 @@ def main():
         if not os.path.isfile(d):
             sys.exit(f"ERROR: missing {d}\n  -> bash tools/build_ipamir_wcnf.sh")
 
-    ours_env = {"TOPOR_NUWLS_TIME_LIMIT": str(args.nuwls_time)}
+    ours_env = {
+        "TOPOR_NUWLS_TIME_LIMIT": str(args.nuwls_time),
+        # Solver-internal budget (seconds); stop gracefully before subprocess kill.
+        "TOPOR_IPAMIR_TIME_LIMIT": str(max(1, int(args.timeout) - 1)),
+        "TOPOR_IPAMIR_VERBOSE": "1",
+    }
 
     base_seed = args.seed if args.seed is not None else random.randrange(2**31)
     stamp = datetime.now().strftime("%Y-%m-%d-%H%M%S")
