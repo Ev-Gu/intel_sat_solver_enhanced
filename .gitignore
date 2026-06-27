@@ -26,3 +26,8 @@ third_party/MaxSAT-Fuzzer/kissat/
 third_party/MaxSAT-Fuzzer/*__FaultLogs*
 third_party/MaxSAT-Fuzzer/__pycache__/
 third_party/ipamir/
+
+# MSE2022 performance benchmark outputs (generated)
+benchmarks/mse2022/results/
+benchmarks/mse2022/report_bundle/
+benchmarks/mse2022/*.tar.gz
