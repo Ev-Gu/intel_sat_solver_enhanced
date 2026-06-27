@@ -318,17 +318,22 @@ namespace Topor
                             std::make_pair(numeric_limits<double>::max(), false),
                             wmbOptions.conflictThreshold);
 
-                        // IMMEDIATE GLOBAL UPDATE: Intercept SAT models during WMB
                         if (ret == Topor::TToporReturnVal::RET_SAT) {
                             CaptureToporAssignment();
                             ComputeObjFromAssignment();
                             UpdateBestCost(m_Result.cost, m_Result.assignment);
                             if (m_bestCost == 0) m_optimal = true;
+                            return 10; // Translate to standard SAT
                         }
-                        return ret;
+                        else if (ret == Topor::TToporReturnVal::RET_UNSAT) {
+                            return 20; // Translate to standard UNSAT
+                        }
+                        return 0; // Unknown / Timeout
                         };
 
-                    auto getValCb = [&](int32_t l) { return CTopor::GetLitValue(l); };
+                    auto getValCb = [&](int32_t l) {
+                        return CTopor::GetLitValue(l) == Topor::TToporLitVal::VAL_SATISFIED;
+                        };
 
                     wmb::WMBResult wmbRes = wmb::RunMrsBeaver(
                         m_isWeighted, wr, internalAssumps,
@@ -363,18 +368,22 @@ namespace Topor
                         std::vector<int32_t> fullAssumps = a;
                         auto ret = CTopor::Solve(std::span<int32_t>(fullAssumps.data(), fullAssumps.size()));
 
-                        // IMMEDIATE GLOBAL UPDATE: Intercept SAT models during LSU
                         if (ret == Topor::TToporReturnVal::RET_SAT) {
                             CaptureToporAssignment();
                             ComputeObjFromAssignment();
                             UpdateBestCost(m_Result.cost, m_Result.assignment);
                             if (m_bestCost == 0) m_optimal = true;
+                            return 10; // Translate to standard SAT
                         }
-                        return ret;
+                        else if (ret == Topor::TToporReturnVal::RET_UNSAT) {
+                            return 20; // Translate to standard UNSAT
+                        }
+                        return 0; // Unknown / Timeout
                         };
 
-                    auto getValCb = [&](int32_t l) { return CTopor::GetLitValue(l); };
-
+                    auto getValCb = [&](int32_t l) {
+                        return CTopor::GetLitValue(l) == Topor::TToporLitVal::VAL_SATISFIED;
+                        };
                     lsu::TLinearSUResult lsuRes;
 
                     try {
